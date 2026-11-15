@@ -3112,7 +3112,7 @@ function updatePano(dt) {
    AI companion — conversation via proxy + voice (Web Speech API)
    ===================================================================== */
 const ai = { history: [], busy: false, speak: true, rec: null, listening: false, revealTimer: null, hideTimer: null };
-const SUGGEST = ['What is an immersive digital twin?', 'Explain spring snowmelt floods simply', 'How does river ice grow?', 'Ideas for a hydrology VR demo'];
+const SUGGEST = ['What can I see in this hall?', 'List the supersites', 'What do the Oulanka sensors measure?', 'Explain spring snowmelt floods simply'];
 const ORB_STATUS = { idle: 'Tap the orb or hold Space to talk', listening: 'Listening…', thinking: 'Thinking…', speaking: 'Speaking…' };
 function md(t) {
   const esc = t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -3179,6 +3179,44 @@ function aiInit() {
   $('#abHist').addEventListener('click', () => { const p = $('#aiPanel'); if (p.classList.contains('show')) p.classList.remove('show'); else { closeSitePanel(); p.classList.add('show'); } });
   $('#abClose').addEventListener('click', dismissOrb);
 }
+/* ---------- what the assistant knows about the hall (sent with every question) ---------- */
+function hubContext() {
+  const code = s => s.code || siteCode(s);
+  const L = [];
+  L.push('ABOUT THIS HALL (DIWA Spatial Hub, demo by Siamak Bazzaz, MetaParametric.com). The user is standing inside it right now and can see everything listed here.');
+  L.push('DIWA = Digital Waters, a Finnish research flagship (Research Council of Finland) on water and environmental monitoring, led by the University of Oulu with partners such as SYKE and the University of Turku. Website: digitalwaters.fi.');
+  L.push('It is an oval glass hall with a forest landscape outside: a real 360° photo of the Oulankajoki riverside in Oulanka National Park, Kuusamo.');
+  L.push(`SUPERSITE TABLES (${SITES.length} miniature 3D landscape tables, each labelled with a two-letter code). The big centre table is the hero site; the others form a ring around it:`);
+  SITES.forEach((s, i) => L.push(`${i + 1}. ${code(s)} · ${s.name} (${s.sub})${s.hero ? ' — CENTRE TABLE, the only one with full data layers' : ''}. ${s.text}`));
+  L.push('The table terrains, trees and sensor positions are illustrative, not real elevation data; real DSM / elevation data will come in a later version.');
+  L.push(`OULANKAJOKI SENSOR STATIONS (floating glowing globes on the centre table, from the DIWA Oulanka metadata template): ${GLOBES.map(G => `${G.name} (since ${G.since}; measures ${G.measures.join(', ')})`).join('; ')}.`);
+  L.push('Clicking a sensor globe opens a card with a time-series chart. A timeline at the bottom plays one year of illustrative weather and hydrology (discharge, water level, water temperature, air temperature, snow depth), and the table changes with the seasons (winter snow, spring melt, summer, autumn colours).');
+  L.push(`SCENARIOS on the Oulankajoki table: flooding (${FLOOD.map(f => f.name).join(', ')}) and river ice (${ICE.map(f => f.name).join(', ')}). There is also a story mode about the spring snowmelt flood.`);
+  L.push(`360° PHOTOS: ${CONFIG.PANORAMAS.length} real 360° photos from Oulanka are pinned on the centre table (${CONFIG.PANORAMAS.map(p => p.title).join(', ')}). Clicking one opens it full screen.`);
+  L.push(`MEDIA WALL at the back of the hall, left to right: a Finland map board with pulsing circles for each supersite; three big video screens (${CONFIG.SCREENS.map(v => v.title).join('; ')}) that play when you walk close and unmute when clicked; and a Latest News board with a slideshow from digitalwaters.fi.`);
+  L.push(`Current news on the board: ${CONFIG.NEWS.map(n => `${n.date}: ${n.title}`).join('; ')}.`);
+  L.push(`LOUNGES: ${LOUNGES.length} seating corners (sofa, two armchairs, coffee table with two DIWA brochures, a lamp) near the walls, each with a shared whiteboard behind the sofa for drawing and writing together.`);
+  L.push('YOU, the assistant, are the glowing sci-fi orb that floats near the user. A big faded DIWA logo is printed on the floor near the entrance.');
+  L.push('CONTROLS (top right and bottom dock): day/night toggle (night shows northern lights and stars outside), layers (sensors, rivers, catchment, land cover, 360° photos, clouds, rain/snow, particles), generated lo-fi background music, People (multi-user sessions where visitors appear as coloured circle avatars and talk by voice), VR button for headsets like Meta Quest 3, help. The bottom dock flies to each table; keys 1–9 too. Users can also sit on the sofas.');
+  // live state
+  const near = []; const cp = camera.position;
+  tables.forEach(T => near.push([T.site.name + ' table', Math.hypot(cp.x - T.site.pos[0], cp.z - T.site.pos[1])]));
+  SCREENS.forEach(S => near.push([`video screen "${S.cfg?.title || ''}"`, cp.distanceTo(S.center)]));
+  near.push(['Finland map board', Math.hypot(cp.x - MAPB.pos.x, cp.z - MAPB.pos.z)], ['news board', Math.hypot(cp.x - NEWS.pos.x, cp.z - NEWS.pos.z)]);
+  LOUNGES.forEach((p, i) => near.push([`lounge ${i + 1}`, Math.hypot(cp.x - p.x, cp.z - p.z)]));
+  near.sort((a, b) => a[1] - b[1]);
+  const st = [];
+  st.push(focus.id ? `the user is looking at the ${SITE[focus.id].name} table` : 'the user is walking freely in the hall');
+  st.push(`closest things: ${near.slice(0, 3).map(n => n[0]).join(', ')}`);
+  st.push(state.night ? 'it is night mode (northern lights outside)' : 'it is day mode');
+  st.push(`timeline date ${fmtDate(playback.day)}, season ${seasonOfDay(playback.day)}`);
+  if (scen.kind) st.push(`active scenario: ${scen.kind === 'flood' ? (FLOOD.find(f => f.id === scen.id)?.name || 'flood') : (ICE.find(f => f.id === scen.id)?.name || 'river ice')}`);
+  const on = Object.entries(state.layers).filter(([, v]) => v).map(([k]) => k); st.push(`layers on: ${on.join(', ')}`);
+  if (mp.joined) st.push(`in a shared session with ${mp.peers.size ? [...mp.peers.values()].map(P => P.name).join(', ') : 'nobody else yet'}`);
+  if (music.on) st.push('lo-fi music is playing');
+  L.push('RIGHT NOW: ' + st.join('; ') + '.');
+  return L.join('\n');
+}
 async function sendAI(text) {
   text = (text ?? $('#aiInput').value).trim(); if (!text || ai.busy) return;
   if (ORB.mode !== 'companion') summonOrb();
@@ -3188,9 +3226,9 @@ async function sendAI(text) {
   setOrbState('thinking'); caption(text, '<span class="typing"><i></i><i></i><i></i></span>');
   let reply;
   try {
-    if (!CONFIG.AI_PROXY_URL) { await new Promise(r => setTimeout(r, 900)); reply = 'I’m not connected to an AI model yet. Once the proxy URL is set in the configuration, I’ll answer questions like this one with Claude.'; }
+    if (!CONFIG.AI_PROXY_URL) { await new Promise(r => setTimeout(r, 900)); reply = 'I’m not connected to an AI model yet. Once the proxy URL is set in the configuration, I’ll answer questions like this one.'; }
     else {
-      const res = await fetch(CONFIG.AI_PROXY_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: ai.history.slice(-16) }) });
+      const res = await fetch(CONFIG.AI_PROXY_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: ai.history.slice(-16), context: (() => { try { return hubContext(); } catch (e) { console.warn('hubContext', e); return ''; } })() }) });
       const j = await res.json().catch(() => ({}));
       if (!res.ok || !j.reply) throw new Error(j.error || `HTTP ${res.status}`);
       reply = j.reply; if (j.engine) { const lbl = j.engine === 'claude' ? 'Claude' : 'Free AI · Workers AI'; $('#aiStatus span').textContent = 'Connected · ' + lbl; $('#abConn').title = 'Connected · ' + lbl; }
@@ -3776,7 +3814,7 @@ async function boot() {
   renderer.setAnimationLoop(loop);
   renderer.compile(scene, camera);
   await progress(1, 'Ready');
-  window.__hub = { THREE, scene, camera, controls, focusSite, goHome, focusAI, focusLive, openPano, closePano, openGlobe, startStory, storyStep, applySeason, setDay, state, renderer,
+  window.__hub = { hubContext, sendAI, THREE, scene, camera, controls, focusSite, goHome, focusAI, focusLive, openPano, closePano, openGlobe, startStory, storyStep, applySeason, setDay, state, renderer,
     summonOrb, dismissOrb, D, cloudSets, precipSets, setOrbState, updateOrb, deliver, caption, applyFlood, applyIce, setIceDay, clearScenario, music, ORB, scen, enter, simulatePeer, sitAt, focusLounge, toggleNight, mp, getAurora: () => aurora, focusLive, focusScreen, focusMap, focusNews, focusWhiteboard, openMapCard, wbApply, SCREENS, WB, BOARDS };
   $('#loader').classList.add('ready');
   $('#btnEnter').addEventListener('click', () => enter(true));
