@@ -581,6 +581,14 @@ body.assist-on #wbBar{bottom:158px}
 .ld-contact a:hover{background:rgba(76,169,255,.22)}
 @media (max-height:820px){.ld-logo{height:48px}.ld-wrap{gap:16px}.ld-sub{margin-top:-10px}}
 
+/* start screen always uses the light palette, even if night mode was left on */
+#loader{--ink:#1d1d1f;--ink-2:#515154;--ink-3:#86868b;color:var(--ink)}
+#loader .ld-title{color:#1d1d1f}
+#loader .ld-intro p{color:#3a3a3c}
+body.night #loader .field{background:rgba(255,255,255,.92);color:#1d1d1f;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.14),0 6px 18px rgba(12,42,76,.08)}
+body.night #loader .field::placeholder{color:#8e8e93}
+.leave-btn:hover{color:#ff3b30}
+
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 </head>
@@ -622,6 +630,7 @@ body.assist-on #wbBar{bottom:158px}
     <button class="icon-btn glass" id="btnLayers" title="Layers"></button>
     <button class="icon-btn glass" id="btnHelp" title="Controls"></button>
     <button class="icon-btn glass" id="btnFull" title="Full screen"></button>
+    <button class="icon-btn glass leave-btn" id="btnLeave" title="Leave the hub"></button>
     <button class="pill-btn glass vr-btn" id="btnVR" title="Enter VR"></button>
   </div>
 </div>
@@ -879,6 +888,7 @@ const ICON = {
   scen: '<path d="M4 18c2.5-2 5-2 7.5 0s5 2 8.5-1"/><path d="M5 13l4-4 3 3 6-6"/><path d="M14 6h4v4"/>',
   close: '<path d="M6 6l12 12M18 6 6 18"/>',
   sofa: '<path d="M4 11V8.5A2.5 2.5 0 0 1 6.5 6h11A2.5 2.5 0 0 1 20 8.5V11"/><path d="M3 12.5a1.5 1.5 0 0 1 3 0V14h12v-1.5a1.5 1.5 0 0 1 3 0V18H3z"/><path d="M5 18v1.5M19 18v1.5"/>',
+  exit: '<path d="M10 4H5.5A1.5 1.5 0 0 0 4 5.5v13A1.5 1.5 0 0 0 5.5 20H10"/><path d="M15 8l4 4-4 4"/><path d="M19 12H9"/>',
   people: '<circle cx="9" cy="8" r="3.2"/><path d="M3 19.5c.6-3.3 3-5.2 6-5.2s5.4 1.9 6 5.2"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.4.2 4 1.8 4.5 4.6"/>',
   cloud: '<path d="M7 18.5h10.5a4 4 0 0 0 .4-8 5.5 5.5 0 0 0-10.6-1.2A4.6 4.6 0 0 0 7 18.5z"/>',
   map: '<path d="M3.5 6.5 9 4l6 2.5L20.5 4v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>',
@@ -2755,7 +2765,7 @@ function segSet(el, v) {
 }
 
 function buildUI() {
-  $('#btnHome').innerHTML = svg('home'); $('#btnLayers').innerHTML = svg('layers'); $('#btnHelp').innerHTML = svg('help'); $('#btnFull').innerHTML = svg('full');
+  $('#btnHome').innerHTML = svg('home'); $('#btnLayers').innerHTML = svg('layers'); $('#btnHelp').innerHTML = svg('help'); $('#btnFull').innerHTML = svg('full'); $('#btnLeave').innerHTML = svg('exit'); $('#btnLeave').addEventListener('click', leaveHub);
   $('#btnVR').innerHTML = svg('vr') + '<span>VR</span>';
   $('#tlPlay').innerHTML = svg('play'); $('#btnStory').innerHTML = svg('story') + 'Snowmelt story';
   $('#panoBack').innerHTML = svg('back') + 'Back to hub';
@@ -3974,6 +3984,18 @@ async function boot() {
   if (/[?&]autoenter\b/.test(location.search)) enter(false, true);
 }
 let entered = false;
+/* leave: out of the shared room at once, mic and music off, back to the start screen */
+function leaveHub() {
+  if (!entered) return;
+  try { renderer.xr.getSession()?.end(); } catch { }
+  stopSpeaking(); if (ORB.mode === 'companion') dismissOrb();
+  closeAllPanels(); closeMapCard(); standUp(); document.querySelectorAll('.pop').forEach(p => p.classList.remove('show'));
+  mpLeave(); music.on = false; music.apply(.6); $('#btnMusic').classList.add('muted');
+  SCREENS.forEach(S => { if (!S.muted) setScreenSound(S, false); if (S.playing) { ytCmd(S, 'pauseVideo'); S.playing = false; } });
+  screensArmed = false; IDLE.on = false; entered = false;
+  const L = $('#loader'); L.classList.remove('gone'); requestAnimationFrame(() => L.classList.remove('hide'));
+  focus.kind = 'home'; focus.id = null; camera.position.set(0, 16, 62); controls.target.copy(HOME_TGT);
+}
 function enter(sound, auto = false) {
   if (entered) return;
   const nm = $('#ldName'), name = nm.value.trim().replace(/\s+/g, ' ').slice(0, 24) || (auto ? 'Guest' : '');
