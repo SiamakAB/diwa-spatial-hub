@@ -23,7 +23,10 @@ The **Oulankajoki** supersite at Oulanka Research Station, Kuusamo, is the first
 - **Spatial context:** the river network, the catchment boundary and land-cover layers.
 - **360° field views:** 15 panoramas from around Oulanka Research Station and the Oulankajoki valley.
 - **Live camera:** a live video stream shown inside the hall.
-- **AI companion:** an assistant you can talk to by voice or text.
+- **AI companion:** an assistant you can talk to by voice or text, answering in a natural voice.
+- **Meet together:** several visitors can share the hall at the same time. Each person appears as a glowing circle avatar in their own colour with their name above it. The circle shows a live voice waveform while they talk, and you can talk by spatial voice, gather around a table or sit together in the lounge.
+- **Living sky:** clouds drift over the tables, and rain or snow falls from them at a wind-blown angle. All of it follows the cloud cover, precipitation and temperature of the selected day.
+- **Day and night:** switch the hall between daylight and a night mode, with the tables kept clearly lit.
 - **VR:** works with WebXR headsets such as Meta Quest 3 through the headset's web browser.
 
 ![360° view of the Oulankajoki rapids](docs/preview-360.jpg)
@@ -38,6 +41,9 @@ The **Oulankajoki** supersite at Oulanka Research Station, Kuusamo, is the first
 | Walk | W A S D |
 | Back to the overview | H |
 | Talk to the assistant | Hold Space, or tap the orb |
+| Meet others | People button → enter your name → Join, then share the invite link |
+| Sit in the lounge | Sofa icon in the dock, then click a seat |
+| Day / night | Moon / sun button |
 | VR | *Enter VR* in the headset browser, then point and pull the trigger to teleport |
 
 Chrome or Edge on a laptop or desktop gives the best experience.
@@ -57,5 +63,5 @@ Digital Waters (DIWA) Flagship
 ## Credits
 
 - **360° photography:** Siamak Bazzaz, Oulanka, September 2026.
-- **Built with:** [three.js](https://threejs.org) and the Web Audio and WebXR browser APIs.
+- **Built with:** [three.js](https://threejs.org), [Trystero](https://github.com/dmotz/trystero) for peer-to-peer sessions, and the Web Audio, WebRTC and WebXR browser APIs.
 - **Music:** composed live in the browser for this project.

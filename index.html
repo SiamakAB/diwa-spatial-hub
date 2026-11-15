@@ -444,6 +444,74 @@ body.assist-on #lcLegend{bottom:238px}
 .pano-load{position:absolute;left:50%;top:84px;transform:translateX(-50%) translateY(-6px);padding:8px 14px;border-radius:14px;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:8px;opacity:0;transition:opacity .3s, transform .4s var(--spring)}
 .pano-load.show{opacity:1;transform:translateX(-50%)}
 
+/* ---------- v0.4: people, VR button, name tags ---------- */
+.people-btn{position:relative}
+.people-btn .count{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--green);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.people-btn.live svg{stroke:var(--green)}
+#peoplePop{top:68px;right:16px;width:310px}
+.pp-text{font-size:12.5px;color:var(--ink-2);line-height:1.45;margin:0 8px 10px}
+.pp-text b{font-weight:650;color:var(--ink)}
+.pp-label{font-size:11.5px;font-weight:600;color:var(--ink-3);margin:10px 8px 6px}
+.field{width:calc(100% - 16px);margin:0 8px;height:38px;border:none;outline:none;border-radius:11px;padding:0 12px;font:inherit;font-size:14px;background:rgba(255,255,255,.9);box-shadow:inset 0 0 0 .5px rgba(0,0,0,.12);color:var(--ink)}
+.field:focus{box-shadow:inset 0 0 0 2px var(--accent)}
+.field.shake{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+.swatches{display:flex;gap:8px;margin:0 8px 6px;flex-wrap:wrap}
+.swatches button{width:26px;height:26px;border-radius:50%;border:none;cursor:pointer;box-shadow:inset 0 0 0 2px rgba(255,255,255,.6);transition:transform .3s var(--spring), box-shadow .2s}
+.swatches button:hover{transform:scale(1.12)}
+.swatches button.on{box-shadow:0 0 0 2.5px #fff,0 0 0 4.5px var(--ink)}
+#peopleList{display:flex;flex-direction:column;gap:2px;margin:0 2px 4px}
+.person{display:flex;align-items:center;gap:10px;padding:8px;border-radius:12px;transition:background .2s}
+.person i{width:28px;height:28px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 2px rgba(255,255,255,.55);transition:box-shadow .2s}
+.person b{display:block;font-size:13px;font-weight:620}
+.person span{display:block;font-size:11px;color:var(--ink-3)}
+.person em{margin-left:auto;opacity:0;transition:opacity .2s}
+.person em svg{width:16px;height:16px;stroke:var(--green);fill:none;stroke-width:2}
+.person.talking em{opacity:1}
+.person.talking i{box-shadow:0 0 0 3px rgba(52,199,89,.5)}
+#peoplePop .btn-row{margin:6px 6px 4px}
+#mpMute.muted{background:rgba(255,59,48,.12);color:var(--red)}
+.vr-btn{padding:0 14px}
+.vr-btn.ready{background:var(--accent);color:#fff;border-color:transparent}
+.name-tag{pointer-events:none;display:flex;align-items:center;gap:7px;padding:5px 11px 5px 6px;border-radius:14px;background:var(--glass-dark);-webkit-backdrop-filter:saturate(160%) blur(12px);backdrop-filter:saturate(160%) blur(12px);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:12.5px;font-weight:620;white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,.25);transition:transform .35s var(--spring)}
+.name-tag i{width:16px;height:16px;border-radius:50%;box-shadow:inset 0 0 0 2px rgba(255,255,255,.5)}
+.name-tag .spk{display:none}.name-tag .spk svg{width:14px;height:14px;stroke:#7dffa8;fill:none;stroke-width:2}
+.name-tag.talking{transform:scale(1.06)}.name-tag.talking .spk{display:block}
+
+/* ---------- v0.4: night theme (tables and live screen keep their own light) ---------- */
+body.night{--ink:#f5f5f7;--ink-2:#c7c7cc;--ink-3:#8e8e93;--glass:rgba(28,31,38,.62);--hair:rgba(255,255,255,.1);--hair-light:rgba(255,255,255,.12);--glass-dark:rgba(10,18,32,.66);background:#0b1424}
+body.night .glass{box-shadow:0 18px 50px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08)}
+body.night .card,body.night .stat,body.night .scen-row,body.night .msg.bot,body.night .suggest button{background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 .5px rgba(255,255,255,.1)}
+body.night .scen-row.active{background:rgba(10,132,255,.18)}
+body.night .composer textarea,body.night .field{background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 .5px rgba(255,255,255,.14);color:var(--ink)}
+body.night .seg{background:rgba(118,118,128,.28)}
+body.night .seg .seg-thumb{background:#636366;box-shadow:0 3px 8px rgba(0,0,0,.35)}
+body.night .dock-item:not(.ai){background:linear-gradient(180deg,rgba(72,76,86,.95),rgba(44,47,55,.9));box-shadow:0 2px 6px rgba(0,0,0,.35), inset 0 0 0 .5px rgba(255,255,255,.08)}
+body.night .dock-item:not(.ai):not(.live) svg{stroke:#9fd0ff}
+body.night .x,body.night .btn.ghost,body.night .round.ghost,body.night .round.mic,body.night .round.spk,body.night .var-pills button,body.night .chip.gray{background:rgba(255,255,255,.12);color:var(--ink-2)}
+body.night .x svg{stroke:var(--ink-2)}
+body.night .var-pills button.active{background:#f5f5f7;color:#1d1d1f}
+body.night .chip{background:rgba(10,132,255,.22);color:#8cc4ff}
+body.night .btn.secondary{background:rgba(10,132,255,.22);color:#6cb6ff}
+body.night .chart .grid line{stroke:rgba(255,255,255,.08)}
+body.night .chart .tip{background:rgba(40,43,50,.96);box-shadow:0 6px 18px rgba(0,0,0,.4)}
+body.night .toggle-row:hover,body.night .list-row:hover{background:rgba(255,255,255,.06)}
+body.night .badge{background:rgba(255,255,255,.12)}
+body.night .play{background:#f5f5f7}body.night .play svg{fill:#1d1d1f}
+body.night .icon-btn.on{background:rgba(10,132,255,.25)}
+body.night .ab-main input{color:var(--ink)}
+body.night #hint{color:rgba(230,236,245,.55)}
+body.night .ab-sep,body.night .dock-sep{background:rgba(255,255,255,.14)}
+body.night .mini-table td,body.night .mini-table th{border-color:rgba(255,255,255,.1)}
+
+@media (max-width:1500px){ #seasonSeg button:not(.active) span{display:none} #seasonSeg button{padding:8px 11px} }
+@media (max-width:1100px){ .brand span{display:none} }
+
+.sel-row{padding:0 8px 8px}
+.sel-row select{width:100%;height:36px;border:none;outline:none;border-radius:11px;padding:0 10px;font:inherit;font-size:13px;background:rgba(255,255,255,.9);box-shadow:inset 0 0 0 .5px rgba(0,0,0,.12);color:var(--ink);cursor:pointer}
+body.night .sel-row select{background:rgba(255,255,255,.1);color:var(--ink)}
+body.night .sel-row option{color:#1d1d1f}
+
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 </head>
@@ -464,18 +532,20 @@ body.assist-on #lcLegend{bottom:238px}
 <div id="topbar" class="ui hide-in-pano">
   <div class="brand glass">
     <svg viewBox="0 0 64 64"><defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5ac8fa"/><stop offset="1" stop-color="#0a63d8"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="18" fill="url(#lg2)"/><path d="M14 40c6-10 12-10 18 0s12 10 18 0" stroke="#fff" stroke-width="3.6" fill="none" stroke-linecap="round"/><path d="M14 30c6-10 12-10 18 0s12 10 18 0" stroke="#fff" stroke-opacity=".55" stroke-width="3.6" fill="none" stroke-linecap="round"/><circle cx="32" cy="20" r="3.6" fill="#fff"/></svg>
-    <div><b>DIWA Spatial Hub</b><span>Immersive digital twin · Draft v0.2</span></div>
+    <div><b>DIWA Spatial Hub</b><span>Immersive digital twin · Draft v0.6</span></div>
   </div>
   <div class="top-center">
     <div class="seg glass big" id="seasonSeg"></div>
   </div>
   <div class="top-actions">
     <button class="icon-btn glass" id="btnHome" title="Overview (H)"></button>
+    <button class="icon-btn glass" id="btnNight" title="Switch to night"></button>
+    <button class="icon-btn glass people-btn" id="btnPeople" title="Shared session"></button>
     <button class="icon-btn glass" id="btnMusic" title="Sound"></button>
     <button class="icon-btn glass" id="btnLayers" title="Layers"></button>
     <button class="icon-btn glass" id="btnHelp" title="Controls"></button>
     <button class="icon-btn glass" id="btnFull" title="Full screen"></button>
-    <button class="pill-btn glass" id="btnVR" style="display:none"></button>
+    <button class="pill-btn glass vr-btn" id="btnVR" title="Enter VR"></button>
   </div>
 </div>
 
@@ -483,7 +553,25 @@ body.assist-on #lcLegend{bottom:238px}
   <div class="toggle-row" data-m="music"><div class="sw-ic" style="background:#ff9f0a" id="icMusic"></div>Lo-fi music<div class="switch on"></div></div>
   <div class="vol-row" id="volRow"><input type="range" id="volRange" min="0" max="100" value="50" aria-label="Music volume"></div>
   <div class="toggle-row" data-m="amb"><div class="sw-ic" style="background:#34c759" id="icAmb"></div>Forest ambience<div class="switch on"></div></div>
+  <h4 style="margin-top:10px">Assistant voice</h4>
+  <div class="sel-row"><select id="voiceSel" aria-label="Assistant voice"></select></div>
   <div class="small-note" style="padding:0 8px 4px">Composed live in your browser — no audio files. The music softens while the assistant listens or speaks.</div>
+</div>
+<div id="peoplePop" class="pop glass ui">
+  <h4>Shared session</h4>
+  <div id="mpForm">
+    <p class="pp-text">Join to see everyone in this room as a sculpture avatar and talk by voice. Room <b id="mpRoom"></b></p>
+    <input id="mpName" class="field" maxlength="24" placeholder="Your name" autocomplete="name">
+    <div class="pp-label">Avatar colour</div>
+    <div class="swatches" id="mpColors"></div>
+    <div class="toggle-row" id="mpMicToggle"><div class="sw-ic" style="background:#ff3b30" id="icMpMic"></div>Join with microphone<div class="switch on"></div></div>
+    <button class="btn" id="mpJoin" style="width:100%;margin-top:6px">Join</button>
+  </div>
+  <div id="mpOn" style="display:none">
+    <div id="peopleList"></div>
+    <div class="btn-row"><button class="btn ghost" id="mpMute"></button><button class="btn secondary" id="mpInvite"></button><button class="btn ghost" id="mpLeave">Leave</button></div>
+  </div>
+  <div class="small-note" style="padding:4px 8px 2px">Peer-to-peer: voice goes directly between participants. Others join with the same link (add <b>?room=name</b> for a private room).</div>
 </div>
 <div id="layersPop" class="pop glass ui"><h4>Layers</h4><div id="layerRows"></div></div>
 <div id="helpPop" class="pop glass ui">
@@ -596,7 +684,10 @@ import { CSS3DRenderer, CSS3DObject } from 'three/addons/renderers/CSS3DRenderer
 const CONFIG = {
   // URL of your Cloudflare Worker (see worker.js + README). Leave '' until it exists.
   AI_PROXY_URL: '',
-  AI_MODEL_LABEL: 'Claude Haiku',
+  AI_MODEL_LABEL: 'AI',
+  // Assistant voice: 'auto' = the most natural voice available (human-sounding browser voice, else the proxy's cloud voice),
+  // 'cloud' = always the proxy's voice (Workers AI), 'browser' = always the browser's own voice.
+  AI_VOICE: 'auto',
   // YouTube live stream shown on the screen in the hall.
   // Real 360° photo used as the landscape outside the hall's windows ('' = procedural sky).
   OUTSIDE_PANORAMA: 'panoramas/oulanka-08.jpg', OUTSIDE_YAW: 0,
@@ -664,6 +755,10 @@ const ICON = {
   ice: '<path d="M12 2.8 19.8 7.4v9.2L12 21.2l-7.8-4.6V7.4z"/><path d="M12 7v10M7.7 9.5l8.6 5M16.3 9.5l-8.6 5"/>',
   scen: '<path d="M4 18c2.5-2 5-2 7.5 0s5 2 8.5-1"/><path d="M5 13l4-4 3 3 6-6"/><path d="M14 6h4v4"/>',
   close: '<path d="M6 6l12 12M18 6 6 18"/>',
+  sofa: '<path d="M4 11V8.5A2.5 2.5 0 0 1 6.5 6h11A2.5 2.5 0 0 1 20 8.5V11"/><path d="M3 12.5a1.5 1.5 0 0 1 3 0V14h12v-1.5a1.5 1.5 0 0 1 3 0V18H3z"/><path d="M5 18v1.5M19 18v1.5"/>',
+  people: '<circle cx="9" cy="8" r="3.2"/><path d="M3 19.5c.6-3.3 3-5.2 6-5.2s5.4 1.9 6 5.2"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.4.2 4 1.8 4.5 4.6"/>',
+  cloud: '<path d="M7 18.5h10.5a4 4 0 0 0 .4-8 5.5 5.5 0 0 0-10.6-1.2A4.6 4.6 0 0 0 7 18.5z"/>',
+  moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
   ext: '<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
 };
 const svg = (n, a = '') => `<svg viewBox="0 0 24 24" ${a}>${ICON[n]}</svg>`;
@@ -868,6 +963,8 @@ function genData() {
   return { airT, precip, weekly, snow, Q, WL, WT, TURB, rh, sw: swS, co2, pres, soil10, profile, snowpack, vwc, smoothArr };
 }
 const D = genData();
+// cloud cover (0–1), illustrative: from rain, humidity and slow weather systems
+D.cloud = (() => { const r = mulberry32(31); let ar = 0; return D.precip.map((p, i) => { ar = .85 * ar + (r() - .5) * .5; const wet = D.smoothArr(D.precip, 2)[i]; return clamp(.32 + wet * .22 + ar * .6 + (D.rh[i] - 80) * .012, 0, 1); }); })();
 const PEAK_DAY = D.Q.indexOf(Math.max(...D.Q.slice(60, 200)));
 
 /* =====================================================================
@@ -973,6 +1070,9 @@ setSun(28);
 const hall = new THREE.Group(); scene.add(hall);
 const pickables = [];
 let floorOverlay, groundMat, forestMesh, reflector;
+const HALLREF = { ceil: null, fills: [] };
+const nightGlow = { value: 0 };
+function glowPatch(m) { m.onBeforeCompile = sh => { sh.uniforms.uNightGlow = nightGlow; sh.fragmentShader = 'uniform float uNightGlow;\n' + sh.fragmentShader.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n  totalEmissiveRadiance += diffuseColor.rgb * uNightGlow;'); }; m.customProgramCacheKey = () => 'nightglow'; return m; }
 
 function ellipsePts(sx, sz, y, n = 160, mod = null) {
   const pts = [];
@@ -983,9 +1083,9 @@ function buildHall() {
   const { rx, rz, h } = HALL;
   // reflective floor + marble overlay
   const fg = new THREE.CircleGeometry(1, 160); fg.scale(rx + 1.2, rz + 1.2, 1);
-  reflector = new Reflector(fg, { clipBias: 0.003, textureWidth: Math.min(1400, innerWidth) * renderer.getPixelRatio() * .6, textureHeight: Math.min(900, innerHeight) * renderer.getPixelRatio() * .6, color: 0x8c8c8c });
+  reflector = new Reflector(fg, { clipBias: 0.003, textureWidth: Math.min(1400, innerWidth) * renderer.getPixelRatio() * .6, textureHeight: Math.min(900, innerHeight) * renderer.getPixelRatio() * .6, color: 0x3c3c3c });
   reflector.rotation.x = -Math.PI / 2; reflector.position.y = 0.0; hall.add(reflector);
-  floorOverlay = new THREE.Mesh(fg.clone(), new THREE.MeshStandardMaterial({ map: marbleTex, transparent: true, opacity: .62, roughness: .2, metalness: 0, envMapIntensity: .6 }));
+  floorOverlay = new THREE.Mesh(fg.clone(), new THREE.MeshStandardMaterial({ map: marbleTex, transparent: true, opacity: .86, roughness: .38, metalness: 0, envMapIntensity: .6 }));
   floorOverlay.rotation.x = -Math.PI / 2; floorOverlay.position.y = 0.012; floorOverlay.receiveShadow = true; hall.add(floorOverlay);
   // plinth
   const pl = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, .5, 160), new THREE.MeshStandardMaterial({ color: 0xd9d3c8, roughness: .8 }));
@@ -1003,7 +1103,7 @@ function buildHall() {
     const m = new THREE.Mesh(new THREE.TubeGeometry(c, 240, y > 1 ? .07 : .14, 6, true), mm); m.castShadow = y > 1; hall.add(m);
   }
   // ceiling with raised oculus
-  const ceilMat = new THREE.MeshStandardMaterial({ color: 0xf6f3ee, roughness: .92, side: THREE.DoubleSide, emissive: 0xfff6ea, emissiveIntensity: .12 });
+  const ceilMat = HALLREF.ceil = new THREE.MeshStandardMaterial({ color: 0xf6f3ee, roughness: .92, side: THREE.DoubleSide, emissive: 0xfff6ea, emissiveIntensity: .12 });
   const cg = new THREE.RingGeometry(.44, 1, 160, 1); cg.scale(rx + .3, rz + .3, 1);
   const ceil = new THREE.Mesh(cg, ceilMat); ceil.rotation.x = Math.PI / 2; ceil.position.y = h; hall.add(ceil);
   const cyl = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1.6, 160, 1, true), ceilMat); cyl.scale.set(rx * .44, 1, rz * .44); cyl.position.y = h + .8; hall.add(cyl);
@@ -1033,21 +1133,12 @@ function buildHall() {
     }
   }
   // interior fill lights
-  for (const [x, z] of [[-14, -8], [14, -8], [0, 8]]) { const l = new THREE.PointLight(0xffe2bf, 18, 30, 1.6); l.position.set(x, h - 2.5, z); hall.add(l); }
-  // plants by the windows (simple planters)
-  const potM = new THREE.MeshStandardMaterial({ color: 0xf2efe9, roughness: .7 }), leafM = new THREE.MeshStandardMaterial({ color: 0x3f7d3a, roughness: .8, flatShading: true });
-  for (let i = 0; i < 16; i++) {
-    const t = i / 16 * Math.PI * 2 + .2; if (Math.sin(t) > .82) continue;
-    const g = new THREE.Group(); const pot = new THREE.Mesh(new THREE.CylinderGeometry(.55, .42, .8, 20), potM); pot.position.y = .4; pot.castShadow = true; g.add(pot);
-    const r = mulberry32(i + 40);
-    for (let k = 0; k < 5; k++) { const l = new THREE.Mesh(new THREE.IcosahedronGeometry(.42 + r() * .25, 0), leafM); l.position.set((r() - .5) * .6, 1.1 + r() * .7, (r() - .5) * .6); l.castShadow = true; g.add(l); }
-    g.position.set(Math.cos(t) * (rx - 2.2), 0, Math.sin(t) * (rz - 2.2)); hall.add(g);
-  }
+  for (const [x, z] of [[-14, -8], [14, -8], [0, 8], [17, 16]]) { const l = new THREE.PointLight(0xffe2bf, 18, 30, 1.6); l.position.set(x, h - 2.5, z); hall.add(l); HALLREF.fills.push(l); }
 }
 
 const OUT_VS = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }`;
 const OUT_FS = `
-  uniform sampler2D map; uniform float uWinter, uSpring, uSummer, uExposure; varying vec2 vUv;
+  uniform sampler2D map; uniform float uWinter, uSpring, uSummer, uExposure, uNight; varying vec2 vUv;
   void main(){
     vec3 c = texture2D(map, vUv).rgb;
     float l = dot(c, vec3(.299, .587, .114));
@@ -1057,6 +1148,7 @@ const OUT_FS = `
     vec3 snow = vec3(.93, .95, .98) * (.55 + .5 * l);                        // winter: snow-covered look
     float s = smoothstep(.62, .2, vUv.y) * .78 + .22;                        // more snow on the ground half
     c = mix(c, mix(snow, vec3(l * 1.05), .25), uWinter * s);
+    c = mix(c, c * vec3(.36, .46, .78) * .34 + vec3(.004, .009, .024), uNight);
     gl_FragColor = vec4(c * uExposure, 1.);
     #include <colorspace_fragment>
   }`;
@@ -1070,10 +1162,10 @@ function buildOutside() {
   new THREE.TextureLoader().load(CONFIG.OUTSIDE_PANORAMA, t => {
     t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
     outsideMat = new THREE.ShaderMaterial({ vertexShader: OUT_VS, fragmentShader: OUT_FS, side: THREE.BackSide, depthWrite: false, fog: false,
-      uniforms: { map: { value: t }, uWinter: { value: 0 }, uSpring: { value: 0 }, uSummer: { value: 0 }, uExposure: { value: 1 } } });
+      uniforms: { map: { value: t }, uWinter: { value: 0 }, uSpring: { value: 0 }, uSummer: { value: 0 }, uExposure: { value: 1 }, uNight: { value: state.night ? 1 : 0 } } });
     const sph = new THREE.Mesh(new THREE.SphereGeometry(700, 96, 48), outsideMat);
     sph.position.y = 30; sph.rotation.y = THREE.MathUtils.degToRad(CONFIG.OUTSIDE_YAW); sph.renderOrder = -2; scene.add(sph);
-    sky.visible = false; setOutsideSeason(state.season, true);
+    sky.visible = false; setOutsideSeason(state.season, true); applyLighting(true);
   }, undefined, () => {});
 }
 function setOutsideSeason(season, instant) {
@@ -1122,7 +1214,7 @@ const CONIFER = { summer: 0x24502a, spring: 0x2c5a2e, autumn: 0x234a26, winter: 
 const PINE = { summer: 0x3d6b33, spring: 0x46733a, autumn: 0x3b6331, winter: 0xd6e0da };
 const DECID = { summer: 0x6a9a3a, spring: 0xa6cf6c, autumn: [0xe0a326, 0xd0662a, 0xc9b23a], winter: 0xa39a90 };
 const tables = [];
-const state = { season: 'summer', landcover: false, layers: { sensors: true, rivers: true, catchment: true, landcover: false, pano: true, particles: true } };
+const state = { season: 'summer', landcover: false, layers: { clouds: true, precip: true, sensors: true, rivers: true, catchment: true, landcover: false, pano: true, particles: true } };
 
 function siteShape(site) {
   const N = makeNoise(site.seed), rnd = mulberry32(site.seed * 3 + 1);
@@ -1219,23 +1311,23 @@ function buildTable(site) {
   const nrm = geo.attributes.normal;
   meta.forEach((m, k) => { const ny = nrm.getY(k); m.slope = Math.sqrt(Math.max(0, 1 - ny * ny)) / Math.max(.05, ny) * 3; m.cls = shape.classify(m.x, m.z, m.h, m.slope); m.v = .9 + .2 * shape.N.n2(m.x * 9 + 3, m.z * 9); });
   geo.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(meta.length * 3), 3));
-  const terr = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .92, metalness: 0, flatShading: false }));
+  const terr = new THREE.Mesh(geo, glowPatch(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .92, metalness: 0, flatShading: false })));
   terr.position.y = TOP - .03; terr.receiveShadow = true; terr.castShadow = false; g.add(terr);
   terr.userData.site = site.id; pickables.push(terr);
   T.terr = terr; T.meta = meta; T.colorFrom = new Float32Array(meta.length * 3); T.colorTo = new Float32Array(meta.length * 3);
   T.heightAt = (x, z) => shape.height(x, z) * VS;
   T.local = (x, z, lift = 0) => new THREE.Vector3(x * Rt, TOP - .03 + T.heightAt(x, z) + lift, z * Rt);
   // water
-  const wMat = new THREE.MeshStandardMaterial({ color: WATER.summer.color, transparent: true, opacity: .82, roughness: .06, metalness: .15, emissive: 0x06203a, emissiveIntensity: .35, envMapIntensity: 1.4 });
+  const wMat = glowPatch(new THREE.MeshStandardMaterial({ color: WATER.summer.color, transparent: true, opacity: .82, roughness: .06, metalness: .15, emissive: 0x06203a, emissiveIntensity: .35, envMapIntensity: 1.4 }));
   const water = new THREE.Mesh(new THREE.CircleGeometry(Rt - .005, 120), wMat); water.rotation.x = -Math.PI / 2;
   T.wlBase = TOP - .03 + shape.wl; water.position.y = T.wlBase; g.add(water); T.water = water; T.wMat = wMat;
   // trees: spruce + pine (conifers) and birch (deciduous), smaller and more natural than v0.1
   const rnd = mulberry32(site.seed * 13), nC = site.hero ? 1500 : 600, nD = site.hero ? 380 : 160, kit = treeKit();
   const mk = (geo, mat, n) => new THREE.InstancedMesh(geo, mat, n);
   const nS = Math.round(nC * .6), nP = nC - nS;
-  const spr = mk(kit.spruce.crown, kit.crownMat.clone(), nS), sprT = mk(kit.spruce.trunk, kit.trunkMat, nS);
-  const pin = mk(kit.pine.crown, kit.crownMat.clone(), nP), pinT = mk(kit.pine.trunk, kit.trunkMat, nP);
-  const dec = mk(kit.birch.crown, kit.crownMat.clone(), nD), decT = mk(kit.birch.trunk, kit.birchTrunkMat, nD);
+  const spr = mk(kit.spruce.crown, glowPatch(kit.crownMat.clone()), nS), sprT = mk(kit.spruce.trunk, kit.trunkMat, nS);
+  const pin = mk(kit.pine.crown, glowPatch(kit.crownMat.clone()), nP), pinT = mk(kit.pine.trunk, kit.trunkMat, nP);
+  const dec = mk(kit.birch.crown, glowPatch(kit.crownMat.clone()), nD), decT = mk(kit.birch.trunk, kit.birchTrunkMat, nD);
   const o = new THREE.Object3D(), col = new THREE.Color();
   const place = (mesh, trunkMesh, n, kind) => {
     let k = 0, guard = 0; mesh.userData.var = [];
@@ -1381,7 +1473,128 @@ function treeColors(T, season, landcover) {
   T.dec.userData.var.forEach((v, k) => { const p = DECID[season]; landcover ? c.setHex(0x3b8a3c) : c.setHex(Array.isArray(p) ? p[Math.floor(v * p.length)] : p); c.multiplyScalar(.85 + v * .3); T.dec.setColorAt(k, c); });
   T.con.instanceColor.needsUpdate = T.dec.instanceColor.needsUpdate = true;
 }
-let seasonTween;
+let seasonTween, stars;
+/* ---------- floating clouds over the tables, following the cloud cover of the timeline day ---------- */
+const cloudSets = [];
+function buildClouds() {
+  const puff = new THREE.SphereGeometry(1, 14, 10), r = mulberry32(17);
+  tables.forEach((T, ti) => {
+    const grp = new THREE.Group(); grp.position.set(T.group.position.x, 0, T.group.position.z); scene.add(grp);
+    const mat = glowPatch(new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, metalness: 0, transparent: true, opacity: .92, emissive: 0xffffff, emissiveIntensity: .08 }));
+    const clouds = [];
+    for (let k = 0; k < 9; k++) {
+      const parts = [], n = 6 + Math.floor(r() * 4);
+      for (let i = 0; i < n; i++) { const g = puff.clone(), sc = .17 + r() * .17; g.scale(sc * 1.2, sc * .82, sc); g.translate((i - n / 2) * .15 + (r() - .5) * .08, (r() - .2) * .09 + (1 - Math.abs(i - n / 2) / n) * .1, (r() - .5) * .18); parts.push(g); }
+      const c = new THREE.Mesh(mergeGeometries(parts), mat); c.castShadow = false;
+      const a = k / 9 * Math.PI * 2 + r() * .5, d = T.R * (.3 + r() * .5);
+      c.position.set(Math.cos(a) * d, T.TOP + 1.25 + r() * .6, Math.sin(a) * d); c.rotation.y = r() * 6; c.scale.setScalar(.001);
+      grp.add(c); clouds.push({ mesh: c, k: k / 9 + r() * .05, s: 0, base: .8 + r() * .5, bob: r() * 6 });
+    }
+    cloudSets.push({ grp, mat, clouds, speed: (.02 + r() * .02) * (r() < .5 ? 1 : -1), offset: T.site.hero ? 0 : ti * 23 });
+  });
+}
+/* ---------- precipitation: rain streaks and snowflakes falling from the clouds at a wind angle ---------- */
+const PRECIP_VS = `
+  attribute vec4 aSeed; attribute float aEnd;
+  uniform float uTime, uSpeed, uH, uLen, uAmount, uSway, uSnow; uniform vec3 uDir; uniform float uPR;
+  varying float vA;
+  void main(){
+    float s = fract(aSeed.w + uTime * uSpeed / uH);
+    vec3 top = vec3(aSeed.x, uH, aSeed.z) - uDir * (uH / -uDir.y) * .5;        // start upwind so drops land over the table
+    vec3 head = top + uDir * (s * uH / -uDir.y);
+    head.x += sin(uTime * 1.3 + aSeed.w * 40.) * uSway; head.z += cos(uTime * 1.1 + aSeed.w * 31.) * uSway;
+    vec3 p = head - uDir * uLen * (1. - aEnd);
+    vec4 mv = modelViewMatrix * vec4(p, 1.);
+    gl_Position = projectionMatrix * mv;
+    gl_PointSize = uSnow * uPR * (9. + 7. * fract(aSeed.w * 7.)) / -mv.z;
+    float on = step(aSeed.y, uAmount);
+    vA = on * smoothstep(0., .12, s) * smoothstep(1., .82, s) * (.35 + .65 * aEnd + uSnow);
+  }`;
+const RAIN_FS = `varying float vA; uniform vec3 uColor; void main(){ gl_FragColor = vec4(uColor, vA * .85); }`;
+const SNOW_FS = `varying float vA; uniform vec3 uColor; void main(){ float d = length(gl_PointCoord - .5); vec3 c = mix(uColor, vec3(.52, .6, .72), smoothstep(.18, .42, d)); gl_FragColor = vec4(c, smoothstep(.5, .3, d) * vA); }`;
+const precipSets = [];
+function buildPrecip() {
+  const r = mulberry32(53);
+  tables.forEach((T, ti) => {
+    const grp = new THREE.Group(); grp.position.set(T.group.position.x, T.TOP + .02, T.group.position.z); scene.add(grp);
+    const wind = r() * Math.PI * 2, H = 1.35;
+    const mk = (n, snow) => {
+      const seeds = new Float32Array(n * (snow ? 4 : 8)), ends = new Float32Array(n * (snow ? 1 : 2));
+      for (let i = 0; i < n; i++) {
+        const a = r() * Math.PI * 2, d = Math.sqrt(r()) * T.Rt * .9, x = Math.cos(a) * d, z = Math.sin(a) * d, amt = r(), ph = r();
+        for (let e = 0; e < (snow ? 1 : 2); e++) { const k = snow ? i : i * 2 + e; seeds.set([x, amt, z, ph], k * 4); ends[k] = snow ? 1 : e; }
+      }
+      const g = new THREE.BufferGeometry(); g.setAttribute('aSeed', new THREE.BufferAttribute(seeds, 4)); g.setAttribute('aEnd', new THREE.BufferAttribute(ends, 1));
+      g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(ends.length * 3), 3)); g.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, H / 2, 0), T.R * 2);
+      const tilt = snow ? .75 : .42; // tan of the angle from vertical: rain ≈ 23°, snow ≈ 37°
+      const dir = new THREE.Vector3(Math.cos(wind) * tilt, -1, Math.sin(wind) * tilt).normalize();
+      const m = new THREE.ShaderMaterial({ vertexShader: PRECIP_VS, fragmentShader: snow ? SNOW_FS : RAIN_FS, transparent: true, depthWrite: false,
+        uniforms: { uTime: { value: 0 }, uSpeed: { value: snow ? .22 : 1.6 }, uH: { value: H }, uLen: { value: snow ? 0 : .14 }, uAmount: { value: 0 }, uSway: { value: snow ? .03 : 0 }, uSnow: { value: snow ? 1 : 0 },
+          uDir: { value: dir }, uPR: { value: renderer.getPixelRatio() }, uColor: { value: new THREE.Color(snow ? 0xffffff : 0x5f86ad) } } });
+      const obj = snow ? new THREE.Points(g, m) : new THREE.LineSegments(g, m); obj.frustumCulled = false; obj.visible = false; grp.add(obj); return obj;
+    };
+    precipSets.push({ rain: mk(T.site.hero ? 1600 : 800, false), snow: mk(T.site.hero ? 900 : 450, true), offset: T.site.hero ? 0 : ti * 23, rainA: 0, snowA: 0 });
+  });
+}
+function precipState(day) {
+  const p = D.precip[day], T = D.airT[day];
+  const snowy = state.season === 'winter' || T < .5;
+  const amt = clamp(p / 7, 0, 1);
+  return { rain: snowy ? 0 : (p > .3 ? .15 + amt * .85 : 0), snow: snowy ? (p > .2 ? .2 + amt * .8 : 0) : 0 };
+}
+function updatePrecip(dt, t) {
+  const on = state.layers.precip !== false;
+  precipSets.forEach(S => {
+    const st = precipState((playback.day + S.offset) % DAYS), k = 1 - Math.exp(-dt * 3);
+    S.rainA = lerp(S.rainA, on ? st.rain : 0, k); S.snowA = lerp(S.snowA, on ? st.snow : 0, k);
+    [[S.rain, S.rainA], [S.snow, S.snowA]].forEach(([o, a]) => { o.visible = a > .02; o.material.uniforms.uTime.value = t; o.material.uniforms.uAmount.value = a; });
+  });
+}
+const _cc = new THREE.Color();
+function updateClouds(dt, t) {
+  const on = state.layers.clouds !== false;
+  cloudSets.forEach(S => {
+    const day = (playback.day + S.offset) % DAYS, cover = on ? Math.max(D.cloud[day], D.precip[day] > .3 ? .55 + clamp(D.precip[day] / 7, 0, .45) : 0) : 0, rain = D.smoothArr ? clamp(D.precip[day] / 6, 0, 1) : 0;
+    S.grp.rotation.y += dt * S.speed;
+    _cc.setHex(state.season === 'winter' ? 0xe9edf2 : 0xffffff).lerp(_tc.setHex(0x8e98a4), rain * .8); S.mat.color.lerp(_cc, .05);
+    S.clouds.forEach(c => { const target = c.k < cover ? c.base : 0; c.s = lerp(c.s, target, 1 - Math.exp(-dt * 1.6)); c.mesh.scale.setScalar(Math.max(.001, c.s)); c.mesh.visible = c.s > .01; c.mesh.position.y += Math.sin(t * .5 + c.bob) * .0004; });
+  });
+}
+
+function buildStars() {
+  const n = 1600, a = new Float32Array(n * 3), r = mulberry32(11);
+  for (let i = 0; i < n; i++) { const th = r() * Math.PI * 2, el = .3 + Math.asin(r()) * .85; a[i * 3] = Math.cos(th) * Math.cos(el) * 640; a[i * 3 + 1] = Math.sin(el) * 640 + 30; a[i * 3 + 2] = Math.sin(th) * Math.cos(el) * 640; }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(a, 3));
+  stars = new THREE.Points(g, new THREE.PointsMaterial({ color: 0xdfe8ff, size: 1.6, sizeAttenuation: false, transparent: true, opacity: 0, depthWrite: false, fog: false }));
+  stars.renderOrder = -1; scene.add(stars);
+}
+function applyLighting(instant) {
+  const season = state.season, n = !!state.night;
+  const elev = n ? 64 : { winter: 9, spring: 24, summer: 40, autumn: 18 }[season];
+  const ex = n ? .88 : { winter: .98, spring: .92, summer: .9, autumn: .9 }[season];
+  const el0 = state.sunElev ?? 40, ex0 = renderer.toneMappingExposure;
+  const gTo = new THREE.Color({ winter: 0xe9eef3, spring: 0x6b6a45, summer: 0x5d6b3f, autumn: 0x6f5a35 }[season]); if (n) gTo.multiplyScalar(.18);
+  const fogTo = new THREE.Color(n ? 0x0b1424 : season === 'winter' ? 0xe8eef4 : 0xd9e6ef);
+  const F = { gFrom: groundMat.color.clone(), fogFrom: scene.fog.color.clone(), sunC: sun.color.clone(), sunI: sun.intensity, hS: hemi.color.clone(), hG: hemi.groundColor.clone(), hI: hemi.intensity,
+    glow: nightGlow.value, env: scene.environmentIntensity, night: outsideMat ? outsideMat.uniforms.uNight.value : 0, st: stars ? stars.material.opacity : 0, ceil: HALLREF.ceil ? HALLREF.ceil.emissiveIntensity : .12, fill: HALLREF.fills[0]?.intensity ?? 18 };
+  const T = { sunC: new THREE.Color(n ? 0xa9bfff : 0xfff0d6), sunI: n ? .5 : 2.4, hS: new THREE.Color(n ? 0x51648f : 0xe3f0ff), hG: new THREE.Color(n ? 0x241d17 : 0xb38a5c), hI: n ? .28 : .75 };
+  if (!outsideMat) sky.visible = !n;
+  document.body.classList.toggle('night', n);
+  tween(instant ? 1 : 1500, e => {
+    state.sunElev = lerp(el0, elev, e); setSun(state.sunElev); renderer.toneMappingExposure = lerp(ex0, ex, e);
+    groundMat.color.lerpColors(F.gFrom, gTo, e); scene.fog.color.lerpColors(F.fogFrom, fogTo, e);
+    sun.color.lerpColors(F.sunC, T.sunC, e); sun.intensity = lerp(F.sunI, T.sunI, e);
+    hemi.color.lerpColors(F.hS, T.hS, e); hemi.groundColor.lerpColors(F.hG, T.hG, e); hemi.intensity = lerp(F.hI, T.hI, e);
+    nightGlow.value = lerp(F.glow, n ? .5 : 0, e); scene.environmentIntensity = lerp(F.env, n ? .1 : .55, e);
+    if (outsideMat) outsideMat.uniforms.uNight.value = lerp(F.night, n ? 1 : 0, e);
+    if (stars) stars.material.opacity = lerp(F.st, n ? .9 : 0, e);
+    if (HALLREF.ceil) HALLREF.ceil.emissiveIntensity = lerp(F.ceil, n ? .05 : .12, e);
+    HALLREF.fills.forEach(l => l.intensity = lerp(F.fill, n ? 14 : 18, e));
+  });
+  const b = $('#btnNight'); if (b) { b.innerHTML = svg(n ? 'sun' : 'moon'); b.title = n ? 'Switch to day' : 'Switch to night'; }
+}
+function toggleNight() { state.night = !state.night; ls.set('hub.night', state.night ? '1' : '0'); applyLighting(false); }
+
 function applySeason(season, instant = false) {
   const prev = state.season; state.season = season;
   const lc = state.layers.landcover;
@@ -1390,22 +1603,14 @@ function applySeason(season, instant = false) {
     terrainColors(T, season, lc && T.site.hero, T.colorTo);
     treeColors(T, season, lc && T.site.hero);
     const W = WATER[season]; T.wMat.color.setHex(W.color); T.wMat.opacity = W.opacity; T.wMat.roughness = W.rough;
-    T.snowfall.visible = season === 'winter';
+    T.snowfall.visible = false; // replaced by the data-driven precipitation system
   });
   if (seasonTween) tweens.delete(seasonTween);
   const run = (e) => tables.forEach(T => { const a = T.terr.geometry.attributes.color.array; for (let i = 0; i < a.length; i++) a[i] = lerp(T.colorFrom[i], T.colorTo[i], e); T.terr.geometry.attributes.color.needsUpdate = true; });
   if (instant) run(1); else seasonTween = tween(900, run, easeInOut);
   snowMats.forEach(m => m.uniforms.uOpacity.value = season === 'winter' ? .9 : 0);
   // world
-  const elev = { winter: 9, spring: 24, summer: 40, autumn: 18 }[season];
-  const ex = { winter: .98, spring: .92, summer: .9, autumn: .9 }[season];
-  const el0 = state.sunElev ?? 40, ex0 = renderer.toneMappingExposure;
-  const gFrom = groundMat.color.clone(), gTo = new THREE.Color({ winter: 0xe9eef3, spring: 0x6b6a45, summer: 0x5d6b3f, autumn: 0x6f5a35 }[season]);
-  const fogFrom = scene.fog.color.clone(), fogTo = new THREE.Color(season === 'winter' ? 0xe8eef4 : 0xd9e6ef);
-  tween(instant ? 1 : 1400, e => {
-    state.sunElev = lerp(el0, elev, e); setSun(state.sunElev); renderer.toneMappingExposure = lerp(ex0, ex, e);
-    groundMat.color.lerpColors(gFrom, gTo, e); scene.fog.color.lerpColors(fogFrom, fogTo, e);
-  });
+  applyLighting(instant);
   if (forestMesh) { const fc = forestMesh.instanceColor.array, base = forestMesh.userData.base, snowy = season === 'winter';
   for (let i = 0; i < fc.length; i += 3) { fc[i] = snowy ? lerp(base[i], .78, .55) : base[i]; fc[i + 1] = snowy ? lerp(base[i + 1], .82, .55) : base[i + 1]; fc[i + 2] = snowy ? lerp(base[i + 2], .85, .55) : base[i + 2]; }
   forestMesh.instanceColor.needsUpdate = true; }
@@ -1628,7 +1833,7 @@ function updateOrb(dt, t) {
   let e, sw;
   if (O.state === 'listening') { e = .35 + clamp(micLevel() * 9, 0, 1) * .65; sw = .6; }
   else if (O.state === 'thinking') { e = .55 + .2 * Math.sin(t * 6); sw = 1.7; }
-  else if (O.state === 'speaking') { O.speakEnv *= Math.exp(-dt * 7); if (Math.random() < dt * 8) O.speakEnv = Math.max(O.speakEnv, .5 + Math.random() * .5); e = .35 + .65 * O.speakEnv; sw = .8; }
+  else if (O.state === 'speaking') { const tl = ttsLevel(); if (tl >= 0) O.speakEnv = Math.max(O.speakEnv * Math.exp(-dt * 7), clamp(tl * 7, 0, 1)); O.speakEnv *= Math.exp(-dt * 7); if (Math.random() < dt * 8) O.speakEnv = Math.max(O.speakEnv, .5 + Math.random() * .5); e = .35 + .65 * O.speakEnv; sw = .8; }
   else { e = .22 + .08 * Math.sin(t * 1.2); sw = .15; }
   O.energy = lerp(O.energy, e, 1 - Math.exp(-dt * 12)); O.swirl = lerp(O.swirl, sw, 1 - Math.exp(-dt * 2)); O.flash *= Math.exp(-dt * 3);
   const P = ORB_PAL[O.state], k = 1 - Math.exp(-dt * 3);
@@ -1650,6 +1855,284 @@ function updateOrb(dt, t) {
   }
 }
 const _tc = new THREE.Color();
+
+/* =====================================================================
+   Lounge corner — sofas where visitors can sit and talk
+   ===================================================================== */
+const LOUNGE = new THREE.Vector3(17, 0, 16);
+const SEATS = [];
+function sectorShape(r0, r1, a0, a1, seg = 40) {
+  const s = new THREE.Shape();
+  for (let i = 0; i <= seg; i++) { const a = lerp(a0, a1, i / seg); const x = Math.cos(a) * r1, y = Math.sin(a) * r1; i ? s.lineTo(x, y) : s.moveTo(x, y); }
+  for (let i = seg; i >= 0; i--) { const a = lerp(a0, a1, i / seg); s.lineTo(Math.cos(a) * r0, Math.sin(a) * r0); }
+  return s;
+}
+function slab(shape, h, bevel = .06) {
+  const g = new THREE.ExtrudeGeometry(shape, { depth: h, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 4, curveSegments: 24 });
+  g.rotateX(-Math.PI / 2); return g;
+}
+function buildLounge() {
+  const g = new THREE.Group(); g.position.copy(LOUNGE); scene.add(g);
+  const face = Math.atan2(-LOUNGE.z, -LOUNGE.x);           // direction toward the hall centre
+  const back = face + Math.PI, span = 1.05 * Math.PI;      // sofa arc on the far side, open toward the hall
+  const fabric = new THREE.MeshStandardMaterial({ color: 0xd9cfc0, roughness: .95 });
+  const fabric2 = new THREE.MeshStandardMaterial({ color: 0xc8bba7, roughness: .95 });
+  const pillowM = [0x7d9c8a, 0xd98e5f, 0x6f86a8].map(c => new THREE.MeshStandardMaterial({ color: c, roughness: .9 }));
+  // rug
+  const rug = new THREE.Mesh(new THREE.CircleGeometry(4.2, 96), new THREE.MeshStandardMaterial({ color: 0x8a7f73, roughness: 1 }));
+  rug.rotation.x = -Math.PI / 2; rug.position.y = .02; rug.receiveShadow = true; g.add(rug);
+  const rugEdge = new THREE.Mesh(new THREE.RingGeometry(4.0, 4.2, 96), new THREE.MeshStandardMaterial({ color: 0x5f564d, roughness: 1 }));
+  rugEdge.rotation.x = -Math.PI / 2; rugEdge.position.y = .022; g.add(rugEdge);
+  // sofa: seat + backrest + armrests, as one curved piece (Shape angles are in the XY plane; after rotateX(-90°) y → -z)
+  const a0 = -(back + span / 2), a1 = -(back - span / 2);
+  const seat = new THREE.Mesh(slab(sectorShape(2.05, 2.95, a0, a1), .3), fabric); seat.position.y = .12; seat.castShadow = seat.receiveShadow = true; g.add(seat);
+  const cush = new THREE.Mesh(slab(sectorShape(2.1, 2.85, a0 + .02, a1 - .02), .1, .05), fabric2); cush.position.y = .48; cush.castShadow = true; g.add(cush);
+  const backrest = new THREE.Mesh(slab(sectorShape(2.8, 3.1, a0, a1), .82), fabric); backrest.position.y = .12; backrest.castShadow = true; g.add(backrest);
+  for (const a of [a0, a1]) {
+    const arm = new THREE.Mesh(slab(sectorShape(2.0, 3.1, a - .07, a + .07, 6), .5), fabric); arm.position.y = .12; arm.castShadow = true; g.add(arm);
+  }
+  const plinth = new THREE.Mesh(slab(sectorShape(2.1, 3.0, a0, a1), .08, .01), new THREE.MeshStandardMaterial({ color: 0x3b332c, roughness: .6 })); plinth.position.y = .02; g.add(plinth);
+  // seats + pillows
+  const N = 5;
+  for (let i = 0; i < N; i++) {
+    const a = back - span / 2 + span * (i + .5) / N, x = Math.cos(a) * 2.48, z = Math.sin(a) * 2.48;
+    SEATS.push({ pos: new THREE.Vector3(x, 1.18, z).add(LOUNGE), taken: false });
+    const p = new THREE.Mesh(new THREE.BoxGeometry(.5, .42, .16, 3, 3, 1), pillowM[i % 3]);
+    p.geometry.attributes.position.array.forEach((v, k, arr) => { if (k % 3 === 2) arr[k] = v * (1 - .5 * Math.abs(arr[k - 1] / .21) ** 2); });
+    p.position.set(Math.cos(a) * 2.78, .84, Math.sin(a) * 2.78); p.lookAt(0, .84, 0); p.rotation.x -= .18; p.castShadow = true; g.add(p);
+    const hit = new THREE.Mesh(new THREE.CylinderGeometry(.42, .42, 1.1, 12), new THREE.MeshBasicMaterial({ visible: false }));
+    hit.position.set(x, .6, z); hit.userData.seat = i; g.add(hit); pickables.push(hit);
+  }
+  // coffee table
+  const wood = new THREE.MeshStandardMaterial({ map: WOOD_H, roughness: .45 });
+  const top = new THREE.Mesh(new THREE.CylinderGeometry(.95, .95, .07, 64), wood); top.position.y = .46; top.castShadow = top.receiveShadow = true; g.add(top);
+  const leg = new THREE.Mesh(new THREE.CylinderGeometry(.2, .32, .42, 32), new THREE.MeshStandardMaterial({ color: 0x2c2f35, roughness: .4, metalness: .5 })); leg.position.y = .21; g.add(leg);
+  const cup = new THREE.Mesh(new THREE.CylinderGeometry(.06, .05, .11, 20), new THREE.MeshStandardMaterial({ color: 0xf4f2ee, roughness: .3 })); cup.position.set(.3, .55, -.2); g.add(cup);
+  const book = new THREE.Mesh(new THREE.BoxGeometry(.32, .04, .24), new THREE.MeshStandardMaterial({ color: 0x2f5d8a, roughness: .7 })); book.position.set(-.25, .52, .15); book.rotation.y = .4; g.add(book);
+  // floor lamp
+  const lampA = back + span / 2 + .32, lx = Math.cos(lampA) * 2.9, lz = Math.sin(lampA) * 2.9;
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(.025, .025, 1.9, 12), leg.material); pole.position.set(lx, .95, lz); g.add(pole);
+  const shade = new THREE.Mesh(new THREE.CylinderGeometry(.24, .34, .36, 32, 1, true), new THREE.MeshStandardMaterial({ color: 0xfff1d8, emissive: 0xffd9a0, emissiveIntensity: .6, side: THREE.DoubleSide, roughness: .8 }));
+  shade.position.set(lx, 1.95, lz); g.add(shade); LOUNGE.shade = shade;
+  const lglow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffd9a0, transparent: true, opacity: .45, depthWrite: false, blending: THREE.AdditiveBlending })); lglow.scale.setScalar(2.4); lglow.position.set(lx, 1.95, lz); g.add(lglow);
+  const lb = new THREE.Mesh(new THREE.CylinderGeometry(.22, .25, .04, 32), leg.material); lb.position.set(lx, .02, lz); g.add(lb);
+  // label
+  const el = document.createElement('div');
+  el.innerHTML = `<div class="lbl small"><div class="ic">${svg('sofa')}</div><div>Lounge<small>Sit and talk together</small></div></div>`;
+  const lo = new CSS2DObject(el); lo.position.set(0, 2.9, 0); g.add(lo);
+  el.firstElementChild.addEventListener('click', e => { e.stopPropagation(); focusLounge(); });
+}
+let seated = -1;
+function sitAt(i) {
+  endStory(true); closeAllPanels(); focus.kind = 'lounge'; setDockCurrent(null); setLabelsFocus(null); $('#timeline').classList.remove('show');
+  seated = i; const p = SEATS[i].pos, look = LOUNGE.clone().setY(.95);
+  flyTo(p.clone(), look.clone().lerp(p, .02), 1600, () => { controls.minDistance = .01; toast('You’re seated · drag to look around · press H to stand up', 3000); });
+}
+function focusLounge() {
+  endStory(true); closeAllPanels(); focus.kind = 'lounge'; setDockCurrent(null); setLabelsFocus(null); $('#timeline').classList.remove('show');
+  const dir = LOUNGE.clone().normalize();
+  flyTo(LOUNGE.clone().sub(dir.multiplyScalar(6.5)).setY(3.2), LOUNGE.clone().setY(.6), 1700, () => toast('Click a seat on the sofa to sit down', 2600));
+}
+function standUp() { if (seated >= 0) { seated = -1; controls.minDistance = .8; } }
+
+/* =====================================================================
+   Shared sessions — several visitors in the same hall (peer-to-peer)
+   Uses Trystero (WebRTC, signalling over public Nostr relays): no server to run.
+   ===================================================================== */
+const AV_COLORS = ['#0a84ff', '#ff9f0a', '#34c759', '#af52de', '#ff375f', '#30b0c7', '#ffcc00', '#a2845e'];
+const ls = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch { } } };
+const mp = {
+  joined: false, joining: false, room: null, send: null, roomId: (new URLSearchParams(location.search).get('room') || 'diwa-hub').replace(/[^\w-]/g, '').slice(0, 40) || 'diwa-hub',
+  name: new URLSearchParams(location.search).get('name')?.slice(0, 24) || ls.get('hub.name') || '', color: ls.get('hub.color') || AV_COLORS[Math.floor(Math.random() * 4)], micOn: true, mic: null, peers: new Map(), acc: 0, selfSpeaking: false, an: null,
+};
+/* ---------- avatar: a glowing circle that shows a voice waveform while the person talks ---------- */
+const AV_BARS = 48;
+function avatarFace(color, name) {
+  return canvasTex(256, 256, (g, w) => {
+    const c = new THREE.Color(color), hi = '#' + c.clone().lerp(new THREE.Color(1, 1, 1), .45).getHexString(), lo = '#' + c.clone().multiplyScalar(.72).getHexString();
+    const gr = g.createRadialGradient(w * .38, w * .32, 8, w / 2, w / 2, w / 2); gr.addColorStop(0, hi); gr.addColorStop(.7, color); gr.addColorStop(1, lo);
+    g.fillStyle = gr; g.beginPath(); g.arc(w / 2, w / 2, w / 2 - 2, 0, 7); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.95)'; g.font = `650 ${w * .42}px ${DS.font}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText((name || '?').trim().charAt(0).toUpperCase(), w / 2, w / 2 + w * .03);
+  });
+}
+function makeAvatar(color, name) {
+  const g = new THREE.Group(), face = new THREE.Group(); g.add(face);
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(.2, 64), new THREE.MeshBasicMaterial({ map: avatarFace(color, name), transparent: true, toneMapped: false }));
+  const rimMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .75, toneMapped: false, side: THREE.DoubleSide });
+  const rim = new THREE.Mesh(new THREE.RingGeometry(.205, .218, 96), rimMat);
+  const back = new THREE.Mesh(new THREE.CircleGeometry(.218, 64), new THREE.MeshBasicMaterial({ color: new THREE.Color(color).multiplyScalar(.55) })); back.rotation.y = Math.PI; back.position.z = -.002;
+  // talking bars around the circle (like a voice waveform), collapse to a calm dotted ring when quiet
+  const barMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(color).lerp(new THREE.Color(1, 1, 1), .35), transparent: true, opacity: .95, toneMapped: false, side: THREE.DoubleSide });
+  const barGeo = new THREE.PlaneGeometry(.011, 1); barGeo.translate(0, .5, 0);
+  const bars = new THREE.InstancedMesh(barGeo, barMat, AV_BARS);
+  const ripples = [0, 1].map(() => { const m = new THREE.Mesh(new THREE.RingGeometry(.22, .228, 96), new THREE.MeshBasicMaterial({ color: new THREE.Color(color).multiplyScalar(1.5), transparent: true, opacity: 0, toneMapped: false, depthWrite: false, side: THREE.DoubleSide })); face.add(m); return m; });
+  const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: new THREE.Color(color), transparent: true, opacity: .25, depthWrite: false, blending: THREE.AdditiveBlending })); halo.scale.setScalar(.95); halo.position.z = -.01;
+  face.add(halo, back, disc, rim, bars);
+  // soft marker on the floor below the person
+  const floor = new THREE.Mesh(new THREE.CircleGeometry(.32, 48), new THREE.MeshBasicMaterial({ map: glowTex, color: new THREE.Color(color), transparent: true, opacity: .55, depthWrite: false, blending: THREE.AdditiveBlending }));
+  floor.rotation.x = -Math.PI / 2; scene.add(floor);
+  const el = document.createElement('div'); el.innerHTML = `<div class="name-tag"><i style="background:${color}"></i><span></span><b class="spk">${svg('speaker')}</b></div>`;
+  const tagEl = el.firstElementChild; tagEl.querySelector('span').textContent = name || 'Guest';
+  const tag = new CSS2DObject(el); tag.position.y = .34; g.add(tag);
+  g.scale.setScalar(1.3); scene.add(g);
+  return { g, face, disc, rimMat, bars, barMat, ripples, halo, floor, tagEl, tag, color, phase: Math.random() * 10, level: 0 };
+}
+const _bo = new THREE.Object3D();
+function animateAvatar(A, level, t) {
+  A.face.quaternion.copy(camera.quaternion);                  // always faces the viewer
+  A.level = lerp(A.level, level, .35);
+  const L = A.level, talking = L > .12;
+  for (let i = 0; i < AV_BARS; i++) {
+    const a = i / AV_BARS * Math.PI * 2;
+    const wave = .5 + .5 * Math.sin(t * 13 + i * 1.7 + A.phase) * Math.sin(t * 7.3 + i * .63);
+    const len = .006 + L * (.045 + .14 * wave);
+    _bo.position.set(Math.cos(a) * .235, Math.sin(a) * .235, .001); _bo.rotation.set(0, 0, a - Math.PI / 2); _bo.scale.set(1, len, 1); _bo.updateMatrix();
+    A.bars.setMatrixAt(i, _bo.matrix);
+  }
+  A.bars.instanceMatrix.needsUpdate = true;
+  A.barMat.opacity = .45 + .55 * Math.min(1, L * 3);
+  A.rimMat.opacity = talking ? .95 : .55 + .2 * Math.sin(t * 1.6 + A.phase);   // calm breathing when quiet
+  A.halo.material.opacity = .18 + .5 * L; A.halo.scale.setScalar(.95 + .5 * L);
+  A.ripples.forEach((r, k) => { const ph = (t * .9 + k * .5 + A.phase) % 1; r.scale.setScalar(1 + ph * .9); r.material.opacity = talking ? (1 - ph) * .6 * Math.min(1, L * 2) : 0; });
+  A.floor.position.set(A.g.position.x, .03, A.g.position.z);
+  A.floor.material.opacity = .35 + .4 * L;
+  A.tagEl.classList.toggle('talking', talking);
+  return talking;
+}
+function setAvatarStyle(P, name, color) {
+  if ((name && name !== P.name) || (color && color !== P.color)) {
+    P.name = name || P.name; P.color = color || P.color;
+    P.av.tagEl.querySelector('span').textContent = P.name; P.av.tagEl.querySelector('i').style.background = P.color;
+    P.av.disc.material.map = avatarFace(P.color, P.name); P.av.disc.material.needsUpdate = true;
+    const c = new THREE.Color(P.color); P.av.barMat.color.copy(c).lerp(new THREE.Color(1, 1, 1), .35); P.av.halo.material.color.copy(c); P.av.floor.material.color.copy(c);
+    P.av.ripples.forEach(r => r.material.color.copy(c).multiplyScalar(1.5));
+  }
+}
+function ensurePeer(id, d = {}) {
+  let P = mp.peers.get(id);
+  if (!P) {
+    P = { id, name: d.n || 'Guest', color: d.c || '#8e8e93', pos: new THREE.Vector3(0, 1.6, 20), yaw: 0, pitch: 0, tgt: { pos: new THREE.Vector3(0, 1.6, 20), yaw: 0, pitch: 0 }, seen: false, level: 0 };
+    P.av = makeAvatar(P.color, P.name); mp.peers.set(id, P);
+    toast(`${P.name} joined the hub`, 2400); renderPeople();
+  }
+  setAvatarStyle(P, d.n, d.c);
+  return P;
+}
+function removePeer(id) {
+  const P = mp.peers.get(id); if (!P) return;
+  scene.remove(P.av.g); scene.remove(P.av.floor); P.av.tag.element.remove(); P.voice?.el.remove(); try { P.voice?.src.disconnect(); } catch { }
+  mp.peers.delete(id); toast(`${P.name} left`, 2000); renderPeople();
+}
+function onPose(d, id) {
+  const P = ensurePeer(id, d); if (!Array.isArray(d.p)) return;
+  P.tgt.pos.set(+d.p[0] || 0, +d.p[1] || 0, +d.p[2] || 0); P.tgt.yaw = +d.y || 0; P.tgt.pitch = clamp(+d.x || 0, -1.2, 1.2);
+  if (!P.seen) { P.pos.copy(P.tgt.pos); P.yaw = P.tgt.yaw; P.seen = true; }
+}
+const _cp = new THREE.Vector3(), _cd = new THREE.Vector3();
+function selfPose() {
+  const cam = renderer.xr.isPresenting ? renderer.xr.getCamera() : camera;
+  cam.getWorldPosition(_cp); cam.getWorldDirection(_cd);
+  return { p: [+_cp.x.toFixed(3), +_cp.y.toFixed(3), +_cp.z.toFixed(3)], y: +Math.atan2(_cd.x, _cd.z).toFixed(3), x: +Math.asin(clamp(_cd.y, -1, 1)).toFixed(3), n: mp.name, c: mp.color };
+}
+function angLerp(a, b, k) { let d = b - a; while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math.PI * 2; return a + d * k; }
+const _vb = new Float32Array(256);
+function updateMP(dt) {
+  if (!mp.peers.size && !mp.joined) return;
+  if (mp.joined && mp.send) { mp.acc += dt; if (mp.acc > .1) { mp.acc = 0; try { mp.send(selfPose()); } catch { } } }
+  const ctx = music.ctx;
+  if (ctx && mp.peers.size) {
+    const cam = renderer.xr.isPresenting ? renderer.xr.getCamera() : camera; cam.getWorldPosition(_cp); cam.getWorldDirection(_cd); const L = ctx.listener;
+    if (L.positionX) { L.positionX.value = _cp.x; L.positionY.value = _cp.y; L.positionZ.value = _cp.z; L.forwardX.value = _cd.x; L.forwardY.value = _cd.y; L.forwardZ.value = _cd.z; L.upX.value = 0; L.upY.value = 1; L.upZ.value = 0; }
+    else { L.setPosition(_cp.x, _cp.y, _cp.z); L.setOrientation(_cd.x, _cd.y, _cd.z, 0, 1, 0); }
+  }
+  let anyone = false;
+  mp.peers.forEach(P => {
+    const k = 1 - Math.exp(-dt * 8);
+    P.pos.lerp(P.tgt.pos, k); P.yaw = angLerp(P.yaw, P.tgt.yaw, k); P.pitch = lerp(P.pitch, P.tgt.pitch, k);
+    P.av.g.position.copy(P.pos).add(new THREE.Vector3(0, Math.sin(performance.now() / 900 + P.id.length) * .015, 0));
+    let lvl = P.simLevel ?? 0;
+    if (P.voice) {
+      P.voice.an.getFloatTimeDomainData(_vb); let s = 0; for (let i = 0; i < 256; i++) s += _vb[i] * _vb[i]; lvl = Math.sqrt(s / 256);
+      const pn = P.voice.pan; if (pn.positionX) { pn.positionX.value = P.pos.x; pn.positionY.value = P.pos.y; pn.positionZ.value = P.pos.z; } else pn.setPosition(P.pos.x, P.pos.y, P.pos.z);
+    }
+    const talking = animateAvatar(P.av, clamp(lvl * 14, 0, 1), performance.now() / 1000); anyone = anyone || talking;
+    const row = document.querySelector(`#peopleList [data-id="${P.id}"]`); if (row) row.classList.toggle('talking', talking);
+  });
+  // self speaking indicator
+  if (mp.an) { mp.an.getFloatTimeDomainData(_vb); let s = 0; for (let i = 0; i < 256; i++) s += _vb[i] * _vb[i]; const me = Math.sqrt(s / 256) * 14 > .12 && mp.micOn; const r = document.querySelector('#peopleList [data-id="me"]'); if (r) r.classList.toggle('talking', me); }
+  if (ORB.state === 'idle' && !$('#liveModal').classList.contains('show')) music.duck(anyone ? .45 : 1, .8);
+}
+function attachVoice(id, stream) {
+  const ctx = music.ensureCtx(); if (!ctx) return; ctx.resume();
+  const P = ensurePeer(id);
+  const el = new Audio(); el.srcObject = stream; el.muted = true; el.play().catch(() => { }); // Chrome needs a playing element for WebRTC audio in Web Audio
+  const src = ctx.createMediaStreamSource(stream), an = ctx.createAnalyser(); an.fftSize = 256;
+  const pan = ctx.createPanner(); pan.panningModel = 'HRTF'; pan.distanceModel = 'inverse'; pan.refDistance = 2.2; pan.maxDistance = 60; pan.rolloffFactor = 1.1;
+  const gn = ctx.createGain(); gn.gain.value = 1.25;
+  src.connect(an); src.connect(pan); pan.connect(gn); gn.connect(ctx.destination);
+  P.voice = { el, src, an, pan, gn };
+}
+async function mpJoin() {
+  if (mp.joined || mp.joining) return;
+  const name = $('#mpName').value.trim().slice(0, 24);
+  if (!name) { $('#mpName').focus(); $('#mpName').classList.add('shake'); setTimeout(() => $('#mpName').classList.remove('shake'), 500); return; }
+  mp.name = name; ls.set('hub.name', name); ls.set('hub.color', mp.color); mp.joining = true; renderPeople();
+  try {
+    const { joinRoom } = await import(new URL('vendor/trystero-nostr.min.js', location.href).href);
+    const room = joinRoom({ appId: 'diwa-spatial-hub.oulu' }, mp.roomId);
+    const [sendPose, getPose] = room.makeAction('pose');
+    mp.room = room; mp.send = sendPose;
+    getPose(onPose);
+    room.onPeerJoin(id => { ensurePeer(id); try { sendPose(selfPose(), id); } catch { } if (mp.mic) room.addStream(mp.mic, id); });
+    room.onPeerLeave(removePeer);
+    room.onPeerStream((stream, id) => attachVoice(id, stream));
+    if (mp.micOn) {
+      try {
+        mp.mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+        room.addStream(mp.mic);
+        const ctx = music.ensureCtx(); if (ctx) { ctx.resume(); const s = ctx.createMediaStreamSource(mp.mic); mp.an = ctx.createAnalyser(); mp.an.fftSize = 256; s.connect(mp.an); }
+      } catch { mp.micOn = false; toast('Microphone not available — you can still see and be seen'); }
+    }
+    mp.joined = true; toast(`Joined room “${mp.roomId}” · share the invite link so others can join`, 3200);
+  } catch (e) { toast('Couldn’t start the shared session: ' + (e.message || e)); }
+  mp.joining = false; renderPeople();
+}
+function mpLeave() {
+  try { mp.room?.leave(); } catch { }
+  mp.mic?.getTracks().forEach(t => t.stop()); mp.mic = null; mp.an = null; mp.room = null; mp.send = null; mp.joined = false; mp.micOn = true;
+  [...mp.peers.keys()].forEach(removePeer); renderPeople();
+}
+function mpMute() { mp.micOn = !mp.micOn; mp.mic?.getAudioTracks().forEach(t => t.enabled = mp.micOn); renderPeople(); }
+function renderPeople() {
+  const n = mp.peers.size + (mp.joined ? 1 : 0); const b = $('#peopleBadge'); b.textContent = n; b.style.display = n ? '' : 'none';
+  $('#btnPeople').classList.toggle('live', mp.joined);
+  const f = $('#mpForm'), on = $('#mpOn'); f.style.display = mp.joined ? 'none' : ''; on.style.display = mp.joined ? '' : 'none';
+  $('#mpJoin').textContent = mp.joining ? 'Joining…' : 'Join'; $('#mpJoin').disabled = mp.joining;
+  $('#mpRoom').textContent = mp.roomId;
+  if (!mp.joined) return;
+  const row = (id, name, color, sub) => `<div class="person" data-id="${id}"><i style="background:${color}"></i><div><b></b><span>${sub}</span></div><em>${svg('speaker')}</em></div>`;
+  $('#peopleList').innerHTML = row('me', '', mp.color, mp.micOn ? 'You · mic on' : 'You · muted') + [...mp.peers.values()].map(P => row(P.id, '', P.color, P.voice ? 'Voice connected' : 'Connecting voice…')).join('');
+  $('#peopleList').querySelectorAll('.person').forEach(r => { const id = r.dataset.id; r.querySelector('b').textContent = id === 'me' ? mp.name : mp.peers.get(id)?.name || 'Guest'; });
+  $('#mpMute').innerHTML = svg('mic') + (mp.micOn ? 'Mute' : 'Unmute'); $('#mpMute').classList.toggle('muted', !mp.micOn);
+}
+function mpInitUI() {
+  $('#btnPeople').innerHTML = svg('people') + '<span class="count" id="peopleBadge" style="display:none">0</span>';
+  $('#mpName').value = mp.name;
+  $('#mpColors').innerHTML = AV_COLORS.map(c => `<button data-c="${c}" style="background:${c}" class="${c === mp.color ? 'on' : ''}" aria-label="Avatar colour"></button>`).join('');
+  $('#mpColors').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { mp.color = b.dataset.c; $('#mpColors').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); }));
+  $('#mpName').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') mpJoin(); });
+  $('#mpMicToggle').addEventListener('click', () => { mp.micOn = !mp.micOn; $('#mpMicToggle .switch').classList.toggle('on', mp.micOn); });
+  $('#mpJoin').addEventListener('click', mpJoin); $('#mpLeave').addEventListener('click', mpLeave); $('#mpMute').addEventListener('click', mpMute);
+  $('#mpInvite').addEventListener('click', async () => {
+    const u = new URL(location.href); u.search = ''; u.searchParams.set('room', mp.roomId);
+    try { await navigator.clipboard.writeText(u.href); toast('Invite link copied'); } catch { prompt('Copy this invite link:', u.href); }
+  });
+  $('#mpInvite').innerHTML = svg('ext') + 'Copy invite link';
+  renderPeople();
+}
+/* for testing without a network: __hub.simulatePeer('id', 'Name', '#ff9f0a', [x, y, z], yaw) */
+function simulatePeer(id, n, c, p, y = 0, talk) { onPose({ p, y, x: 0, n, c }, id); const P = mp.peers.get(id); if (talk !== undefined) P.simLevel = talk; return P; }
 
 /* =====================================================================
    Camera flights
@@ -1690,14 +2173,17 @@ function segSet(el, v) {
 
 function buildUI() {
   $('#btnHome').innerHTML = svg('home'); $('#btnLayers').innerHTML = svg('layers'); $('#btnHelp').innerHTML = svg('help'); $('#btnFull').innerHTML = svg('full');
-  $('#btnVR').innerHTML = svg('vr') + '<span>Enter VR</span>';
+  $('#btnVR').innerHTML = svg('vr') + '<span>VR</span>';
   $('#tlPlay').innerHTML = svg('play'); $('#btnStory').innerHTML = svg('story') + 'Snowmelt story';
   $('#panoBack').innerHTML = svg('back') + 'Back to hub';
   document.querySelectorAll('.x').forEach(x => x.innerHTML = svg('x'));
   $('#aiIcon').innerHTML = svg('chat'); $('#aiSend').innerHTML = svg('send'); $('#aiMic').innerHTML = svg('mic'); $('#aiSpk').innerHTML = svg('speaker');
   $('#abMic').innerHTML = svg('mic'); $('#abSend').innerHTML = svg('send'); $('#abSpk').innerHTML = svg('speaker'); $('#abHist').innerHTML = svg('chat'); $('#abClose').innerHTML = svg('close');
+  $('#icMpMic').innerHTML = svg('mic'); $('#btnNight').innerHTML = svg('moon'); $('#btnNight').addEventListener('click', toggleNight); mpInitUI();
   $('#btnMusic').innerHTML = svg('music'); $('#icMusic').innerHTML = svg('music'); $('#icAmb').innerHTML = svg('tree');
   $('#volRow').insertAdjacentHTML('afterbegin', svg('speaker'));
+  fillVoiceSelect();
+  $('#voiceSel').addEventListener('change', e => { voicePick.choice = e.target.value; try { localStorage.setItem('hub.voice', voicePick.choice); } catch { } toast('Voice set — ask the orb something to hear it', 2200); });
   const vr = $('#volRange'), setP = () => vr.style.setProperty('--p', vr.value + '%'); setP();
   vr.addEventListener('input', () => { setP(); music.vol = vr.value / 100; if (!music.on) { music.on = true; $('#musicPop [data-m=music] .switch').classList.add('on'); } music.start(); });
   $('#musicPop').querySelectorAll('.toggle-row').forEach(r => r.addEventListener('click', () => {
@@ -1716,6 +2202,7 @@ function buildUI() {
   sep();
   item('live', 'live', CONFIG.LIVE_TITLE, focusLive);
   item('', 'pano', '360° views', () => openPano(CONFIG.PANORAMAS[0].id));
+  item('', 'sofa', 'Lounge · sit and talk', focusLounge);
   item('ai', 'ai', 'Ask the Hub · AI', focusAI);
   // dock magnification
   const items = [...dock.querySelectorAll('.dock-item')];
@@ -1724,12 +2211,12 @@ function buildUI() {
   // layers popover
   const L = [
     ['sensors', 'Sensor stations', 'sensor', '#0a84ff'], ['rivers', 'River network', 'river', '#30b0c7'], ['catchment', 'Catchment boundary', 'boundary', '#ff9f0a'],
-    ['landcover', 'Land cover', 'landcover', '#34c759'], ['pano', '360° points', 'pano', '#5856d6'], ['particles', 'Light particles', 'sparkle', '#ff9f6b'],
+    ['landcover', 'Land cover', 'landcover', '#34c759'], ['pano', '360° points', 'pano', '#5856d6'], ['particles', 'Light particles', 'sparkle', '#ff9f6b'], ['clouds', 'Clouds over the tables', 'cloud', '#8e9bb0'], ['precip', 'Rain and snow', 'drop', '#5ac8fa'],
   ];
-  $('#layerRows').innerHTML = L.map(([k, n, ic, c]) => `<div class="toggle-row" data-k="${k}"><div class="sw-ic" style="background:${c}">${svg(ic)}</div>${n}<div class="switch ${state.layers[k] ? 'on' : ''}"></div></div>`).join('') + '<div class="small-note" style="padding:0 8px 4px">Map layers apply to the Oulankajoki table and are illustrative until real GIS data is added.</div>';
+  $('#layerRows').innerHTML = L.map(([k, n, ic, c]) => `<div class="toggle-row" data-k="${k}"><div class="sw-ic" style="background:${c}">${svg(ic)}</div>${n}<div class="switch ${state.layers[k] ? 'on' : ''}"></div></div>`).join('') + '<div class="small-note" style="padding:0 8px 4px">Map layers apply to the Oulankajoki table and are illustrative until real GIS data is added. Clouds, rain and snow follow the weather of the timeline date.</div>';
   $('#layerRows').querySelectorAll('.toggle-row').forEach(r => r.addEventListener('click', () => { const k = r.dataset.k; state.layers[k] = !state.layers[k]; r.querySelector('.switch').classList.toggle('on', state.layers[k]); applyLayers(); }));
   const pop = (btn, el) => btn.addEventListener('click', e => { e.stopPropagation(); const show = !el.classList.contains('show'); document.querySelectorAll('.pop').forEach(p => p.classList.remove('show')); document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('on')); if (show) { el.classList.add('show'); btn.classList.add('on'); } });
-  pop($('#btnLayers'), $('#layersPop')); pop($('#btnHelp'), $('#helpPop')); pop($('#btnMusic'), $('#musicPop'));
+  pop($('#btnLayers'), $('#layersPop')); pop($('#btnHelp'), $('#helpPop')); pop($('#btnMusic'), $('#musicPop')); pop($('#btnPeople'), $('#peoplePop'));
   document.addEventListener('pointerdown', e => { if (!e.target.closest('.pop') && !e.target.closest('.icon-btn')) { document.querySelectorAll('.pop').forEach(p => p.classList.remove('show')); document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('on')); } });
   $('#btnHome').addEventListener('click', goHome);
   $('#btnFull').addEventListener('click', () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.());
@@ -1768,10 +2255,12 @@ function setDockCurrent(id) { document.querySelectorAll('.dock-item').forEach(b 
 function setLabelsFocus(id, hideAll = false) { tables.forEach(T => { T.lbl.classList.toggle('hidden', hideAll || T.site.id === id); T.lbl.classList.toggle('dim', !!id && T.site.id !== id); }); }
 function closeAllPanels() { closeSitePanel(); $('#aiPanel').classList.remove('show'); closeSensorCard(); clearScenario(); }
 function goHome() {
+  standUp();
   endStory(true); closeAllPanels(); focus.kind = 'home'; focus.id = null; setDockCurrent(null); setLabelsFocus(null);
   $('#timeline').classList.remove('show'); flyTo(HOME_POS, HOME_TGT, 1800);
 }
 function focusSite(id, opts = {}) {
+  standUp();
   const T = tableOf(id); if (!T) return;
   if (!opts.keepStory) { endStory(true); siteTab = 'overview'; }
   if (focus.id !== id) clearScenario();
@@ -1948,7 +2437,7 @@ function renderSiteTab(site) {
 function updateStats() {
   const d = playback.day, w = $('#wStats'), h = $('#hStats');
   const stat = (k, v, u) => `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u}</small></div></div>`;
-  if (w) w.innerHTML = stat('Air temperature', D.airT[d].toFixed(1), '°C') + stat('Snow depth', D.snow[d].toFixed(0), 'cm') + stat('Precipitation · 7 d', D.precip.slice(Math.max(0, d - 6), d + 1).reduce((a, b) => a + b, 0).toFixed(1), 'mm') + stat('Date', fmtDate(d), '');
+  if (w) w.innerHTML = stat('Air temperature', D.airT[d].toFixed(1), '°C') + stat('Snow depth', D.snow[d].toFixed(0), 'cm') + stat('Precipitation · 7 d', D.precip.slice(Math.max(0, d - 6), d + 1).reduce((a, b) => a + b, 0).toFixed(1), 'mm') + stat('Cloud cover', Math.round(D.cloud[d] * 100), '%') + stat('Today', D.precip[d] > .3 ? (precipState(d).snow > 0 ? 'Snow' : 'Rain') : 'Dry', D.precip[d] > .3 ? D.precip[d].toFixed(1) + ' mm' : '');
   if (h) h.innerHTML = stat('Discharge', D.Q[d].toFixed(0), 'm³/s') + stat('Water level', D.WL[d].toFixed(2), 'm') + stat('Water temp.', D.WT[d].toFixed(1), '°C') + stat('Turbidity', D.TURB[d].toFixed(1), 'FNU');
   const sc = $('#scStats'); if (sc && sensorCard.G) sc.innerHTML = sensorStats(sensorCard.G, d);
 }
@@ -2196,7 +2685,7 @@ function summonOrb(prefill) {
   if (prefill) { $('#abInput').value = prefill; $('#abInput').focus({ preventScroll: true }); }
 }
 function dismissOrb() {
-  stopListening(true); speechSynthesis?.cancel(); clearInterval(ai.revealTimer);
+  stopListening(true); stopSpeaking(); clearInterval(ai.revealTimer);
   ORB.mode = 'docked'; setOrbState('idle');
   $('#assistBar').classList.remove('show'); document.body.classList.remove('assist-on'); $('#orbCaption').classList.remove('show');
   $('#aiPanel').classList.remove('show');
@@ -2204,7 +2693,7 @@ function dismissOrb() {
 function aiInit() {
   const connected = !!CONFIG.AI_PROXY_URL;
   [$('#aiStatus'), $('#abConn')].forEach(st => { st.className = (st.id === 'abConn' ? 'ab-conn ' : 'ai-status ') + (connected ? 'ok' : 'off'); });
-  $('#aiStatus span').textContent = connected ? `Connected · ${CONFIG.AI_MODEL_LABEL}` : 'Not connected · set AI_PROXY_URL';
+  $('#aiStatus span').textContent = connected ? 'Connected' : 'Not connected · set AI_PROXY_URL';
   $('#abConn').title = connected ? `Connected · ${CONFIG.AI_MODEL_LABEL}` : 'AI model not connected yet';
   addMsg('bot', 'Hi! I’m the Hub Assistant. Ask me anything — speak to the orb or type here.');
   if (!connected) addMsg('sys', 'The AI model isn’t connected yet. Deploy the included worker.js and paste its URL into CONFIG.AI_PROXY_URL (see README). Voice input and spoken replies already work.');
@@ -2215,7 +2704,7 @@ function aiInit() {
   $('#aiSend').addEventListener('click', () => sendAI());
   $('#abInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); const v = $('#abInput').value; $('#abInput').value = ''; sendAI(v); } if (e.key === 'Escape') $('#abInput').blur(); e.stopPropagation(); });
   $('#abSend').addEventListener('click', () => { const v = $('#abInput').value; $('#abInput').value = ''; sendAI(v); });
-  const spk = () => { ai.speak = !ai.speak; [$('#aiSpk'), $('#abSpk')].forEach(b => b.classList.toggle('on', ai.speak)); if (!ai.speak) speechSynthesis?.cancel(); toast(ai.speak ? 'Spoken replies on' : 'Spoken replies off', 1600); };
+  const spk = () => { ai.speak = !ai.speak; [$('#aiSpk'), $('#abSpk')].forEach(b => b.classList.toggle('on', ai.speak)); if (!ai.speak) stopSpeaking(); toast(ai.speak ? 'Spoken replies on' : 'Spoken replies off', 1600); };
   $('#aiSpk').addEventListener('click', spk); $('#abSpk').addEventListener('click', spk);
   [$('#aiSpk'), $('#abSpk')].forEach(b => b.classList.toggle('on', ai.speak));
   $('#aiMic').addEventListener('click', toggleListening); $('#abMic').addEventListener('click', toggleListening); $('#abOrb').addEventListener('click', toggleListening);
@@ -2236,30 +2725,81 @@ async function sendAI(text) {
       const res = await fetch(CONFIG.AI_PROXY_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: ai.history.slice(-16) }) });
       const j = await res.json().catch(() => ({}));
       if (!res.ok || !j.reply) throw new Error(j.error || `HTTP ${res.status}`);
-      reply = j.reply;
+      reply = j.reply; if (j.engine) { const lbl = j.engine === 'claude' ? 'Claude' : 'Free AI · Workers AI'; $('#aiStatus span').textContent = 'Connected · ' + lbl; $('#abConn').title = 'Connected · ' + lbl; }
     }
   } catch (e) { reply = `Sorry — I couldn’t reach the assistant (${e.message}). Please try again in a moment.`; }
   typing.remove(); addMsg('bot', reply); ai.history.push({ role: 'assistant', content: reply }); ai.busy = false;
   deliver(reply);
 }
+/* ---------- assistant voice: pick the most human-sounding voice available ---------- */
+const FEMALE = ['ava', 'emma', 'jenny', 'aria', 'michelle', 'sonia', 'libby', 'natasha', 'clara', 'zoe', 'samantha', 'serena', 'karen', 'moira', 'tessa', 'fiona', 'allison', 'susan', 'kate', 'joanna', 'salli', 'female', 'hazel', 'zira', 'catherine', 'victoria', 'nicky', 'shelley', 'sandy', 'flo'];
+const MALE = ['guy', 'davis', 'tony', 'jason', 'brian', 'ryan', 'thomas', 'daniel', 'alex', 'fred', 'david', 'mark', 'george', 'james', 'eric', 'christopher', 'roger', 'steffan', 'andrew', 'male', 'rishi', 'aaron', 'arthur', 'oliver', 'reed', 'rocko', 'grandpa', 'eddy'];
+function voiceScore(v) {
+  const n = v.name.toLowerCase(); let s = 0;
+  if (!/^en/i.test(v.lang)) return -99;
+  if (/natural|neural/.test(n)) s += 10; if (/premium|enhanced|wavenet/.test(n)) s += 8; if (/google/.test(n)) s += 3;
+  if (FEMALE.some(f => n.includes(f))) s += 5; if (MALE.some(f => new RegExp('\\b' + f + '\\b').test(n))) s -= 8;
+  if (/en-(us|gb)/i.test(v.lang)) s += 1; if (/compact|novelty|bells|bad news|whisper|bubbles|zarvox|trinoids|organ|cellos/.test(n)) s -= 20;
+  return s;
+}
+const voicePick = { list: [], best: null, choice: (() => { try { return localStorage.getItem('hub.voice') || 'auto'; } catch { return 'auto'; } })() };
+function loadVoices() {
+  if (!('speechSynthesis' in window)) return;
+  voicePick.list = speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang)).sort((a, b) => voiceScore(b) - voiceScore(a));
+  voicePick.best = voicePick.list[0] || null; fillVoiceSelect();
+}
+if ('speechSynthesis' in window) { loadVoices(); speechSynthesis.addEventListener?.('voiceschanged', loadVoices); }
+function fillVoiceSelect() {
+  const sel = document.getElementById('voiceSel'); if (!sel) return;
+  const best = voicePick.best ? ` · ${voicePick.best.name.replace(/^Microsoft |^Google /, '').replace(/ Online \(Natural\).*| - English.*/, '')}` : '';
+  sel.innerHTML = `<option value="auto">Automatic (most natural)${best}</option><option value="cloud">Cloud voice · Workers AI</option>` +
+    voicePick.list.slice(0, 30).map(v => `<option value="v:${v.name.replace(/"/g, '')}">${v.name}</option>`).join('');
+  sel.value = voicePick.choice; if (!sel.value) { sel.value = 'auto'; voicePick.choice = 'auto'; }
+}
+const isNaturalVoice = v => !!v && /natural|neural|premium|enhanced/i.test(v.name);
+function voicePlan() {
+  const c = voicePick.choice, proxy = !!CONFIG.AI_PROXY_URL;
+  if (c === 'cloud' || (CONFIG.AI_VOICE === 'cloud' && c === 'auto')) return proxy ? { cloud: true } : { voice: voicePick.best };
+  if (c.startsWith('v:')) return { voice: voicePick.list.find(v => v.name.replace(/"/g, '') === c.slice(2)) || voicePick.best };
+  if (CONFIG.AI_VOICE === 'browser') return { voice: voicePick.best };
+  return isNaturalVoice(voicePick.best) || !proxy ? { voice: voicePick.best } : { cloud: true };
+}
+const tts = { audio: null, an: null, buf: new Float32Array(512) };
+async function speakCloud(text, onEnd) {
+  const res = await fetch(CONFIG.AI_PROXY_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tts: text }) });
+  if (!res.ok || !/audio/.test(res.headers.get('Content-Type') || '')) throw new Error('cloud voice unavailable');
+  const url = URL.createObjectURL(await res.blob());
+  const el = new Audio(url); tts.audio = el;
+  const ctx = music.ensureCtx();
+  if (ctx) { ctx.resume(); const src = ctx.createMediaElementSource(el); tts.an = ctx.createAnalyser(); tts.an.fftSize = 512; src.connect(tts.an); tts.an.connect(ctx.destination); }
+  el.onended = el.onerror = () => { URL.revokeObjectURL(url); tts.audio = null; tts.an = null; onEnd(); };
+  await el.play();
+  return el;
+}
+function stopSpeaking() { speechSynthesis?.cancel(); if (tts.audio) { tts.audio.pause(); tts.audio.onended?.(); } }
+function ttsLevel() { if (!tts.an) return -1; tts.an.getFloatTimeDomainData(tts.buf); let s = 0; for (let i = 0; i < tts.buf.length; i++) s += tts.buf[i] * tts.buf[i]; return Math.sqrt(s / tts.buf.length); }
 function deliver(reply) {
-  const txt = plain(reply); clearInterval(ai.revealTimer);
-  let shown = 0, boundaryUsed = false;
+  const txt = plain(reply); clearInterval(ai.revealTimer); stopSpeaking();
+  let shown = 0, boundaryUsed = false, cloudEl = null;
   const render = () => { const a = $('#capAns'); a.textContent = txt.slice(0, shown); a.scrollTop = a.scrollHeight; };
   caption(undefined, ''); setOrbState('speaking');
   const finish = () => { clearInterval(ai.revealTimer); shown = txt.length; render(); if (ORB.state === 'speaking') setOrbState('idle'); caption(undefined, undefined, { hideAfter: 9000 }); };
-  // text reveal at reading speed (also the fallback when the voice gives no word timings)
-  ai.revealTimer = setInterval(() => { if (!boundaryUsed || !ai.speak) shown = Math.min(txt.length, shown + 2); render(); if (!ai.speak && shown >= txt.length) finish(); }, 33);
-  if (ai.speak && 'speechSynthesis' in window) {
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(txt);
-    const vs = speechSynthesis.getVoices(), pref = ['Samantha', 'Google UK English Female', 'Microsoft Aria', 'Microsoft Jenny', 'Karen', 'Daniel'];
-    u.voice = pref.map(n => vs.find(v => v.name.includes(n))).find(Boolean) || vs.find(v => v.lang?.startsWith('en')) || null;
-    u.rate = 1.03; u.pitch = 1;
+  ai.revealTimer = setInterval(() => {
+    if (cloudEl && cloudEl.duration) shown = Math.max(shown, Math.floor(txt.length * cloudEl.currentTime / cloudEl.duration) + 4);
+    else if (!boundaryUsed || !ai.speak) shown = Math.min(txt.length, shown + 2);
+    render(); if (!ai.speak && shown >= txt.length) finish();
+  }, 33);
+  if (!ai.speak) return;
+  const browserSpeak = voice => {
+    if (!('speechSynthesis' in window)) { ai.speak = false; return; }
+    const u = new SpeechSynthesisUtterance(txt); u.voice = voice || voicePick.best || null;
+    u.rate = isNaturalVoice(u.voice) ? 1 : 1.02; u.pitch = 1.04;
     u.onboundary = e => { boundaryUsed = true; shown = Math.max(shown, e.charIndex + (e.charLength || 6)); ORB.speakEnv = 1; };
-    u.onend = finish; u.onerror = finish;
-    speechSynthesis.speak(u);
-  }
+    u.onend = finish; u.onerror = finish; speechSynthesis.speak(u);
+  };
+  const plan = voicePlan();
+  if (plan.cloud) speakCloud(txt, finish).then(el => cloudEl = el).catch(() => browserSpeak(voicePick.best));
+  else browserSpeak(plan.voice);
 }
 /* microphone level for the orb */
 const mic = { stream: null, an: null, buf: null };
@@ -2282,7 +2822,7 @@ function startListening() {
   if (ORB.mode !== 'companion') summonOrb();
   if (!SR) { toast('Voice input isn’t supported in this browser — try Chrome or Edge, or type your question.'); $('#abInput').focus(); return; }
   if (ai.listening || ai.busy) return;
-  speechSynthesis?.cancel(); clearInterval(ai.revealTimer);
+  stopSpeaking(); clearInterval(ai.revealTimer);
   const rec = new SR(); ai.rec = rec; rec.lang = 'en-US'; rec.interimResults = true; rec.continuous = false;
   let finalText = '', interim = '';
   rec.onstart = () => { ai.listening = true; setOrbState('listening'); caption('', '<span class="hint">Listening…</span>'); micStart(); };
@@ -2634,18 +3174,19 @@ function setupInput() {
     if (u.globe) openGlobe(u.globe);
     else if (u.pano) openPano(u.pano);
     else if (u.live) { if (focus.kind === 'live') openLiveModal(); else focusLive(); }
+    else if (u.seat !== undefined) sitAt(u.seat);
     else if (u.ai) { ORB.mode === 'docked' ? summonOrb() : toggleListening(); }
     else if (u.site) { if (focus.id !== u.site) focusSite(u.site); }
   });
   el.addEventListener('pointermove', e => {
     if (pano.active || e.buttons) return; const o = pick(e);
-    const id = o ? (o.userData.site || (o.userData.globe && 'g:' + o.userData.globe) || (o.userData.pano && 'p:' + o.userData.pano) || (o.userData.live && 'live') || (o.userData.ai && 'ai')) : null;
+    const id = o ? (o.userData.site || (o.userData.globe && 'g:' + o.userData.globe) || (o.userData.pano && 'p:' + o.userData.pano) || (o.userData.live && 'live') || (o.userData.ai && 'ai') || (o.userData.seat !== undefined && 'seat')) : null;
     el.style.cursor = id ? 'pointer' : 'grab';
     if (id !== hovered) { hovered = id; globeObjs.forEach(g => g.tag.classList.toggle('show', hovered === 'g:' + g.G.id || sensorCard.G?.id === g.G.id)); Object.entries(panoTags).forEach(([k, el]) => el.classList.toggle('show', hovered === 'p:' + k)); }
   });
   const keys = new Set();
   addEventListener('keydown', e => {
-    if (e.target.closest('textarea, input')) return;
+    if (e.target.closest('textarea, input, select')) return;
     if (pano.active) { if (e.key === 'Escape') closePano(); if (e.key === 'ArrowRight') panoStep(1); if (e.key === 'ArrowLeft') panoStep(-1); return; }
     if (e.key === ' ') { e.preventDefault(); document.activeElement?.blur?.(); if (!e.repeat) { ai.spaceHeld = true; startListening(); } return; }
     keys.add(e.key.toLowerCase());
@@ -2672,14 +3213,14 @@ function walk(dt) {
    ===================================================================== */
 let xrBase = null;
 function setupVR() {
-  if (!navigator.xr) return;
-  navigator.xr.isSessionSupported('immersive-vr').then(ok => {
-    if (!ok) return;
-    const b = $('#btnVR'); b.style.display = '';
-    b.addEventListener('click', async () => {
-      const s = await navigator.xr.requestSession('immersive-vr', { optionalFeatures: ['local-floor', 'bounded-floor'] });
-      renderer.xr.setReferenceSpaceType('local-floor'); await renderer.xr.setSession(s);
-    });
+  const b = $('#btnVR'); b.style.display = '';
+  let ok = false;
+  navigator.xr?.isSessionSupported('immersive-vr').then(v => { ok = v; b.classList.toggle('ready', v); }).catch(() => { });
+  b.addEventListener('click', async () => {
+    if (!ok) { toast('VR opens in a headset browser — on Meta Quest 3, open this page in the Quest Browser and press VR.', 4200); return; }
+    if (renderer.xr.isPresenting) { renderer.xr.getSession()?.end(); return; }
+    try { const sess = await navigator.xr.requestSession('immersive-vr', { optionalFeatures: ['local-floor', 'bounded-floor'] }); renderer.xr.setReferenceSpaceType('local-floor'); await renderer.xr.setSession(sess); }
+    catch (e) { toast('Couldn’t start VR: ' + e.message); }
   });
   renderer.xr.addEventListener('sessionstart', () => {
     xrBase = renderer.xr.getReferenceSpace(); liveMesh.material = liveVRMat; teleport(0, 18);
@@ -2721,7 +3262,7 @@ function loop() {
   if (pano.active) { updatePano(dt); renderer.render(pano.scene, pano.cam); return; }
   if (playback.playing) { playback.acc += dt * 4 * playback.speed; if (playback.acc >= 1) { const s = Math.floor(playback.acc); playback.acc -= s; if (playback.day + s >= DAYS - 1) { setDay(DAYS - 1); stopPlay(); } else setDay(playback.day + s); } }
   particleMats.forEach(m => m.uniforms.uTime.value = t); snowMats.forEach(m => m.uniforms.uTime.value = t); if (dustMat) dustMat.uniforms.uTime.value = t;
-  updateOrb(dt, t); updateScenario(dt);
+  updateOrb(dt, t); updateScenario(dt); updateMP(dt); updateClouds(dt, t); updatePrecip(dt, t);
   const airT = D.airT[playback.day];
   globeObjs.forEach(o => {
     const p = .5 + .5 * Math.sin(t * 2 + o.phase);
@@ -2756,15 +3297,15 @@ async function boot() {
   await progress(.3, 'Shaping the tables');
   for (let i = 0; i < SITES.length; i++) { buildTable(SITES[i]); if (i % 3 === 2) await progress(.3 + .4 * (i + 1) / SITES.length, `Shaping the tables · ${i + 1}/${SITES.length}`); }
   await progress(.75, 'Placing sensors and layers');
-  buildHeroLayers(tableOf('oulanka')); buildScenarioObjects(); buildLive(); buildOrb(); makeDust();
+  buildHeroLayers(tableOf('oulanka')); buildScenarioObjects(); buildLive(); buildOrb(); makeDust(); buildLounge(); buildStars(); buildClouds(); buildPrecip();
   await progress(.88, 'Preparing interface');
   buildUI(); aiInit(); setupInput(); panoInput(); setupVR();
-  applySeason('summer', true); applyLayers(); setDay(playback.day);
+  state.night = ls.get('hub.night') === '1'; applySeason('summer', true); applyLayers(); setDay(playback.day);
   renderer.setAnimationLoop(loop);
   renderer.compile(scene, camera);
   await progress(1, 'Ready');
   window.__hub = { THREE, scene, camera, controls, focusSite, goHome, focusAI, focusLive, openPano, closePano, openGlobe, startStory, storyStep, applySeason, setDay, state, renderer,
-    summonOrb, dismissOrb, setOrbState, updateOrb, deliver, caption, applyFlood, applyIce, setIceDay, clearScenario, music, ORB, scen, enter };
+    summonOrb, dismissOrb, D, cloudSets, precipSets, setOrbState, updateOrb, deliver, caption, applyFlood, applyIce, setIceDay, clearScenario, music, ORB, scen, enter, simulatePeer, sitAt, focusLounge, toggleNight, mp };
   $('#loader').classList.add('ready');
   $('#btnEnter').addEventListener('click', () => enter(true));
   $('#btnEnterQuiet').addEventListener('click', () => enter(false));
