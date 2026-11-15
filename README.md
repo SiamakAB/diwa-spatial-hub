@@ -63,7 +63,7 @@ This is a research demonstrator. The sensor metadata is taken from the DIWA meta
 Water, Energy and Environmental Engineering, Faculty of Technology, University of Oulu
 Digital Waters (DIWA) Flagship
 
-[LinkedIn](LINKEDIN_URL) · [University of Oulu profile](https://www.oulu.fi/en/researchers/siamak-bazzaz)
+[LinkedIn](https://www.linkedin.com/in/siamakbazzaz/) · [University of Oulu profile](https://www.oulu.fi/en/researchers/siamak-bazzaz)
 
 ## Credits
 
