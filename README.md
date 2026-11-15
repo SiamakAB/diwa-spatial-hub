@@ -6,13 +6,13 @@
 
 ![DIWA Spatial Hub — the hall with the supersite tables](docs/preview.jpg)
 
-The DIWA Spatial Hub brings environmental monitoring sites across Finland together in one virtual hall. Each site is a miniature 3D landscape on its own table. Visitors can walk between the tables, explore sensor stations, follow data through the seasons and step into 360° views of the field sites. The hub runs in any modern browser and on VR headsets, with nothing to install.
+The DIWA Spatial Hub brings environmental monitoring sites across Finland together in one virtual hall. Each site is a miniature 3D landscape on its own table. Visitors can walk between the tables, explore sensor stations, follow data through the seasons, step into 360° views of the field sites and meet each other in the same space. The hub runs in any modern browser and on VR headsets, with nothing to install.
 
 ## Sites
 
 Tana River (TA) · Pallas Research Station (PA) · Sodankylä Research Station (SO) · **Oulankajoki River (OU)** · Kemijoki River (KE) · Vantaanjoki River (VA) · Kokkola Groundwater Area (KO) · Archipelago Sea (AR) · Oulu Region (OR)
 
-The **Oulankajoki** supersite at Oulanka Research Station, Kuusamo, is the first fully interactive table.
+The **Oulankajoki** supersite at Oulanka Research Station, Kuusamo, is the large centre table and the first fully interactive one.
 
 ## Features
 
@@ -21,14 +21,15 @@ The **Oulankajoki** supersite at Oulanka Research Station, Kuusamo, is the first
 - **Seasons:** winter, spring, summer and autumn, shown on the landscapes and the surroundings.
 - **Scenarios:** spring flood scenarios of different return periods, and river-ice scenarios that include ice growth, breakup and ice jams.
 - **Spatial context:** the river network, the catchment boundary and land-cover layers.
-- **360° field views:** 15 panoramas from around Oulanka Research Station and the Oulankajoki valley.
-- **Video wall:** three large screens that loop videos muted; walk up and click a screen for sound.
-- **Supersite map and news:** a map of Finland with pulsing supersite points, and a slideshow of the latest news from digitalwaters.fi.
-- **AI companion:** an assistant you can talk to by voice or text, answering in a natural voice.
-- **Meet together:** several visitors can share the hall at the same time. Each person appears as a glowing circle avatar in their own colour with their name above it. The circle shows a live voice waveform while they talk, and you can talk by spatial voice, gather around a table or sit together in the lounge.
-- **Living sky:** clouds drift over the tables, and rain or snow falls from them at a wind-blown angle. All of it follows the cloud cover, precipitation and temperature of the selected day.
-- **Shared whiteboard:** draw, write and erase together in a session.
-- **Day and night:** switch the hall between daylight and a night mode with northern lights, twinkling stars and warm lamps, while the tables stay clearly lit.
+- **360° field views:** 15 panoramas from around Oulanka Research Station and the Oulankajoki valley. The landscape outside the hall is a real 360° photo from the Oulankajoki riverside.
+- **Media wall:** three large video screens that play when you walk up to them, framed by a supersite map of Finland with pulsing points and a slideshow of the latest news from digitalwaters.fi.
+- **AI companion:** a floating orb you can talk to by voice or text. It knows the hall, including the tables, sensors, screens, boards and where you are standing, and answers aloud.
+- **Meet together:** every visitor enters with their name and appears to the others as a glowing circle avatar in a colour chosen by the system. The circle shows a live voice waveform while someone talks, with spatial voice once a visitor turns on their microphone.
+- **Resident agents:** Emma, Suzan and Sofia live in the hall. They wander around, visit the tables, sit in the lounges and have quiet chats with each other.
+- **Lounges and whiteboards:** four seating corners with DIWA brochures, each with a shared whiteboard for drawing, writing and erasing together.
+- **Living sky:** optional clouds drift over the tables, with rain or snow falling at a wind-blown angle, all following the weather of the selected day.
+- **Day and night:** switch between daylight and a night mode with northern lights and twinkling stars over the forest and warm lamps inside, while the tables stay clearly lit.
+- **Showcase mode:** when nobody touches the controls for 10 seconds, the view returns to the overview and circles slowly around the hall.
 - **VR:** works with WebXR headsets such as Meta Quest 3 through the headset's web browser.
 
 ![360° view of the Oulankajoki rapids](docs/preview-360.jpg)
@@ -37,14 +38,15 @@ The **Oulankajoki** supersite at Oulanka Research Station, Kuusamo, is the first
 
 | Action | Control |
 |---|---|
+| Enter | Type your name on the start screen and press *Enter the hub* |
 | Visit a site | Click a table, its label or a dock icon (or press keys 1–9) |
 | Look around | Drag |
 | Zoom | Scroll |
 | Walk | W A S D |
 | Back to the overview | H |
 | Talk to the assistant | Hold Space, or tap the orb |
-| Meet others | People button → enter your name → Join, then share the invite link |
-| Sit in the lounge | Sofa icon in the dock, then click a seat |
+| See who is here | People button; *Unmute* to talk, *Copy invite link* to invite others |
+| Sit in a lounge | Sofa icon in the dock, then click a seat |
 | Whiteboard | Pen icon in the dock, then drag on the board |
 | Day / night | Moon / sun button |
 | VR | *Enter VR* in the headset browser, then point and pull the trigger to teleport |
@@ -61,12 +63,12 @@ This is a research demonstrator. The sensor metadata is taken from the DIWA meta
 Water, Energy and Environmental Engineering, Faculty of Technology, University of Oulu
 Digital Waters (DIWA) Flagship
 
-[University of Oulu profile](https://www.oulu.fi/en/researchers/siamak-bazzaz) · [ORCID](https://orcid.org/0000-0003-2489-1285) · [Google Scholar](https://scholar.google.com/citations?user=m8JtKCYAAAAJ)
+[LinkedIn](LINKEDIN_URL) · [University of Oulu profile](https://www.oulu.fi/en/researchers/siamak-bazzaz)
 
 ## Credits
 
 - **360° photography:** Siamak Bazzaz, Oulanka, September 2026.
-- **Built with:** [three.js](https://threejs.org), [Trystero](https://github.com/dmotz/trystero) for peer-to-peer sessions, and the Web Audio, WebRTC and WebXR browser APIs.
+- **Built with:** [three.js](https://threejs.org), [Trystero](https://github.com/dmotz/trystero) for peer-to-peer sessions, Cloudflare Workers AI for the assistant, and the Web Audio, WebRTC, Web Speech and WebXR browser APIs.
 - **Music:** composed live in the browser for this project.
 
 © 2026 MetaParametric.com · Siamak Bazzaz

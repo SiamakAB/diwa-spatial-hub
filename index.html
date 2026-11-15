@@ -560,6 +560,14 @@ body.assist-on #wbBar{bottom:158px}
 .live-screen iframe.on{opacity:1}
 .live-screen .poster.thumb-poster{background-size:cover;background-repeat:no-repeat;background-position:center}
 
+/* v0.9 — name at the door */
+.ld-name{width:260px;margin:4px 0 0;height:44px;border-radius:14px;text-align:center;font-size:15px;background:rgba(255,255,255,.92);box-shadow:inset 0 0 0 .5px rgba(0,0,0,.14),0 6px 18px rgba(12,42,76,.08)}
+.ld-name:focus{box-shadow:inset 0 0 0 1.5px #1770b8,0 6px 18px rgba(23,112,184,.18)}
+.ld-note{max-width:300px;text-align:center;font-size:11.5px;line-height:1.45;color:var(--ink-3);margin:-2px 0 4px}
+.pp-room{float:right;font-size:11px;font-weight:560;color:var(--ink-3)}
+.name-tag .ag-pill{font-style:normal;font-size:9.5px;font-weight:650;letter-spacing:.02em;text-transform:uppercase;padding:1px 6px;border-radius:6px;background:rgba(255,255,255,.18);color:inherit;opacity:.85;margin-left:2px}
+.person.agent{opacity:.85}
+
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 </head>
@@ -573,7 +581,10 @@ body.assist-on #wbBar{bottom:158px}
     <div class="ld-sub">Immersive digital twin of the DIWA supersites</div>
     <div class="ld-bar"><i id="ldBar"></i></div>
     <div class="ld-step" id="ldStep">Preparing…</div>
-    <div class="ld-enter"><button class="btn big" id="btnEnter">Enter the hub</button><button class="link-btn" id="btnEnterQuiet">Enter without sound</button></div>
+    <div class="ld-enter">
+      <input id="ldName" class="field ld-name" maxlength="24" placeholder="Your name" autocomplete="name" aria-label="Your name">
+      <div class="ld-note">Others in the hub will see you as a coloured circle with this name.<br>Your microphone stays off until you turn it on.</div>
+      <button class="btn big" id="btnEnter">Enter the hub</button><button class="link-btn" id="btnEnterQuiet">Enter without sound</button></div>
   </div>
 </div>
 
@@ -606,18 +617,14 @@ body.assist-on #wbBar{bottom:158px}
   <div class="small-note" style="padding:0 8px 4px">Composed live in your browser — no audio files. The music softens while the assistant listens or speaks.</div>
 </div>
 <div id="peoplePop" class="pop glass ui">
-  <h4>Shared session</h4>
+  <h4>People in the hub <span class="pp-room">Room <b id="mpRoom"></b></span></h4>
   <div id="mpForm">
-    <p class="pp-text">Join to see everyone in this room as a circle avatar and talk by voice. Room <b id="mpRoom"></b></p>
-    <input id="mpName" class="field" maxlength="24" placeholder="Your name" autocomplete="name">
-    <div class="pp-label">Avatar colour</div>
-    <div class="swatches" id="mpColors"></div>
-    <div class="toggle-row" id="mpMicToggle"><div class="sw-ic" style="background:#ff3b30" id="icMpMic"></div>Join with microphone<div class="switch on"></div></div>
-    <button class="btn" id="mpJoin" style="width:100%;margin-top:6px">Join</button>
+    <p class="pp-text" id="mpState">Connecting you to the room…</p>
+    <button class="btn" id="mpJoin" style="width:100%;margin-top:6px">Reconnect</button>
   </div>
   <div id="mpOn" style="display:none">
     <div id="peopleList"></div>
-    <div class="btn-row"><button class="btn ghost" id="mpMute"></button><button class="btn secondary" id="mpInvite"></button><button class="btn ghost" id="mpLeave">Leave</button></div>
+    <div class="btn-row"><button class="btn ghost" id="mpMute"></button><button class="btn secondary" id="mpInvite"></button></div>
   </div>
   <div class="small-note" style="padding:4px 8px 2px">Peer-to-peer: voice goes directly between participants. Others join with the same link (add <b>?room=name</b> for a private room).</div>
 </div>
@@ -1338,7 +1345,7 @@ const CONIFER = { summer: 0x24502a, spring: 0x2c5a2e, autumn: 0x234a26, winter: 
 const PINE = { summer: 0x3d6b33, spring: 0x46733a, autumn: 0x3b6331, winter: 0xd6e0da };
 const DECID = { summer: 0x6a9a3a, spring: 0xa6cf6c, autumn: [0xe0a326, 0xd0662a, 0xc9b23a], winter: 0xa39a90 };
 const tables = [];
-const state = { season: 'summer', landcover: false, layers: { clouds: false, precip: false, sensors: true, rivers: true, catchment: true, landcover: false, pano: true, particles: true } };
+const state = { season: 'summer', landcover: false, layers: { clouds: false, precip: false, sensors: true, rivers: true, catchment: true, landcover: false, pano: true, particles: true, agents: true } };
 
 function siteShape(site) {
   const N = makeNoise(site.seed), rnd = mulberry32(site.seed * 3 + 1);
@@ -1950,11 +1957,12 @@ function slab(shape, h, bevel = .06) {
    Shared sessions — several visitors in the same hall (peer-to-peer)
    Uses Trystero (WebRTC, signalling over public Nostr relays): no server to run.
    ===================================================================== */
-const AV_COLORS = ['#0a84ff', '#ff9f0a', '#34c759', '#af52de', '#ff375f', '#30b0c7', '#ffcc00', '#a2845e'];
+const AV_COLORS = ['#0a84ff', '#ff9f0a', '#34c759', '#af52de', '#ff375f', '#30b0c7', '#ffcc00', '#a2845e', '#5e5ce6'];
+const randomColor = (avoid = []) => { const free = AV_COLORS.filter(c => !avoid.includes(c)); const pool = free.length ? free : AV_COLORS; return pool[Math.floor(Math.random() * pool.length)]; };
 const ls = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch { } } };
 const mp = {
   joined: false, joining: false, room: null, send: null, roomId: (new URLSearchParams(location.search).get('room') || 'diwa-hub').replace(/[^\w-]/g, '').slice(0, 40) || 'diwa-hub',
-  name: new URLSearchParams(location.search).get('name')?.slice(0, 24) || ls.get('hub.name') || '', color: ls.get('hub.color') || AV_COLORS[Math.floor(Math.random() * 4)], micOn: true, mic: null, peers: new Map(), acc: 0, selfSpeaking: false, an: null,
+  name: new URLSearchParams(location.search).get('name')?.slice(0, 24) || ls.get('hub.name') || '', color: randomColor(), selfId: '', micOn: false, mic: null, peers: new Map(), acc: 0, selfSpeaking: false, an: null,
 };
 /* ---------- avatar: a glowing circle that shows a voice waveform while the person talks ---------- */
 const AV_BARS = 48;
@@ -2037,6 +2045,8 @@ function removePeer(id) {
 }
 function onPose(d, id) {
   const P = ensurePeer(id, d); if (!Array.isArray(d.p)) return;
+  // two people with the same colour: the one with the larger id quietly picks another free colour
+  if (d.c && d.c === mp.color && mp.selfId && mp.selfId > id) { mp.color = randomColor([...mp.peers.values()].map(Q => Q.color)); renderPeople(); }
   P.tgt.pos.set(+d.p[0] || 0, +d.p[1] || 0, +d.p[2] || 0); P.tgt.yaw = +d.y || 0; P.tgt.pitch = clamp(+d.x || 0, -1.2, 1.2);
   if (!P.seen) { P.pos.copy(P.tgt.pos); P.yaw = P.tgt.yaw; P.seen = true; }
 }
@@ -2086,14 +2096,13 @@ function attachVoice(id, stream) {
 }
 async function mpJoin() {
   if (mp.joined || mp.joining) return;
-  const name = $('#mpName').value.trim().slice(0, 24);
-  if (!name) { $('#mpName').focus(); $('#mpName').classList.add('shake'); setTimeout(() => $('#mpName').classList.remove('shake'), 500); return; }
-  mp.name = name; ls.set('hub.name', name); ls.set('hub.color', mp.color); mp.joining = true; renderPeople();
+  mp.name = (mp.name || 'Guest').slice(0, 24); mp.joining = true; renderPeople();
   try {
     // the peer-to-peer library is embedded in this page (no separate file to upload)
     const srcEl = document.getElementById('trystero-src');
     const modUrl = srcEl ? URL.createObjectURL(new Blob([srcEl.textContent], { type: 'text/javascript' })) : new URL('vendor/trystero-nostr.min.js', location.href).href;
-    const { joinRoom } = await import(modUrl);
+    const { joinRoom, selfId } = await import(modUrl);
+    mp.selfId = selfId || '';
     const room = joinRoom({ appId: 'diwa-spatial-hub.oulu' }, mp.roomId);
     const [sendPose, getPose] = room.makeAction('pose');
     const [sendWb, getWb] = room.makeAction('wb'); WB.send = sendWb; getWb(o => wbApply(o, true));
@@ -2102,44 +2111,48 @@ async function mpJoin() {
     room.onPeerJoin(id => { ensurePeer(id); try { sendPose(selfPose(), id); if (BOARDS.some(B => B.ops.length)) sendWb({ t: 'state', boards: BOARDS.map(B => B.ops) }, id); } catch { } if (mp.mic) room.addStream(mp.mic, id); });
     room.onPeerLeave(removePeer);
     room.onPeerStream((stream, id) => attachVoice(id, stream));
-    if (mp.micOn) {
-      try {
-        mp.mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
-        room.addStream(mp.mic);
-        const ctx = music.ensureCtx(); if (ctx) { ctx.resume(); const s = ctx.createMediaStreamSource(mp.mic); mp.an = ctx.createAnalyser(); mp.an.fftSize = 256; s.connect(mp.an); }
-      } catch { mp.micOn = false; toast('Microphone not available — you can still see and be seen'); }
-    }
-    mp.joined = true; toast(`Joined room “${mp.roomId}” · share the invite link so others can join`, 3200);
-  } catch (e) { toast('Couldn’t start the shared session: ' + (e.message || e)); }
+    mp.joined = true;
+  } catch (e) { mp.failed = String(e.message || e); console.warn('shared session', e); }
   mp.joining = false; renderPeople();
 }
+// microphone is only requested the first time someone unmutes
+async function startMic() {
+  try {
+    mp.mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+    mp.room?.addStream(mp.mic);
+    const ctx = music.ensureCtx(); if (ctx) { ctx.resume(); const s = ctx.createMediaStreamSource(mp.mic); mp.an = ctx.createAnalyser(); mp.an.fftSize = 256; s.connect(mp.an); }
+    return true;
+  } catch { toast('Microphone not available — others can still see you'); return false; }
+}
 function mpLeave() {
-  WB.send = null; wbClearAll();
+  WB.send = null;
   try { mp.room?.leave(); } catch { }
-  mp.mic?.getTracks().forEach(t => t.stop()); mp.mic = null; mp.an = null; mp.room = null; mp.send = null; mp.joined = false; mp.micOn = true;
+  mp.mic?.getTracks().forEach(t => t.stop()); mp.mic = null; mp.an = null; mp.room = null; mp.send = null; mp.joined = false; mp.micOn = false;
   [...mp.peers.keys()].forEach(removePeer); renderPeople();
 }
-function mpMute() { mp.micOn = !mp.micOn; mp.mic?.getAudioTracks().forEach(t => t.enabled = mp.micOn); renderPeople(); }
+async function mpMute() {
+  if (!mp.micOn && !mp.mic) { if (!(await startMic())) return; }
+  mp.micOn = !mp.micOn; mp.mic?.getAudioTracks().forEach(t => t.enabled = mp.micOn);
+  toast(mp.micOn ? 'Microphone on — people near you can hear you' : 'Microphone off', 1800); renderPeople();
+}
 function renderPeople() {
   const n = mp.peers.size + (mp.joined ? 1 : 0); const b = $('#peopleBadge'); b.textContent = n; b.style.display = n ? '' : 'none';
   $('#btnPeople').classList.toggle('live', mp.joined);
   const f = $('#mpForm'), on = $('#mpOn'); f.style.display = mp.joined ? 'none' : ''; on.style.display = mp.joined ? '' : 'none';
-  $('#mpJoin').textContent = mp.joining ? 'Joining…' : 'Join'; $('#mpJoin').disabled = mp.joining;
+  $('#mpJoin').textContent = mp.joining ? 'Connecting…' : 'Reconnect'; $('#mpJoin').disabled = mp.joining; $('#mpJoin').style.display = mp.joining || !entered ? 'none' : '';
+  $('#mpState').textContent = mp.joining || !entered ? 'Connecting you to the room…' : 'Not connected to the shared room. Check the network and try again.';
   $('#mpRoom').textContent = mp.roomId;
   if (!mp.joined) return;
   const row = (id, name, color, sub) => `<div class="person" data-id="${id}"><i style="background:${color}"></i><div><b></b><span>${sub}</span></div><em>${svg('speaker')}</em></div>`;
   $('#peopleList').innerHTML = row('me', '', mp.color, mp.micOn ? 'You · mic on' : 'You · muted') + [...mp.peers.values()].map(P => row(P.id, '', P.color, P.voice ? 'Voice connected' : 'Connecting voice…')).join('');
-  $('#peopleList').querySelectorAll('.person').forEach(r => { const id = r.dataset.id; r.querySelector('b').textContent = id === 'me' ? mp.name : mp.peers.get(id)?.name || 'Guest'; });
+  $('#peopleList').innerHTML += state.layers.agents ? AGENTS.map(A => `<div class="person agent" data-id="ag-${A.i}"><i style="background:${A.color}"></i><div><b>${A.name}</b><span>Resident agent</span></div></div>`).join('') : '';
+  $('#peopleList').querySelectorAll('.person:not(.agent)').forEach(r => { const id = r.dataset.id; r.querySelector('b').textContent = id === 'me' ? mp.name : mp.peers.get(id)?.name || 'Guest'; });
   $('#mpMute').innerHTML = svg('mic') + (mp.micOn ? 'Mute' : 'Unmute'); $('#mpMute').classList.toggle('muted', !mp.micOn);
 }
 function mpInitUI() {
   $('#btnPeople').innerHTML = svg('people') + '<span class="count" id="peopleBadge" style="display:none">0</span>';
-  $('#mpName').value = mp.name;
-  $('#mpColors').innerHTML = AV_COLORS.map(c => `<button data-c="${c}" style="background:${c}" class="${c === mp.color ? 'on' : ''}" aria-label="Avatar colour"></button>`).join('');
-  $('#mpColors').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { mp.color = b.dataset.c; $('#mpColors').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); }));
-  $('#mpName').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') mpJoin(); });
-  $('#mpMicToggle').addEventListener('click', () => { mp.micOn = !mp.micOn; $('#mpMicToggle .switch').classList.toggle('on', mp.micOn); });
-  $('#mpJoin').addEventListener('click', mpJoin); $('#mpLeave').addEventListener('click', mpLeave); $('#mpMute').addEventListener('click', mpMute);
+  $('#mpJoin').addEventListener('click', mpJoin); $('#mpMute').addEventListener('click', mpMute);
+  addEventListener('pagehide', () => { try { mp.room?.leave(); } catch { } });
   $('#mpInvite').addEventListener('click', async () => {
     const u = new URL(location.href); u.search = ''; u.searchParams.set('room', mp.roomId);
     try { await navigator.clipboard.writeText(u.href); toast('Invite link copied'); } catch { prompt('Copy this invite link:', u.href); }
@@ -2147,6 +2160,87 @@ function mpInitUI() {
   $('#mpInvite').innerHTML = svg('ext') + 'Copy invite link';
   renderPeople();
 }
+/* =====================================================================
+   Resident agents — Emma, Suzan and Sofia live in the hall: they wander, visit tables,
+   sit in the lounges and have silent chats with each other. Every action lasts 5–10 s.
+   (Local to each visitor's view; they are not part of the shared session.)
+   ===================================================================== */
+const AGENT_DEFS = [{ name: 'Emma', color: '#e04fa0' }, { name: 'Suzan', color: '#00c7be' }, { name: 'Sofia', color: '#ff6b3d' }];
+const AGENTS = [];
+const AG = { STAND: 1.62, SIT: 1.18, SPEED: 1.15 };
+const rnd = (a, b) => a + Math.random() * (b - a);
+function freeFloorPoint() {
+  for (let k = 0; k < 40; k++) {
+    const a = Math.random() * Math.PI * 2, r = Math.sqrt(Math.random()) * .8, p = new THREE.Vector3(Math.cos(a) * HALL.rx * r, AG.STAND, Math.sin(a) * HALL.rz * r);
+    if (p.z < -24 || p.z > 26) continue;                                        // keep off the media wall and the entrance
+    if (tables.some(T => Math.hypot(p.x - T.site.pos[0], p.z - T.site.pos[1]) < T.site.r + 1.2)) continue;
+    if (LOUNGES.some(L => Math.hypot(p.x - L.x, p.z - L.z) < 4.2)) continue;
+    return p;
+  }
+  return new THREE.Vector3(rnd(-6, 6), AG.STAND, rnd(12, 18));
+}
+function buildAgents() {
+  AGENT_DEFS.forEach((d, i) => {
+    const av = makeAvatar(d.color, d.name);
+    av.tagEl.insertAdjacentHTML('beforeend', '<em class="ag-pill">agent</em>');
+    const A = { ...d, i, av, pos: freeFloorPoint(), goal: null, seat: -1, state: 'idle', timer: rnd(1, 4), partner: null, talk: 0, turn: 0, label: 'arriving' };
+    av.g.position.copy(A.pos); AGENTS.push(A);
+  });
+}
+function agentGo(A, p, after, label) { A.goal = p.clone(); A.after = after; A.state = 'walk'; A.label = label; }
+function agentFree(A) { A.seat = -1; if (A.partner) { const B = A.partner; A.partner = null; if (B.partner === A) { B.partner = null; B.state = 'idle'; B.timer = rnd(1, 3); } } }
+function agentNext(A) {
+  agentFree(A);
+  const pick = Math.random(), others = AGENTS.filter(B => B !== A && !B.partner && B.state !== 'walk');
+  if (pick < .3) {                                                             // look at a table
+    const T = tables[Math.floor(Math.random() * tables.length)], a = Math.random() * Math.PI * 2;
+    let p = new THREE.Vector3(T.site.pos[0] + Math.cos(a) * (T.site.r + .9), AG.STAND, T.site.pos[1] + Math.sin(a) * (T.site.r + .9));
+    if (p.z < -24) p.z = T.site.pos[1] + Math.abs(Math.sin(a)) * (T.site.r + .9);
+    agentGo(A, p, 'look', `looking at the ${T.site.name} table`);
+  } else if (pick < .52) {                                                     // sit on a free seat
+    const taken = new Set(AGENTS.map(B => B.seat).concat([seated])), free = SEATS.map((S, k) => k).filter(k => !taken.has(k));
+    if (!free.length) return agentNext(A);
+    const k = free[Math.floor(Math.random() * free.length)], S = SEATS[k];
+    A.seat = k; agentGo(A, S.pos.clone().setY(AG.STAND), 'sit', `sitting in a lounge`);
+  } else if (pick < .78 && others.length) {                                    // meet another agent for a silent chat
+    const B = others[Math.floor(Math.random() * others.length)]; agentFree(B);
+    const m = freeFloorPoint(), off = new THREE.Vector3(.75, 0, 0);
+    A.partner = B; B.partner = A;
+    agentGo(A, m.clone().add(off), 'chat', `chatting with ${B.name}`); agentGo(B, m.clone().sub(off), 'chat', `chatting with ${A.name}`);
+  } else agentGo(A, freeFloorPoint(), 'pause', 'walking around');
+}
+const _ag = new THREE.Vector3();
+function updateAgents(dt, t) {
+  AGENTS.forEach(A => {
+    let level = 0;
+    if (A.state === 'walk') {
+      _ag.copy(A.goal).sub(A.pos); _ag.y = 0; const d = _ag.length();
+      if (d < .08) { A.state = A.after; A.timer = rnd(5, 10); if (A.state === 'sit') A.label = 'sitting in a lounge'; }
+      else {
+        _ag.multiplyScalar(Math.min(d, AG.SPEED * dt) / d);
+        // steer around the tables
+        tables.forEach(T => { const dx = A.pos.x - T.site.pos[0], dz = A.pos.z - T.site.pos[1], r = Math.hypot(dx, dz), lim = T.site.r + .7; if (r < lim + .6 && r > .01) { const push = (lim + .6 - r) * dt * 2.2; _ag.x += dx / r * push; _ag.z += dz / r * push; } });
+        A.pos.add(_ag);
+      }
+      A.pos.y = lerp(A.pos.y, AG.STAND, .1);
+    } else {
+      A.timer -= dt;
+      if (A.state === 'sit') { if (seated === A.seat) A.timer = 0; const S = SEATS[A.seat]; if (S) A.pos.lerp(_ag.set(S.pos.x, AG.SIT, S.pos.z), .08); }
+      if (A.state === 'chat') {
+        const B = A.partner;
+        if (!B) A.timer = 0;
+        else if (B.state === 'chat') {                                       // take turns, like a real conversation
+          if (A.i < B.i) { A.turn -= dt; if (A.turn <= 0) { A.turn = rnd(1.4, 3.2); A.talk = A.talk ? 0 : 1; B.talk = 1 - A.talk; } B.timer = A.timer; }
+          level = A.talk ? .25 + .25 * Math.abs(Math.sin(t * 5.3 + A.i) * Math.sin(t * 2.1)) : 0;
+        } else A.timer = Math.max(A.timer, 1);
+      }
+      if (A.timer <= 0) agentNext(A);
+    }
+    A.av.g.position.copy(A.pos); A.av.g.position.y += Math.sin(t * 1.1 + A.i * 2) * .015 + (A.state === 'walk' ? Math.abs(Math.sin(t * 6 + A.i)) * .02 : 0);
+    animateAvatar(A.av, level, t);
+  });
+}
+function agentsSummary() { return AGENTS.map(A => `${A.name} is ${A.label}`).join('; '); }
 /* for testing without a network: __hub.simulatePeer('id', 'Name', '#ff9f0a', [x, y, z], yaw) */
 function simulatePeer(id, n, c, p, y = 0, talk) { onPose({ p, y, x: 0, n, c }, id); const P = mp.peers.get(id); if (talk !== undefined) P.simLevel = talk; return P; }
 
@@ -2623,7 +2717,7 @@ function clampCamera() {
   if (k > 1) { const f = 1 / Math.sqrt(k); p.x *= f; p.z *= f; }
   p.y = clamp(p.y, .6, HALL.h - 1.2);
   const t = controls.target, kt = (t.x / (HALL.rx * .85)) ** 2 + (t.z / (HALL.rz * .85)) ** 2;
-  if (kt > 1) { const f = 1 / Math.sqrt(kt); t.x *= f; t.z *= f; }
+  if (kt > 1 && !IDLE.on) { const f = 1 / Math.sqrt(kt); t.x *= f; t.z *= f; }
   t.y = clamp(t.y, 0, 8);
 }
 
@@ -2650,7 +2744,7 @@ function buildUI() {
   document.querySelectorAll('.x').forEach(x => x.innerHTML = svg('x'));
   $('#aiIcon').innerHTML = svg('chat'); $('#aiSend').innerHTML = svg('send'); $('#aiMic').innerHTML = svg('mic'); $('#aiSpk').innerHTML = svg('speaker');
   $('#abMic').innerHTML = svg('mic'); $('#abSend').innerHTML = svg('send'); $('#abSpk').innerHTML = svg('speaker'); $('#abHist').innerHTML = svg('chat'); $('#abClose').innerHTML = svg('close');
-  $('#icMpMic').innerHTML = svg('mic'); $('#btnNight').innerHTML = svg('moon'); $('#btnNight').addEventListener('click', toggleNight); mpInitUI();
+  $('#btnNight').innerHTML = svg('moon'); $('#btnNight').addEventListener('click', toggleNight); mpInitUI();
   $('#btnMusic').innerHTML = svg('music'); $('#icMusic').innerHTML = svg('music'); $('#icAmb').innerHTML = svg('tree');
   $('#volRow').insertAdjacentHTML('afterbegin', svg('speaker'));
   fillVoiceSelect();
@@ -2685,7 +2779,7 @@ function buildUI() {
   // layers popover
   const L = [
     ['sensors', 'Sensor stations', 'sensor', '#0a84ff'], ['rivers', 'River network', 'river', '#30b0c7'], ['catchment', 'Catchment boundary', 'boundary', '#ff9f0a'],
-    ['landcover', 'Land cover', 'landcover', '#34c759'], ['pano', '360° points', 'pano', '#5856d6'], ['particles', 'Light particles', 'sparkle', '#ff9f6b'], ['clouds', 'Clouds over the tables', 'cloud', '#8e9bb0'], ['precip', 'Rain and snow', 'drop', '#5ac8fa'],
+    ['landcover', 'Land cover', 'landcover', '#34c759'], ['pano', '360° points', 'pano', '#5856d6'], ['particles', 'Light particles', 'sparkle', '#ff9f6b'], ['clouds', 'Clouds over the tables', 'cloud', '#8e9bb0'], ['precip', 'Rain and snow', 'drop', '#5ac8fa'], ['agents', 'Agents · Emma, Suzan, Sofia', 'people', '#e04fa0'],
   ];
   $('#layerRows').innerHTML = L.map(([k, n, ic, c]) => `<div class="toggle-row" data-k="${k}"><div class="sw-ic" style="background:${c}">${svg(ic)}</div>${n}<div class="switch ${state.layers[k] ? 'on' : ''}"></div></div>`).join('') + '<div class="small-note" style="padding:0 8px 4px">Map layers apply to the Oulankajoki table and are illustrative until real GIS data is added. Clouds, rain and snow follow the weather of the timeline date.</div>';
   $('#layerRows').querySelectorAll('.toggle-row').forEach(r => r.addEventListener('click', () => { const k = r.dataset.k; state.layers[k] = !state.layers[k]; r.querySelector('.switch').classList.toggle('on', state.layers[k]); applyLayers(); }));
@@ -2711,6 +2805,7 @@ function buildUI() {
 }
 function applyLayers() {
   const L = state.layers;
+  AGENTS.forEach(A => { A.av.g.visible = A.av.floor.visible = A.av.tag.visible = L.agents; });
   heroLayers.sensors.visible = L.sensors; heroLayers.rivers.visible = L.rivers; heroLayers.catchment.visible = L.catchment; heroLayers.pano.visible = L.pano;
   heroLayers.sensors.traverse(o => { if (o.isCSS2DObject) o.visible = L.sensors; });
   heroLayers.pano.traverse(o => { if (o.isCSS2DObject) o.visible = L.pano; });
@@ -3196,6 +3291,7 @@ function hubContext() {
   L.push(`MEDIA WALL at the back of the hall, left to right: a Finland map board with pulsing circles for each supersite; three big video screens (${CONFIG.SCREENS.map(v => v.title).join('; ')}) that play when you walk close and unmute when clicked; and a Latest News board with a slideshow from digitalwaters.fi.`);
   L.push(`Current news on the board: ${CONFIG.NEWS.map(n => `${n.date}: ${n.title}`).join('; ')}.`);
   L.push(`LOUNGES: ${LOUNGES.length} seating corners (sofa, two armchairs, coffee table with two DIWA brochures, a lamp) near the walls, each with a shared whiteboard behind the sofa for drawing and writing together.`);
+  L.push(`RESIDENT AGENTS: ${AGENTS.map(A => A.name).join(', ')} are three friendly agent avatars (coloured circles with a small 'agent' label) who live in the hall: they wander, visit the tables, sit in the lounges and have silent chats. They are part of the demo, not real visitors. Right now: ${agentsSummary()}.`);
   L.push('YOU, the assistant, are the glowing sci-fi orb that floats near the user. A big faded DIWA logo is printed on the floor near the entrance.');
   L.push('CONTROLS (top right and bottom dock): day/night toggle (night shows northern lights and stars outside), layers (sensors, rivers, catchment, land cover, 360° photos, clouds, rain/snow, particles), generated lo-fi background music, People (multi-user sessions where visitors appear as coloured circle avatars and talk by voice), VR button for headsets like Meta Quest 3, help. The bottom dock flies to each table; keys 1–9 too. Users can also sit on the sofas.');
   // live state
@@ -3212,7 +3308,7 @@ function hubContext() {
   st.push(`timeline date ${fmtDate(playback.day)}, season ${seasonOfDay(playback.day)}`);
   if (scen.kind) st.push(`active scenario: ${scen.kind === 'flood' ? (FLOOD.find(f => f.id === scen.id)?.name || 'flood') : (ICE.find(f => f.id === scen.id)?.name || 'river ice')}`);
   const on = Object.entries(state.layers).filter(([, v]) => v).map(([k]) => k); st.push(`layers on: ${on.join(', ')}`);
-  if (mp.joined) st.push(`in a shared session with ${mp.peers.size ? [...mp.peers.values()].map(P => P.name).join(', ') : 'nobody else yet'}`);
+  st.push(`the user's name is ${mp.name || 'unknown'}`); if (mp.joined) st.push(`other real visitors in the hall: ${mp.peers.size ? [...mp.peers.values()].map(P => P.name).join(', ') : 'none right now'}`);
   if (music.on) st.push('lo-fi music is playing');
   L.push('RIGHT NOW: ' + st.join('; ') + '.');
   return L.join('\n');
@@ -3765,6 +3861,42 @@ function adaptQuality(rawDt) {
   if (avg > .034 && perf.level === 2) { perf.level = 1; renderer.setPixelRatio(1); renderer.setSize(innerWidth, innerHeight); }
   else if (avg > .045 && perf.level === 1) { perf.level = 0; reflector.visible = false; floorOverlay.material.opacity = 1; floorOverlay.material.transparent = false; floorOverlay.material.needsUpdate = true; perf.armed = false; }
 }
+/* ---------- attract mode: after 10 s without input, return to the home view and turn slowly (same speed as the 360° photos) ---------- */
+const IDLE = { t: 0, on: false, wait: 0, AFTER: 10, DEG_PER_S: 2.2, theta: 0, y: 0, R: [33, 30.5] };
+['pointerdown', 'pointermove', 'wheel', 'keydown', 'touchstart'].forEach(ev => addEventListener(ev, idleWake, { capture: true, passive: true }));
+function idleWake() {
+  IDLE.t = 0; if (!IDLE.on) return; IDLE.on = false;
+  // if the slow turn left the view facing out through the glass, glide back to the home view
+  const t = controls.target; if ((t.x / (HALL.rx * .85)) ** 2 + (t.z / (HALL.rz * .85)) ** 2 > 1) flyTo(HOME_POS.clone(), HOME_TGT.clone(), 1200);
+}
+function idleAllowed() {
+  if (!entered || pano.active || renderer.xr.isPresenting || story.active || playback.playing || seated >= 0) return false;
+  if (ORB.state !== 'idle' || mp.micOn || WB.drawing) return false;
+  if (SCREENS.some(S => S.playing || !S.muted)) return false;          // someone is watching a video
+  if (['wb', 'news', 'map', 'screen'].includes(focus.kind)) return false; // reading a board
+  if (document.querySelector('#sitePanel.show, #aiPanel.show, #sensorCard.show, #mapCard.show, #liveModal.show, .pop.show, #wbBar.show')) return false;
+  const a = document.activeElement; if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return false;
+  return true;
+}
+function updateIdle(dt) {
+  if (!IDLE.on) {
+    IDLE.t += dt;
+    if (IDLE.t > IDLE.AFTER && idleAllowed()) {
+      IDLE.on = true; IDLE.wait = 2.2;
+      const home = camera.position.distanceTo(HOME_POS) < 1.5 && focus.kind === 'home';
+      if (home) IDLE.wait = 0; else goHome();
+      IDLE.theta = Math.atan2(camera.position.x, camera.position.z);
+    }
+    return;
+  }
+  if (!idleAllowed()) { IDLE.on = false; IDLE.t = 0; return; }
+  if (IDLE.wait > 0) { IDLE.wait -= dt; IDLE.theta = 0; IDLE.y = camera.position.y; return; }
+  // circle slowly around the hall, starting from the home view and always looking at the tables
+  IDLE.theta += dt * IDLE.DEG_PER_S * Math.PI / 180;
+  const th = IDLE.theta, R = IDLE.R;
+  camera.position.set(Math.sin(th) * R[0], lerp(IDLE.y ?? HOME_POS.y, HOME_POS.y, Math.min(1, th * 4)), Math.cos(th) * R[1]);
+  controls.target.lerp(HOME_TGT, .05);
+}
 function loop() {
   const rawDt = clock.getDelta(), dt = Math.min(rawDt, .05), t = clock.elapsedTime, now = performance.now();
   adaptQuality(rawDt);
@@ -3772,7 +3904,7 @@ function loop() {
   if (pano.active) { updatePano(dt); renderer.render(pano.scene, pano.cam); return; }
   if (playback.playing) { playback.acc += dt * 4 * playback.speed; if (playback.acc >= 1) { const s = Math.floor(playback.acc); playback.acc -= s; if (playback.day + s >= DAYS - 1) { setDay(DAYS - 1); stopPlay(); } else setDay(playback.day + s); } }
   particleMats.forEach(m => m.uniforms.uTime.value = t); snowMats.forEach(m => m.uniforms.uTime.value = t); if (dustMat) dustMat.uniforms.uTime.value = t;
-  updateOrb(dt, t); updateScenario(dt); updateMP(dt); updateClouds(dt, t); updatePrecip(dt, t); updateScreens(dt); updateNews(dt); updateMapPins(t); updateNightSky(t);
+  updateOrb(dt, t); updateScenario(dt); updateMP(dt); updateClouds(dt, t); updatePrecip(dt, t); updateScreens(dt); updateNews(dt); updateMapPins(t); updateNightSky(t); updateIdle(dt); updateAgents(dt, t);
   const airT = D.airT[playback.day];
   globeObjs.forEach(o => {
     const p = .5 + .5 * Math.sin(t * 2 + o.phase);
@@ -3807,23 +3939,29 @@ async function boot() {
   await progress(.3, 'Shaping the tables');
   for (let i = 0; i < SITES.length; i++) { buildTable(SITES[i]); if (i % 3 === 2) await progress(.3 + .4 * (i + 1) / SITES.length, `Shaping the tables · ${i + 1}/${SITES.length}`); }
   await progress(.75, 'Placing sensors and layers');
-  buildHeroLayers(tableOf('oulanka')); buildScenarioObjects(); buildScreens(); buildOrb(); makeDust(); buildLounges(); buildStars(); buildNightSky(); buildLamps(); buildNews(); buildMapBoard(); buildFloorLogo(); buildClouds(); buildPrecip();
+  buildHeroLayers(tableOf('oulanka')); buildScenarioObjects(); buildScreens(); buildOrb(); makeDust(); buildLounges(); buildAgents(); buildStars(); buildNightSky(); buildLamps(); buildNews(); buildMapBoard(); buildFloorLogo(); buildClouds(); buildPrecip();
   await progress(.88, 'Preparing interface');
   buildUI(); aiInit(); wbInput(); setupInput(); panoInput(); setupVR();
   state.night = ls.get('hub.night') === '1'; applySeason('summer', true); applyLayers(); setDay(playback.day);
   renderer.setAnimationLoop(loop);
   renderer.compile(scene, camera);
   await progress(1, 'Ready');
-  window.__hub = { hubContext, sendAI, THREE, scene, camera, controls, focusSite, goHome, focusAI, focusLive, openPano, closePano, openGlobe, startStory, storyStep, applySeason, setDay, state, renderer,
+  window.__hub = { hubContext, sendAI, IDLE, AGENTS, THREE, scene, camera, controls, focusSite, goHome, focusAI, focusLive, openPano, closePano, openGlobe, startStory, storyStep, applySeason, setDay, state, renderer,
     summonOrb, dismissOrb, D, cloudSets, precipSets, setOrbState, updateOrb, deliver, caption, applyFlood, applyIce, setIceDay, clearScenario, music, ORB, scen, enter, simulatePeer, sitAt, focusLounge, toggleNight, mp, getAurora: () => aurora, focusLive, focusScreen, focusMap, focusNews, focusWhiteboard, openMapCard, wbApply, SCREENS, WB, BOARDS };
   $('#loader').classList.add('ready');
+  const nm = $('#ldName'); nm.value = mp.name; setTimeout(() => { if (!entered) nm.focus(); }, 400);
+  nm.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') enter(true); });
   $('#btnEnter').addEventListener('click', () => enter(true));
   $('#btnEnterQuiet').addEventListener('click', () => enter(false));
-  if (/[?&]autoenter\b/.test(location.search)) enter(false);
+  if (/[?&]autoenter\b/.test(location.search)) enter(false, true);
 }
 let entered = false;
-function enter(sound) {
-  if (entered) return; entered = true;
+function enter(sound, auto = false) {
+  if (entered) return;
+  const nm = $('#ldName'), name = nm.value.trim().replace(/\s+/g, ' ').slice(0, 24) || (auto ? 'Guest' : '');
+  if (!name) { nm.focus(); nm.classList.add('shake'); setTimeout(() => nm.classList.remove('shake'), 500); toast('Please type your name first', 1800); return; }
+  entered = true; mp.name = name; ls.set('hub.name', name); nm.blur();
+  mpJoin();   // everyone who enters is visible to everyone else; the microphone stays off
   music.on = sound; $('#musicPop [data-m=music] .switch').classList.toggle('on', sound); $('#btnMusic').classList.toggle('muted', !sound);
   if (sound) music.start();
   screensArmed = true;
