@@ -46,7 +46,8 @@ button{font-family:inherit;color:inherit}
 
 /* ---------- Loader ---------- */
 #loader{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:radial-gradient(1200px 700px at 50% 40%,#ffffff 0%,#eef3f8 55%,#dfe8f1 100%);transition:opacity .9s var(--ease), visibility .9s}
-#loader.hide{opacity:0;visibility:hidden}
+#loader.hide{opacity:0;visibility:hidden;pointer-events:none}
+#loader.gone{display:none}
 .ld-wrap{display:flex;flex-direction:column;align-items:center;gap:22px}
 .ld-mark{width:64px;height:64px}
 .ld-title{font-size:26px;font-weight:650;letter-spacing:-.02em}
@@ -311,6 +312,8 @@ kbd{font-family:var(--font);font-size:11px;font-weight:600;padding:2px 7px;borde
 /* ---------- Panorama ---------- */
 #panoUI{position:fixed;inset:0;z-index:30;pointer-events:none;opacity:0;transition:opacity .5s}
 #panoUI.show{opacity:1}
+#panoUI:not(.show){visibility:hidden;transition:opacity .5s, visibility 0s .5s}
+#panoUI:not(.show) *{pointer-events:none !important}
 #panoUI .top{position:absolute;top:16px;left:16px;right:16px;display:flex;align-items:center;gap:10px;pointer-events:auto}
 #panoUI .title{padding:10px 16px;border-radius:16px}
 #panoUI .title b{display:block;font-size:15px;font-weight:650}
@@ -532,7 +535,7 @@ body.night .sel-row option{color:#1d1d1f}
 <div id="topbar" class="ui hide-in-pano">
   <div class="brand glass">
     <svg viewBox="0 0 64 64"><defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5ac8fa"/><stop offset="1" stop-color="#0a63d8"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="18" fill="url(#lg2)"/><path d="M14 40c6-10 12-10 18 0s12 10 18 0" stroke="#fff" stroke-width="3.6" fill="none" stroke-linecap="round"/><path d="M14 30c6-10 12-10 18 0s12 10 18 0" stroke="#fff" stroke-opacity=".55" stroke-width="3.6" fill="none" stroke-linecap="round"/><circle cx="32" cy="20" r="3.6" fill="#fff"/></svg>
-    <div><b>DIWA Spatial Hub</b><span>Immersive digital twin · Draft v0.6</span></div>
+    <div><b>DIWA Spatial Hub</b><span>Immersive digital twin · Draft v0.6.1</span></div>
   </div>
   <div class="top-center">
     <div class="seg glass big" id="seasonSeg"></div>
@@ -3316,7 +3319,7 @@ function enter(sound) {
   if (entered) return; entered = true;
   music.on = sound; $('#musicPop [data-m=music] .switch').classList.toggle('on', sound); $('#btnMusic').classList.toggle('muted', !sound);
   if (sound) music.start();
-  $('#loader').classList.add('hide');
+  $('#loader').classList.add('hide'); setTimeout(() => $('#loader').classList.add('gone'), 1000);
   camera.lookAt(HOME_TGT);
   flyTo(HOME_POS, HOME_TGT, 3600, () => { setTimeout(() => $('#hint').style.opacity = 0, 6000); startLiveIframe(); perf.armed = !/[?&]hq\b/.test(location.search); });
 }
