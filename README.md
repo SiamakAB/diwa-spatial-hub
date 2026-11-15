@@ -10,7 +10,7 @@ The DIWA Spatial Hub brings environmental monitoring sites across Finland togeth
 
 ## Sites
 
-Tana River · Pallas Research Station · Sodankylä Research Station · **Oulankajoki River** · Kemijoki River · Vantaanjoki River · Kokkola Groundwater Area · Archipelago Sea · Organic Space Planning
+Tana River (TA) · Pallas Research Station (PA) · Sodankylä Research Station (SO) · **Oulankajoki River (OU)** · Kemijoki River (KE) · Vantaanjoki River (VA) · Kokkola Groundwater Area (KO) · Archipelago Sea (AR) · Oulu Region (OR)
 
 The **Oulankajoki** supersite at Oulanka Research Station, Kuusamo, is the first fully interactive table.
 
@@ -22,11 +22,13 @@ The **Oulankajoki** supersite at Oulanka Research Station, Kuusamo, is the first
 - **Scenarios:** spring flood scenarios of different return periods, and river-ice scenarios that include ice growth, breakup and ice jams.
 - **Spatial context:** the river network, the catchment boundary and land-cover layers.
 - **360° field views:** 15 panoramas from around Oulanka Research Station and the Oulankajoki valley.
-- **Live camera:** a live video stream shown inside the hall.
+- **Video wall:** three large screens that loop videos muted; walk up and click a screen for sound.
+- **Supersite map and news:** a map of Finland with pulsing supersite points, and a slideshow of the latest news from digitalwaters.fi.
 - **AI companion:** an assistant you can talk to by voice or text, answering in a natural voice.
 - **Meet together:** several visitors can share the hall at the same time. Each person appears as a glowing circle avatar in their own colour with their name above it. The circle shows a live voice waveform while they talk, and you can talk by spatial voice, gather around a table or sit together in the lounge.
 - **Living sky:** clouds drift over the tables, and rain or snow falls from them at a wind-blown angle. All of it follows the cloud cover, precipitation and temperature of the selected day.
-- **Day and night:** switch the hall between daylight and a night mode, with the tables kept clearly lit.
+- **Shared whiteboard:** draw, write and erase together in a session.
+- **Day and night:** switch the hall between daylight and a night mode with northern lights, twinkling stars and warm lamps, while the tables stay clearly lit.
 - **VR:** works with WebXR headsets such as Meta Quest 3 through the headset's web browser.
 
 ![360° view of the Oulankajoki rapids](docs/preview-360.jpg)
@@ -43,6 +45,7 @@ The **Oulankajoki** supersite at Oulanka Research Station, Kuusamo, is the first
 | Talk to the assistant | Hold Space, or tap the orb |
 | Meet others | People button → enter your name → Join, then share the invite link |
 | Sit in the lounge | Sofa icon in the dock, then click a seat |
+| Whiteboard | Pen icon in the dock, then drag on the board |
 | Day / night | Moon / sun button |
 | VR | *Enter VR* in the headset browser, then point and pull the trigger to teleport |
 
@@ -65,3 +68,5 @@ Digital Waters (DIWA) Flagship
 - **360° photography:** Siamak Bazzaz, Oulanka, September 2026.
 - **Built with:** [three.js](https://threejs.org), [Trystero](https://github.com/dmotz/trystero) for peer-to-peer sessions, and the Web Audio, WebRTC and WebXR browser APIs.
 - **Music:** composed live in the browser for this project.
+
+© 2026 MetaParametric.com · Siamak Bazzaz
