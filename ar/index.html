@@ -119,7 +119,7 @@ const SITES = {
 const ORDER = ['oulanka', 'tana', 'pallas', 'sodankyla', 'kemijoki', 'osp', 'kokkola', 'archipelago', 'vantaanjoki'];
 // image targets in targets.mind, in compile order: the cover, then pages 3–11
 const TARGETS = ['oulanka', 'oulanka', 'tana', 'pallas', 'sodankyla', 'kemijoki', 'osp', 'kokkola', 'archipelago', 'vantaanjoki'];
-const TARGET_FIT = [0.6, 0.72, 0.72, 0.72, 0.72, 0.72, 0.72, 0.72, 0.72, 0.72]; // table diameter as a share of the printed image width
+const TARGET_FIT = [0.7, 0.86, 0.86, 0.86, 0.86, 0.86, 0.86, 0.86, 0.86, 0.86]; // table diameter as a share of the printed image width
 
 const $ = s => document.querySelector(s);
 const ICON = {
@@ -202,6 +202,18 @@ function animateStage(S, dt, t) {
 
 /* ---------- AR mode (camera + image tracking) ---------- */
 let mindar = null, arStage = null, arAnchorIdx = -1;
+const holders = [], anchorsAR = [];
+// keep every table seen from the same angle as the 3D view (about 28° above the table top), whatever the phone's angle
+const VIEW_ELEV = THREE.MathUtils.degToRad(28), _inv = new THREE.Matrix4(), _cam = new THREE.Vector3(), _d = new THREE.Vector3(), _v = new THREE.Vector3(), _u = new THREE.Vector3(), _q = new THREE.Quaternion(), _Y = new THREE.Vector3(0, 1, 0);
+function faceCamera(i, snap) {
+  const H = holders[i], A = anchorsAR[i]; A.group.updateMatrixWorld(true);
+  _cam.set(0, 0, 0).applyMatrix4(_inv.copy(A.group.matrixWorld).invert());     // the phone camera in page coordinates
+  _d.copy(_cam).sub(H.position).normalize();
+  _v.copy(_Y).addScaledVector(_d, -_Y.dot(_d)); if (_v.lengthSq() < 1e-4) _v.set(0, 0, 1); _v.normalize();   // page 'up', across the view
+  _u.copy(_d).multiplyScalar(Math.sin(VIEW_ELEV)).addScaledVector(_v, Math.cos(VIEW_ELEV)).normalize();
+  _q.setFromUnitVectors(_Y, _u);
+  if (snap) H.quaternion.copy(_q); else H.quaternion.slerp(_q, .12);
+}
 async function startAR() {
   state.mode = 'ar'; busy(true, 'Starting camera…');
   try {
@@ -215,9 +227,10 @@ async function startAR() {
     arStage = makeStage();
     TARGETS.forEach((id, i) => {
       const anchor = mindar.addAnchor(i);
-      const holder = new THREE.Group(); holder.rotation.x = Math.PI / 2; holder.scale.setScalar(TARGET_FIT[i]); anchor.group.add(holder);
+      const holder = new THREE.Group(); holder.position.set(0, -.04, .16); holder.scale.setScalar(TARGET_FIT[i]); anchor.group.add(holder);
+      holders[i] = holder; anchorsAR[i] = anchor;
       anchor.onTargetFound = () => {
-        arAnchorIdx = i; holder.add(arStage.stage); arStage.appear = 0;
+        arAnchorIdx = i; holder.add(arStage.stage); arStage.appear = 0; faceCamera(i, true);
         if (state.site !== id) { state.site = id; setModel(arStage, id, state.season); }
         showChip(id); $('#scan').style.display = 'none'; $('#controls').classList.add('on');
         navigator.vibrate?.(18);
@@ -234,7 +247,7 @@ async function startAR() {
     const clock = new THREE.Clock();
     renderer.setAnimationLoop(() => {
       const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
-      if (arAnchorIdx >= 0) animateStage(arStage, dt, t);
+      if (arAnchorIdx >= 0) { faceCamera(arAnchorIdx, false); animateStage(arStage, dt, t); }
       renderer.render(scene, camera);
     });
   } catch (e) {
