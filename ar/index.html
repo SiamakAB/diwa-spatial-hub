@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0c2a4c">
+<link rel="icon" href="logo-white.png">
+<title>DIWA Supersites in AR</title>
+<style>
+:root{--navy:#0c2a4c;--blue:#1770b8;--light:#4ca9ff;--ink:#ffffff;--ink2:#c9dbec;--glass:rgba(12,30,52,.62);--hair:rgba(255,255,255,.16);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,system-ui,sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#071a30;color:var(--ink)}
+button{font:inherit;color:inherit;border:0;cursor:pointer}
+.glass{background:var(--glass);backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);box-shadow:inset 0 0 0 .5px var(--hair),0 10px 30px rgba(0,0,0,.25)}
+#ar,#viewer{position:fixed;inset:0}
+#viewer{display:none;background:radial-gradient(120% 90% at 50% 30%,#1a4d80 0%,#0c2a4c 55%,#071a30 100%)}
+#viewer canvas{display:block;width:100%;height:100%;touch-action:none}
+/* start screen */
+#start{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(120% 90% at 50% 25%,#1a4d80 0%,#0c2a4c 55%,#071a30 100%);transition:opacity .45s}
+#start.hide{opacity:0;pointer-events:none}
+.card{width:min(420px,100%);border-radius:28px;padding:28px 24px 22px;display:flex;flex-direction:column;gap:14px;text-align:center}
+.card img{height:42px;align-self:center}
+.card h1{margin:6px 0 0;font-size:26px;line-height:1.15;font-weight:800;letter-spacing:-.02em}
+.card p{margin:0;font-size:15px;line-height:1.5;color:var(--ink2)}
+.btn{min-height:50px;border-radius:16px;font-size:16px;font-weight:650;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 18px}
+.btn.primary{background:#ffffff;color:var(--navy)}
+.btn.primary:active{transform:scale(.98)}
+.btn.ghost{background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 1px var(--hair)}
+.foot{font-size:12px;color:#9fb6cc;margin-top:4px}
+/* scanning hint */
+#scan{position:fixed;left:50%;top:50%;transform:translate(-50%,-55%);z-index:5;display:none;flex-direction:column;align-items:center;gap:18px;pointer-events:none}
+#scan .frame{width:min(62vw,300px);aspect-ratio:1;position:relative;animation:breathe 2.4s ease-in-out infinite}
+#scan .frame i{position:absolute;width:34px;height:34px;border:3.5px solid #fff;border-radius:4px;opacity:.95}
+#scan .frame i:nth-child(1){left:0;top:0;border-right:0;border-bottom:0}
+#scan .frame i:nth-child(2){right:0;top:0;border-left:0;border-bottom:0}
+#scan .frame i:nth-child(3){left:0;bottom:0;border-right:0;border-top:0}
+#scan .frame i:nth-child(4){right:0;bottom:0;border-left:0;border-top:0}
+#scan .msg{padding:10px 16px;border-radius:999px;font-size:14.5px;font-weight:600;text-align:center}
+@keyframes breathe{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.05);opacity:.6}}
+/* site chip */
+#chip{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 16px);transform:translate(-50%,-12px);z-index:6;display:flex;align-items:center;gap:12px;padding:8px 18px 8px 8px;border-radius:999px;opacity:0;transition:opacity .35s,transform .35s;pointer-events:none;max-width:calc(100vw - 100px)}
+#chip.on{opacity:1;transform:translate(-50%,0)}
+#chip .code{flex:none;width:38px;height:38px;border-radius:50%;background:linear-gradient(160deg,var(--light),var(--blue));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px}
+#chip b{display:block;font-size:15.5px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#chip small{display:block;font-size:12px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* controls */
+#controls{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 18px);transform:translate(-50%,20px);z-index:6;display:flex;gap:10px;padding:8px;border-radius:24px;opacity:0;pointer-events:none;transition:opacity .35s,transform .35s}
+#controls.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.ctl{min-width:132px;min-height:52px;border-radius:17px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;gap:9px;font-size:15px;font-weight:650;padding:0 16px}
+.ctl:active{transform:scale(.97)}
+.ctl svg{width:20px;height:20px}
+#close{position:fixed;right:calc(env(safe-area-inset-right) + 14px);top:calc(env(safe-area-inset-top) + 16px);z-index:7;width:44px;height:44px;border-radius:50%;display:none;align-items:center;justify-content:center}
+#close svg{width:18px;height:18px}
+/* 3D mode site picker */
+#picker{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 94px);z-index:6;display:none;gap:8px;overflow-x:auto;padding:4px 16px;scrollbar-width:none;justify-content:safe center}
+#picker::-webkit-scrollbar{display:none}
+#picker button{flex:none;min-height:40px;padding:0 14px;border-radius:999px;font-size:13.5px;font-weight:650;background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 1px var(--hair)}
+#picker button.on{background:#fff;color:var(--navy)}
+/* toast + spinner */
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 96px);transform:translateX(-50%);z-index:8;padding:10px 16px;border-radius:14px;font-size:14px;font-weight:550;opacity:0;transition:opacity .3s;pointer-events:none;text-align:center;max-width:calc(100vw - 40px)}
+#toast.on{opacity:1}
+#busy{position:fixed;inset:0;z-index:15;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;background:rgba(7,26,48,.55);font-size:15px;font-weight:600}
+#busy.on{display:flex}
+.spin{width:40px;height:40px;border-radius:50%;border:3.5px solid rgba(255,255,255,.25);border-top-color:#fff;animation:sp 0.9s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head>
+<body>
+<div id="ar"></div>
+<div id="viewer"></div>
+
+<div id="start">
+  <div class="card glass">
+    <img src="logo-white.png" alt="Digital Waters">
+    <h1>DIWA Supersites in AR</h1>
+    <p>Point your camera at a table image in the booklet and watch the supersite rise from the page in 3D.</p>
+    <button class="btn primary" id="btnCamera"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Start camera</button>
+    <button class="btn ghost" id="btnView">View in 3D without camera</button>
+    <div class="foot">Oulanka Symposium · DIWA Spatial Hub</div>
+  </div>
+</div>
+
+<div id="scan"><div class="frame"><i></i><i></i><i></i><i></i></div><div class="msg glass">Point at a table image in the booklet</div></div>
+
+<div id="chip" class="glass"><div class="code" id="chipCode">OU</div><div style="min-width:0"><b id="chipName">Oulankajoki River</b><small id="chipSub">Supersite · Oulanka, Kuusamo</small></div></div>
+
+<div id="picker"></div>
+
+<div id="controls" class="glass">
+  <button class="ctl" id="btnSeason" aria-label="Switch season"></button>
+  <button class="ctl" id="btnPause" aria-label="Pause rotation"></button>
+</div>
+
+<button id="close" class="glass" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+<div id="toast" class="glass"></div>
+<div id="busy"><div class="spin"></div><div id="busyText">Starting camera…</div></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const SITES = {
+  oulanka:     { code: 'OU', name: 'Oulankajoki River',         sub: 'Supersite · Oulanka, Kuusamo' },
+  tana:        { code: 'TA', name: 'Tana River',                sub: 'River site · Finland–Norway border' },
+  pallas:      { code: 'PA', name: 'Pallas Research Station',   sub: 'Research station · Western Lapland' },
+  sodankyla:   { code: 'SO', name: 'Sodankylä Research Station', sub: 'Research station · Central Lapland' },
+  kemijoki:    { code: 'KE', name: 'Kemijoki River',            sub: 'River site · Lapland' },
+  osp:         { code: 'OR', name: 'Oulu Region',               sub: 'Regional site · Northern Ostrobothnia' },
+  kokkola:     { code: 'KO', name: 'Kokkola Groundwater Area',  sub: 'Groundwater area · Central Ostrobothnia' },
+  archipelago: { code: 'AR', name: 'Archipelago Sea',           sub: 'Coastal sea · Southwest Finland' },
+  vantaanjoki: { code: 'VA', name: 'Vantaanjoki River',         sub: 'River site · Uusimaa' },
+};
+const ORDER = ['oulanka', 'tana', 'pallas', 'sodankyla', 'kemijoki', 'osp', 'kokkola', 'archipelago', 'vantaanjoki'];
+// image targets in targets.mind, in compile order: the cover, then pages 3–11
+const TARGETS = ['oulanka', 'oulanka', 'tana', 'pallas', 'sodankyla', 'kemijoki', 'osp', 'kokkola', 'archipelago', 'vantaanjoki'];
+const TARGET_FIT = [0.6, 0.72, 0.72, 0.72, 0.72, 0.72, 0.72, 0.72, 0.72, 0.72]; // table diameter as a share of the printed image width
+
+const $ = s => document.querySelector(s);
+const ICON = {
+  summer: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>',
+  winter: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2.5v19M3.8 7.2l16.4 9.6M3.8 16.8l16.4-9.6M9.5 4l2.5 2 2.5-2M9.5 20l2.5-2 2.5 2"/></svg>',
+  pause: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>',
+  play: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>',
+};
+
+const state = { season: 'summer', paused: false, site: null, mode: null };
+function renderControls() {
+  const next = state.season === 'summer' ? 'winter' : 'summer';
+  $('#btnSeason').innerHTML = ICON[state.season] + (state.season === 'summer' ? 'Summer' : 'Winter');
+  $('#btnSeason').setAttribute('aria-label', 'Switch to ' + next);
+  $('#btnPause').innerHTML = state.paused ? ICON.play + 'Rotate' : ICON.pause + 'Pause';
+  $('#btnPause').setAttribute('aria-label', state.paused ? 'Start rotation' : 'Pause rotation');
+}
+renderControls();
+let toastT;
+function toast(msg, ms = 2600) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), ms); }
+function busy(on, text) { $('#busy').classList.toggle('on', on); if (text) $('#busyText').textContent = text; }
+function showChip(id) {
+  const s = SITES[id]; $('#chipCode').textContent = s.code; $('#chipName').textContent = s.name; $('#chipSub').textContent = s.sub;
+  $('#chip').classList.add('on');
+}
+
+/* ---------- models ---------- */
+const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+const cache = new Map();
+function loadModel(id, season) {
+  const key = id + '-' + season;
+  if (!cache.has(key)) cache.set(key, loader.loadAsync(`models/${key}.glb`).then(g => prepare(g.scene)));
+  return cache.get(key);
+}
+function prepare(root) {
+  root.traverse(o => {
+    if (!o.isMesh) return;
+    const m = o.material;
+    if (m.color && (m.color.r > 1 || m.color.g > 1 || m.color.b > 1)) { // the glowing rim: keep it bright without an out-of-range colour
+      m.emissive = new THREE.Color(0x59c8ff); m.emissiveIntensity = 1.2; m.color.set(0x59c8ff);
+    }
+    if (m.transparent) m.depthWrite = false;
+    o.frustumCulled = false;
+  });
+  // centre on the table axis, base on y = 0, diameter = 1
+  const box = new THREE.Box3().setFromObject(root), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
+  const s = 1 / Math.max(size.x, size.z);
+  const wrap = new THREE.Group(); root.scale.setScalar(s); root.position.set(-c.x * s, -box.min.y * s, -c.z * s); wrap.add(root);
+  wrap.userData.height = size.y * s;
+  return wrap;
+}
+// a floating table: pivot (spins) holding the model, plus a glowing ring on the page
+const glowTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d'); const r = g.createRadialGradient(128, 128, 40, 128, 128, 128); r.addColorStop(0, 'rgba(76,169,255,.55)'); r.addColorStop(.7, 'rgba(76,169,255,.18)'); r.addColorStop(1, 'rgba(76,169,255,0)'); g.fillStyle = r; g.fillRect(0, 0, 256, 256); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+function makeStage() {
+  const stage = new THREE.Group(), pivot = new THREE.Group(); stage.add(pivot);
+  const glow = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 1.5), new THREE.MeshBasicMaterial({ map: glowTex, transparent: true, depthWrite: false }));
+  glow.rotation.x = -Math.PI / 2; glow.position.y = .002; stage.add(glow);
+  const ring = new THREE.Mesh(new THREE.RingGeometry(.56, .575, 128), new THREE.MeshBasicMaterial({ color: 0x9fd4ff, transparent: true, opacity: .85, depthWrite: false, side: THREE.DoubleSide }));
+  ring.rotation.x = -Math.PI / 2; ring.position.y = .004; stage.add(ring);
+  return { stage, pivot, glow, ring, model: null, appear: 0, angle: 0 };
+}
+async function setModel(S, id, season) {
+  const req = id + season; S.want = req;
+  const m = (await loadModel(id, season)).clone();
+  if (S.want !== req) return;           // a newer request won
+  if (S.model) S.pivot.remove(S.model);
+  S.model = m; S.pivot.add(m);
+}
+const easeOutBack = t => { const c1 = 1.5, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+function animateStage(S, dt, t) {
+  S.appear = Math.min(1, S.appear + dt / .75);
+  const a = easeOutBack(S.appear);
+  S.pivot.scale.setScalar(Math.max(.001, a));
+  S.pivot.position.y = .06 * Math.min(1, S.appear * 1.4) + .012 * Math.sin(t * 1.7);   // float above the page
+  if (!state.paused) S.angle += dt * .32;                                              // about 18° per second
+  S.pivot.rotation.y = S.angle;
+  S.glow.material.opacity = Math.min(1, S.appear * 1.5) * (.85 + .15 * Math.sin(t * 2.2));
+  S.ring.scale.setScalar(.6 + .4 * Math.min(1, S.appear * 1.3));
+}
+
+/* ---------- AR mode (camera + image tracking) ---------- */
+let mindar = null, arStage = null, arAnchorIdx = -1;
+async function startAR() {
+  state.mode = 'ar'; busy(true, 'Starting camera…');
+  try {
+    const { MindARThree } = await import('./vendor/mindar-image-three.prod.js');
+    mindar = new MindARThree({ container: $('#ar'), imageTargetSrc: 'targets.mind', maxTrack: 1, uiLoading: 'no', uiScanning: 'no', uiError: 'no', filterMinCF: .0001, filterBeta: .004, missTolerance: 6, warmupTolerance: 4 });
+    const { renderer, scene, camera } = mindar;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+    const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(new RoomEnvironment(), .04).texture;
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x3a4a5a, .9));
+    const sun = new THREE.DirectionalLight(0xffffff, 1.6); sun.position.set(.4, 1, 1.2); scene.add(sun);
+    arStage = makeStage();
+    TARGETS.forEach((id, i) => {
+      const anchor = mindar.addAnchor(i);
+      const holder = new THREE.Group(); holder.rotation.x = Math.PI / 2; holder.scale.setScalar(TARGET_FIT[i]); anchor.group.add(holder);
+      anchor.onTargetFound = () => {
+        arAnchorIdx = i; holder.add(arStage.stage); arStage.appear = 0;
+        if (state.site !== id) { state.site = id; setModel(arStage, id, state.season); }
+        showChip(id); $('#scan').style.display = 'none'; $('#controls').classList.add('on');
+        navigator.vibrate?.(18);
+      };
+      anchor.onTargetLost = () => {
+        if (arAnchorIdx !== i) return; arAnchorIdx = -1;
+        setTimeout(() => { if (arAnchorIdx < 0) { $('#chip').classList.remove('on'); $('#controls').classList.remove('on'); $('#scan').style.display = 'flex'; } }, 1200);
+      };
+    });
+    await mindar.start();
+    // preload the centre table so the first scan pops up quickly
+    loadModel('oulanka', 'summer');
+    busy(false); $('#start').classList.add('hide'); $('#scan').style.display = 'flex'; $('#close').style.display = 'flex';
+    const clock = new THREE.Clock();
+    renderer.setAnimationLoop(() => {
+      const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
+      if (arAnchorIdx >= 0) animateStage(arStage, dt, t);
+      renderer.render(scene, camera);
+    });
+  } catch (e) {
+    console.warn('AR start failed', e);
+    try { mindar?.stop(); } catch { }
+    mindar = null; $('#ar').innerHTML = '';
+    busy(false); toast('The camera is not available, so here is the 3D view instead.', 4200);
+    start3D();
+  }
+}
+
+/* ---------- 3D mode (no camera) ---------- */
+let v3 = null;
+function start3D(id = 'oulanka') {
+  state.mode = '3d'; $('#start').classList.add('hide'); $('#viewer').style.display = 'block'; $('#close').style.display = 'flex';
+  if (!v3) {
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.outputColorSpace = THREE.SRGBColorSpace;
+    $('#viewer').appendChild(renderer.domElement);
+    const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(38, 1, .01, 50);
+    camera.position.set(0, .72, 1.45);
+    const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(new RoomEnvironment(), .04).texture;
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x3a4a5a, .9));
+    const sun = new THREE.DirectionalLight(0xffffff, 1.5); sun.position.set(1, 2, 1.5); scene.add(sun);
+    const controls = new OrbitControls(camera, renderer.domElement); controls.target.set(0, .12, 0); controls.enableDamping = true; controls.enablePan = false;
+    controls.maxPolarAngle = Math.PI * .47;
+    const S = makeStage(); scene.add(S.stage);
+    const fit = () => { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+      const hf = Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect), d = Math.max(1.55, .66 / Math.tan(hf));
+      camera.position.copy(controls.target).add(new THREE.Vector3(0, .45, .89).multiplyScalar(d)); controls.maxDistance = d * 1.8; controls.minDistance = d * .45; };
+    addEventListener('resize', fit); fit();
+    const clock = new THREE.Clock();
+    renderer.setAnimationLoop(() => { const dt = Math.min(clock.getDelta(), .05); animateStage(S, dt, clock.elapsedTime); controls.update(); renderer.render(scene, camera); });
+    v3 = { renderer, S };
+    // site picker
+    $('#picker').innerHTML = ORDER.map(k => `<button data-id="${k}">${SITES[k].code} · ${SITES[k].name.replace(' Research Station', '').replace(' Groundwater Area', '')}</button>`).join('');
+    $('#picker').addEventListener('click', e => { const b = e.target.closest('button'); if (b) show3D(b.dataset.id); });
+  }
+  $('#picker').style.display = 'flex'; $('#controls').classList.add('on');
+  show3D(id);
+}
+function show3D(id) {
+  state.site = id; showChip(id); v3.S.appear = 0;
+  document.querySelectorAll('#picker button').forEach(b => b.classList.toggle('on', b.dataset.id === id));
+  document.querySelector(`#picker button[data-id="${id}"]`)?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+  setModel(v3.S, id, state.season);
+}
+
+/* ---------- buttons ---------- */
+$('#btnCamera').addEventListener('click', startAR);
+$('#btnView').addEventListener('click', () => start3D());
+$('#btnPause').addEventListener('click', () => { state.paused = !state.paused; renderControls(); });
+$('#btnSeason').addEventListener('click', async () => {
+  state.season = state.season === 'summer' ? 'winter' : 'summer'; renderControls();
+  const S = state.mode === 'ar' ? arStage : v3?.S; if (!S || !state.site) return;
+  const pending = setModel(S, state.site, state.season);
+  const slow = setTimeout(() => toast('Loading ' + state.season + '…', 1500), 350);
+  await pending; clearTimeout(slow);
+});
+$('#close').addEventListener('click', () => location.replace(location.pathname));
+
+window.__ar = { state, tracked: () => arAnchorIdx };   // for automated tests
+// ?site=tana opens that table straight in the 3D view
+const q = new URLSearchParams(location.search).get('site');
+if (q && SITES[q]) start3D(q);
+</script>
+</body>
+</html>
