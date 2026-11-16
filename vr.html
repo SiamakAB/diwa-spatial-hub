@@ -4426,27 +4426,35 @@ function subRender(P) {
 }
 
 /* ---------- moving around ---------- */
-function vrTeleport(x, z, yaw) {
+const headLocalY = () => (camera.position.y > .3 ? camera.position.y : 1.6);
+const MAX_LIFT = 8;
+function vrTeleport(x, z, yaw, eyeY) {
   vrFade();
+  VR.dolly.position.y = eyeY === undefined ? 0 : clamp(eyeY - headLocalY(), 0, MAX_LIFT);   // no eye height = back on the floor
   const p = new THREE.Vector3(x, 0, z); if (!inHall(p)) { const k = Math.sqrt((p.x / (HALL.rx * .88)) ** 2 + (p.z / (HALL.rz * .88)) ** 2); p.x /= k; p.z /= k; }
   if (yaw !== undefined) VR.dolly.rotation.y = yaw - headYawLocal();
   const off = new THREE.Vector3(camera.position.x, 0, camera.position.z).applyAxisAngle(_Y, VR.dolly.rotation.y);
-  VR.dolly.position.set(p.x - off.x, 0, p.z - off.z);
+  VR.dolly.position.x = p.x - off.x; VR.dolly.position.z = p.z - off.z;
 }
 function vrFade() { if (!VR.fade) return; VR.fade.material.opacity = 1; }
 // hub camera moves (focusSite, tours, goHome …) become a short teleport in VR
+const TABLE_TOP = 1.1, LOOK_DOWN = THREE.MathUtils.degToRad(36);
 function vrStandFor(pos, tgt) {
-  let stand, look;
-  if (pos.distanceTo(HOME_POS) < .5) { vrTeleport(0, 22, faceYaw(0, -1)); return; }
+  let stand, look, eye;
+  if (pos.distanceTo(HOME_POS) < .5) { vrTeleport(0, 22, faceYaw(0, -1), 4.2); return; }     // overview from the entrance, a little raised
   if (focus.kind === 'site' && focus.id) {
+    // above and back from the table, looking down about 36°, so the whole table fits in view
     const T = tableOf(focus.id), c = new THREE.Vector3(T.site.pos[0], 0, T.site.pos[1]);
     const d = new THREE.Vector3(pos.x - c.x, 0, pos.z - c.z); if (d.lengthSq() < 1e-4) d.set(0, 0, 1); d.normalize();
-    stand = c.clone().addScaledVector(d, T.site.r + 1.15); look = c;
+    const D = T.site.r * 1.55 + .6;
+    stand = c.clone().addScaledVector(d, D); look = c; eye = TABLE_TOP + D * Math.tan(LOOK_DOWN);
   } else {
+    // boards and screens: eyes level with their centre, far enough back to see all of it
     const d = new THREE.Vector3(pos.x - tgt.x, 0, pos.z - tgt.z), len = d.length(); if (len < 1e-3) d.set(0, 0, 1); d.normalize();
-    look = tgt.clone().setY(0); stand = look.clone().addScaledVector(d, clamp(len, 2.4, focus.kind === 'home' ? 9 : 6.5));
+    const dist = focus.kind === 'screen' ? 10 : (focus.kind === 'map' || focus.kind === 'news') ? 7.5 : clamp(len, 2.4, 6.5);
+    look = tgt.clone().setY(0); stand = look.clone().addScaledVector(d, dist); eye = Math.max(1.6, tgt.y);
   }
-  vrTeleport(stand.x, stand.z, faceYaw(look.x - stand.x, look.z - stand.z));
+  vrTeleport(stand.x, stand.z, faceYaw(look.x - stand.x, look.z - stand.z), eye);
 }
 const _flyTo2D = flyTo;
 flyTo = function (pos, tgt, dur, done) {
@@ -4572,9 +4580,9 @@ function vrStart() {
   try { renderer.xr.setFoveation(1); } catch { }
   SCREENS.forEach(S => S.mesh.material = S.vr);
   closeAllPanels(); closeAgentMenu(); focus.kind = 'home'; focus.id = null;
-  VR.dolly.position.set(0, 0, 23); VR.dolly.rotation.set(0, 0, 0);
+  VR.dolly.position.set(0, 2.6, 23); VR.dolly.rotation.set(0, 0, 0);
   VR.menuKey = ''; VR.menu.mesh.visible = true;
-  setTimeout(() => vrNote('Welcome to the VR hub', 'Point with either controller and pull the trigger to select a table, a sensor globe, an agent or a 360° photo, or to teleport across the floor. Walk with the left stick and turn with the right. Your menu is on your left hand; press X to hide it.'), 900);
+  setTimeout(() => vrNote('Welcome to the VR hub', 'Point with either controller and pull the trigger to select a table, a sensor globe, an agent or a 360° photo, or to teleport across the floor. Walk with the left stick. Push the right stick left or right to turn, forward or back to rise or sink. Your menu is on your left hand; press X to hide it.'), 900);
 }
 function vrEnd() {
   VR.on = false; vrPanoClose(); vrCardClose();
@@ -4614,9 +4622,10 @@ function vrUpdate(dt, t) {
       camera.getWorldPosition(_hp); if (!inHall(_hp)) { VR.dolly.position.addScaledVector(_hd, sy * sp).addScaledVector(_vq, -sx * sp); }
     }
     if (hand === 'right') {
-      if (Math.abs(sx) > .65 && VR.snapReady[i]) {
+      if (Math.abs(sy) > .2 && Math.abs(sy) > Math.abs(sx)) VR.dolly.position.y = clamp(VR.dolly.position.y - sy * 1.8 * dt, 0, MAX_LIFT);   // rise or sink
+      if (Math.abs(sx) > .65 && Math.abs(sx) > Math.abs(sy) && VR.snapReady[i]) {
         VR.snapReady[i] = false; camera.getWorldPosition(_hp); const a = -Math.sign(sx) * Math.PI / 6;
-        VR.dolly.position.sub(_hp).applyAxisAngle(_Y, a).add(_hp); VR.dolly.rotation.y += a; VR.dolly.position.y = 0;
+        const y0 = VR.dolly.position.y; VR.dolly.position.sub(_hp).applyAxisAngle(_Y, a).add(_hp); VR.dolly.rotation.y += a; VR.dolly.position.y = y0;
       } else if (Math.abs(sx) < .3) VR.snapReady[i] = true;
     }
     // X / Y on the left controller show or hide the menu
