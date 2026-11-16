@@ -589,6 +589,31 @@ body.night #loader .field{background:rgba(255,255,255,.92);color:#1d1d1f;box-sha
 body.night #loader .field::placeholder{color:#8e8e93}
 .leave-btn:hover{color:#ff3b30}
 
+/* v1.0 — agent tasks: tap menu and speech caption */
+#agentMenu{position:fixed;left:50%;bottom:112px;transform:translate(-50%,14px);z-index:60;width:min(460px,calc(100vw - 24px));box-sizing:border-box;padding:14px;border-radius:22px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
+#agentMenu.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.am-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.am-head i{flex:none;width:30px;height:30px;border-radius:50%;box-shadow:0 0 0 3px rgba(255,255,255,.7)}
+.am-who{flex:1;min-width:0}.am-who b{display:block;font-size:16px;color:var(--ink)}.am-who small{display:block;font-size:12px;color:var(--ink-3)}
+.am-x{flex:none;width:34px;height:34px;border-radius:50%;border:0;background:rgba(120,130,145,.14);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.am-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.am-act{min-height:44px;border-radius:13px;border:0;background:rgba(120,130,145,.12);color:var(--ink);font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;padding:0 12px;text-align:left}
+.am-act:hover{background:rgba(23,112,184,.14)}
+.am-act.main{grid-column:1/-1;background:#1770b8;color:#fff;text-align:center}
+.am-act.main:hover{background:#125f9e}
+.am-sites{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:12px;padding-top:12px;border-top:.5px solid rgba(120,130,145,.25)}
+.am-sites span{font-size:11px;font-weight:650;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-right:4px}
+.am-site{min-height:34px;border-radius:999px;border:0;background:rgba(120,130,145,.12);color:var(--ink);font:inherit;font-size:12.5px;font-weight:600;padding:0 12px;cursor:pointer}
+.am-site:hover{background:rgba(23,112,184,.14)}
+#agentCap{position:fixed;left:50%;bottom:112px;transform:translate(-50%,14px);z-index:55;width:min(560px,calc(100vw - 24px));box-sizing:border-box;display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s}
+#agentCap.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#agentMenu.show ~ #agentCap{opacity:0;pointer-events:none}
+#agCapDot{flex:none;width:26px;height:26px;border-radius:50%;margin-top:2px;box-shadow:0 0 0 3px rgba(255,255,255,.7)}
+.ac-body{flex:1;min-width:0}.ac-body b{display:block;font-size:13px;color:var(--ink)}.ac-body p{margin:2px 0 0;font-size:14px;line-height:1.45;color:var(--ink-2)}
+.ac-stop{flex:none;align-self:center;min-height:36px;border-radius:999px;border:0;background:rgba(255,59,48,.12);color:#c62d22;font:inherit;font-size:12.5px;font-weight:650;padding:0 14px;cursor:pointer}
+body.night .ac-stop{color:#ff8a80}
+@media (min-width: 900px){body:has(#sitePanel.show) #agentCap,body:has(#sitePanel.show) #agentMenu{left:calc(50% - 210px)}}
+
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 </head>
@@ -762,6 +787,13 @@ body.night #loader .field::placeholder{color:#8e8e93}
   <button class="round ghost sm" id="wbDone" title="Leave the whiteboard"></button>
 </div>
 <div id="mapCard" class="glass ui hide-in-pano"></div>
+<div id="agentMenu" class="glass" role="dialog" aria-label="Agent menu">
+  <div class="am-head"><i id="amDot"></i><div class="am-who"><b id="amName">Emma</b><small id="amRole">Tour guide</small></div>
+  <button class="am-x" id="amClose" aria-label="Close"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="am-grid" id="amGrid"></div>
+  <div class="am-sites" id="amSites"></div>
+</div>
+<div id="agentCap" class="glass" aria-live="polite"><i id="agCapDot"></i><div class="ac-body"><b id="agCapName"></b><p id="agCapText"></p></div><button id="agStop" class="ac-stop">Stop tour</button></div>
 <div id="copy" class="ui hide-in-pano">© 2026 <a href="https://metaparametric.com" target="_blank" rel="noopener">MetaParametric.com</a> · Siamak Bazzaz</div>
 
 <script type="text/plain" id="trystero-src">
@@ -2211,6 +2243,8 @@ function buildAgents() {
   AGENT_DEFS.forEach((d, i) => {
     const av = makeAvatar(d.color, d.name);
     av.tagEl.insertAdjacentHTML('beforeend', '<em class="ag-pill">agent</em>');
+    av.disc.userData.agent = i; pickables.push(av.disc);
+    av.tagEl.style.pointerEvents = 'auto'; av.tagEl.style.cursor = 'pointer'; av.tagEl.addEventListener('click', e => { e.stopPropagation(); openAgentMenu(i); });
     const A = { ...d, i, av, pos: freeFloorPoint(), goal: null, seat: -1, state: 'idle', timer: rnd(1, 4), partner: null, talk: 0, turn: 0, label: 'arriving' };
     av.g.position.copy(A.pos); AGENTS.push(A);
   });
@@ -2219,7 +2253,7 @@ function agentGo(A, p, after, label) { A.goal = p.clone(); A.after = after; A.st
 function agentFree(A) { A.seat = -1; if (A.partner) { const B = A.partner; A.partner = null; if (B.partner === A) { B.partner = null; B.state = 'idle'; B.timer = rnd(1, 3); } } }
 function agentNext(A) {
   agentFree(A);
-  const pick = Math.random(), others = AGENTS.filter(B => B !== A && !B.partner && B.state !== 'walk');
+  const pick = Math.random(), others = AGENTS.filter(B => B !== A && !B.partner && !B.busy && B.state !== 'walk');
   if (pick < .3) {                                                             // look at a table
     const T = tables[Math.floor(Math.random() * tables.length)], a = Math.random() * Math.PI * 2;
     let p = new THREE.Vector3(T.site.pos[0] + Math.cos(a) * (T.site.r + .9), AG.STAND, T.site.pos[1] + Math.sin(a) * (T.site.r + .9));
@@ -2243,14 +2277,19 @@ function updateAgents(dt, t) {
     let level = 0;
     if (A.state === 'walk') {
       _ag.copy(A.goal).sub(A.pos); _ag.y = 0; const d = _ag.length();
-      if (d < .08) { A.state = A.after; A.timer = rnd(5, 10); if (A.state === 'sit') A.label = 'sitting in a lounge'; }
+      if (d < .08) {
+        if (A.busy) { A.state = 'held'; const f = A.arrive; A.arrive = null; f && f(); }
+        else { A.state = A.after; A.timer = rnd(5, 10); if (A.state === 'sit') A.label = 'sitting in a lounge'; }
+      }
       else {
-        _ag.multiplyScalar(Math.min(d, AG.SPEED * dt) / d);
+        _ag.multiplyScalar(Math.min(d, (A.busy ? A.speed : AG.SPEED) * dt) / d);
         // steer around the tables
         tables.forEach(T => { const dx = A.pos.x - T.site.pos[0], dz = A.pos.z - T.site.pos[1], r = Math.hypot(dx, dz), lim = T.site.r + .7; if (r < lim + .6 && r > .01) { const push = (lim + .6 - r) * dt * 2.2; _ag.x += dx / r * push; _ag.z += dz / r * push; } });
         A.pos.add(_ag);
       }
       A.pos.y = lerp(A.pos.y, AG.STAND, .1);
+    } else if (A.busy) {
+      A.pos.y = lerp(A.pos.y, AG.STAND, .1);                                  // on a task: wait where the task left her
     } else {
       A.timer -= dt;
       if (A.state === 'sit') { if (seated === A.seat) A.timer = 0; const S = SEATS[A.seat]; if (S) A.pos.lerp(_ag.set(S.pos.x, AG.SIT, S.pos.z), .08); }
@@ -2264,10 +2303,224 @@ function updateAgents(dt, t) {
       }
       if (A.timer <= 0) agentNext(A);
     }
+    if (A.speaking) level = tts.an ? Math.min(1, .15 + ttsLevel() * 5) : .28 + .26 * Math.abs(Math.sin(t * 6.1 + A.i) * Math.sin(t * 2.3));
     A.av.g.position.copy(A.pos); A.av.g.position.y += Math.sin(t * 1.1 + A.i * 2) * .015 + (A.state === 'walk' ? Math.abs(Math.sin(t * 6 + A.i)) * .02 : 0);
     animateAvatar(A.av, level, t);
   });
 }
+
+/* =====================================================================
+   Agent tasks: Emma guides tours and greets visitors; all three host their own tables
+   and show features on request (tap an agent, or ask the orb "show me the spring flood").
+   Everything they say is prepared text: only the voice uses the cloud allowance.
+   ===================================================================== */
+const AGENT_ROLE = ['Tour guide · hosts OU, KE, SO', 'Site host · TA, PA, OR', 'Site host · KO, AR, VA'];
+const HOSTS = { oulanka: 0, kemijoki: 0, sodankyla: 0, tana: 1, pallas: 1, osp: 1, kokkola: 2, archipelago: 2, vantaanjoki: 2 };
+const HOST_LINES = {
+  oulanka: 'Welcome to the Oulankajoki River, our centre table and the first fully interactive supersite. The glowing globes are sensor stations; tap one to see its data.',
+  kemijoki: 'This is the Kemijoki, Finland’s longest river. It flows from eastern Lapland to the Gulf of Bothnia and is used heavily for hydropower.',
+  sodankyla: 'Sodankylä in central Lapland has a long tradition of Arctic research, with boreal forest, open fens and a long snow season.',
+  tana: 'This is the Tana River on the border between Finland and Norway, one of Europe’s most important rivers for wild Atlantic salmon.',
+  pallas: 'Welcome to Pallas in western Lapland, where long-term measurements follow the atmosphere, snow and ecosystems of the fells.',
+  osp: 'This is the Oulu Region, where the Oulujoki river system meets the Gulf of Bothnia and towns, farms and peatlands share one catchment.',
+  kokkola: 'Near Kokkola, sand and gravel eskers store groundwater beneath a flat coastal landscape.',
+  archipelago: 'The Archipelago Sea has tens of thousands of islands, and its shallow waters respond quickly to what rivers carry from the land.',
+  vantaanjoki: 'The Vantaanjoki flows through farmland and the Helsinki area, a key place to study how land use affects river water.',
+};
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const AGX = { tour: null, speech: null, quiet: false, introduced: new Set(), greeted: new Set(), lastGreet: 0, cand: null, since: 0, check: 0 };
+const visitorName = () => (mp.name && mp.name !== 'Guest') ? mp.name : '';
+
+/* where an agent stands for each kind of stop: beside it, on the visitor's side, out of the middle of the view */
+function standPoint(where) {
+  const p = new THREE.Vector3(), side = new THREE.Vector3();
+  const beside = (c, toward, out, across) => { const d = new THREE.Vector3(toward.x - c.x, 0, toward.z - c.z).normalize(); side.set(-d.z, 0, d.x); return p.copy(c).addScaledVector(d, out).addScaledVector(side, across).setY(AG.STAND); };
+  if (where === 'home') return p.set(3.4, AG.STAND, 22.5);
+  if (where === 'map') return beside(MAPB.g.position, new THREE.Vector3(0, 0, 0), 3.6, 3.4);
+  if (where === 'news') return beside(NEWS.g.position, new THREE.Vector3(0, 0, 0), 3.6, -3.4);
+  if (where === 'screen') return beside(SCREENS[1].center, new THREE.Vector3(0, 0, 0), 4.2, 6.4);
+  const T = tableOf(where); if (!T) return p.set(0, AG.STAND, 20);
+  const c = new THREE.Vector3(T.site.pos[0], 0, T.site.pos[1]);
+  return beside(c, T.view().pos, T.site.r + .9, T.site.r * .62);
+}
+function occupy(A) {
+  agentFree(A); if (A.seat >= 0) A.seat = -1;
+  A.busy = true; A.state = 'held'; A.label = 'guiding a visitor';
+}
+function release(A, after = 4) { if (!A.busy) return; A.busy = false; A.state = 'idle'; A.timer = rnd(after, after + 3); A.label = 'walking around'; }
+function goTo(A, p) {
+  return new Promise(res => {
+    const d = Math.hypot(p.x - A.pos.x, p.z - A.pos.z);
+    A.goal = p.clone(); A.speed = Math.max(2.6, d / 3.2); A.state = 'walk'; A.arrive = res;
+    setTimeout(() => { if (A.arrive === res) { A.pos.copy(p); A.state = 'held'; A.arrive = null; res(); } }, 6000);
+  });
+}
+/* voices: the same voice settings as the orb; in the browser each agent gets her own voice where the device has several */
+function agentVoice(A) {
+  const L = voicePick.list.filter(v => /^en/i.test(v.lang)).sort((a, b) => voiceScore(b) - voiceScore(a)).filter(v => voiceScore(v) > 0);
+  return L.length ? L[A.i % L.length] : voicePick.best;
+}
+function agentSay(A, text, explicit = true) {
+  return new Promise(resolve => {
+    agentHush();
+    $('#agCapDot').style.background = A.color; $('#agCapName').textContent = A.name; $('#agCapText').textContent = text;
+    $('#agStop').style.display = AGX.tour ? '' : 'none'; $('#agentCap').classList.add('show');
+    let over = false;
+    const done = () => {
+      if (over) return; over = true; A.speaking = false; if (AGX.speech?.done === done) AGX.speech = null;
+      music.duck(ORB.state === 'idle' ? 1 : .22);
+      setTimeout(() => { if (!AGX.speech && !AGX.tour) $('#agentCap').classList.remove('show'); }, 2600);
+      resolve();
+    };
+    AGX.speech = { A, done }; A.speaking = true; music.duck(.22);
+    const readTime = 1600 + text.length * 58;
+    if (!ai.speak || (!explicit && AGX.quiet)) { setTimeout(done, readTime); return; }
+    const browser = () => {
+      if (!('speechSynthesis' in window)) { setTimeout(done, readTime); return; }
+      speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text);
+      u.voice = agentVoice(A) || null; u.pitch = [1.05, .97, 1.12][A.i]; u.rate = 1; const t0 = performance.now();
+      u.onend = done; u.onerror = () => setTimeout(done, Math.max(0, readTime - (performance.now() - t0)));   // no voice: leave the caption up long enough to read
+      speechSynthesis.speak(u);
+    };
+    if (voicePlan().cloud) speakCloud(text, done).catch(browser); else browser();
+    setTimeout(done, 5000 + text.length * 95);                                 // never wait forever
+  });
+}
+function agentHush() { const s = AGX.speech; if (!s) return; AGX.speech = null; stopSpeaking(); s.done(); }
+const intro = A => AGX.introduced.has(A.i) ? '' : (AGX.introduced.add(A.i), `Hi, I’m ${A.name}. `);
+
+/* ---------- on-demand guide ---------- */
+async function agentDo(A, go, act, line, after) {
+  if (AGX.tour) stopTour();
+  if (A.busy && A.task) return; A.task = true;
+  occupy(A); closeAgentMenu(); act?.();
+  await Promise.all([goTo(A, standPoint(go)), wait(1600)]);
+  await agentSay(A, intro(A) + line);
+  A.task = false; after?.(); release(A, 6);
+}
+const showScenTab = () => { try { siteTab = 'scen'; segSet($('#spTabs'), 'scen'); renderSiteTab(HERO); } catch (e) { } };
+const AG_ACTIONS = {
+  tour:   { label: 'Give me a tour', run: A => agentTour(A) },
+  flood:  { label: 'Spring flood', run: A => agentDo(A, 'oulanka', () => { focusSite('oulanka'); setTimeout(() => { applyFlood('q50'); showScenTab(); }, 1800); },
+            'This is a spring flood on the Oulankajoki at a one-in-fifty-year level. Snowmelt lifts the river over its floodplain. You can compare all three flood levels in the Scenarios tab.') },
+  ice:    { label: 'River ice', run: A => agentDo(A, 'oulanka', () => { focusSite('oulanka'); setTimeout(() => { applyIce('jam'); showScenTab(); }, 1800); },
+            'Here is river ice on the Oulankajoki. Ice grows through the winter and breaks up in spring, and where broken ice piles up at a bend it can jam the river.') },
+  winter: { label: () => state.season === 'winter' ? 'Show summer' : 'Show winter', run: A => { const w = state.season !== 'winter';
+            agentDo(A, 'home', () => { goHome(); applySeason(w ? 'winter' : 'summer'); }, w ? 'This is the hall in winter. Every table and the forest outside are now covered in snow.' : 'And here is summer again, with green forests and open water on every table.'); } },
+  night:  { label: () => state.night ? 'Back to daylight' : 'Northern lights', run: A => { const n = !state.night;
+            agentDo(A, 'home', () => { goHome(); if (state.night !== n) toggleNight(); }, n ? 'At night the hall goes dark, and the northern lights and stars appear in the sky over the Oulanka forest. Look up through the glass.' : 'Daylight is back. You can switch between day and night any time with the moon button.'); } },
+  pano:   { label: '360° photo', run: A => agentDo(A, 'oulanka', () => focusSite('oulanka'), 'Let me take you into a real 360° photo from the Oulankajoki riverside. Drag to look around, and close it when you’re done.', () => openPano(CONFIG.PANORAMAS[0].id)) },
+  video:  { label: 'Video wall', run: A => agentDo(A, 'screen', () => focusScreen(1), 'On the video wall you can watch films about DIWA and the Oulanka Research Station. Walk close to a screen to play it, and click it for sound.') },
+  map:    { label: 'Map of Finland', run: A => agentDo(A, 'map', () => focusMap(), 'This map shows all nine DIWA supersites, from the Tana River in the far north to the Archipelago Sea in the southwest. Tap a pulsing point to learn more.') },
+};
+function hostTable(id, A = AGENTS[HOSTS[id]]) { return agentDo(A, id, () => focusSite(id), HOST_LINES[id]); }
+
+/* ---------- tour guide ---------- */
+async function agentTour(A) {
+  if (AGX.tour) stopTour();
+  const tour = AGX.tour = { A, stop: false }; closeAgentMenu(); occupy(A); A.task = true;
+  const nm = visitorName() ? ', ' + visitorName() : '';
+  const steps = [
+    { go: 'home', act: () => goHome(), say: `Welcome to the tour${nm}! I’m ${A.name}. Follow me through the DIWA Spatial Hub.` },
+    { go: 'oulanka', act: () => focusSite('oulanka'), say: 'This is the Oulankajoki River in Oulanka National Park, our centre table and the first fully interactive supersite. The glowing globes are sensor stations from the DIWA metadata template.' },
+    { go: 'map', act: () => focusMap(), say: 'This map shows all nine DIWA supersites across Finland, from the Tana River in the far north to the Archipelago Sea in the southwest.' },
+    { go: 'kemijoki', act: () => focusSite('kemijoki'), say: 'The Kemijoki is Finland’s longest river. Every table follows the seasons: watch it turn to winter for a moment.',
+      during: async () => { const s0 = state.season; await wait(2200); if (tour.stop) return; applySeason(s0 === 'winter' ? 'summer' : 'winter'); await wait(4200); applySeason(s0); } },
+    { go: 'archipelago', act: () => focusSite('archipelago'), say: 'The Archipelago Sea has tens of thousands of islands. Its shallow waters respond quickly to what rivers carry from the land.' },
+    { go: 'screen', act: () => focusScreen(1), say: 'On the video wall you can watch films about DIWA and the Oulanka Research Station. Walk close to a screen to play it.' },
+    { go: 'home', act: () => goHome(), say: 'That’s the tour! Tap Suzan, Sofia or me any time to see the spring flood, river ice, winter or the northern lights, and ask the orb anything.' },
+  ];
+  AGX.introduced.add(A.i);
+  for (const S of steps) {
+    if (tour.stop) break;
+    S.act(); await Promise.all([goTo(A, standPoint(S.go)), wait(1700)]);
+    if (tour.stop) break;
+    const sp = agentSay(A, S.say); S.during?.(); await sp;
+    if (tour.stop) break; await wait(600);
+  }
+  if (AGX.tour === tour) AGX.tour = null;
+  A.task = false; release(A, 5); $('#agStop').style.display = 'none';
+}
+function stopTour() { if (!AGX.tour) return; AGX.tour.stop = true; AGX.tour = null; agentHush(); $('#agentCap').classList.remove('show'); }
+
+/* ---------- greeter: welcomes each visitor after the entry flight ---------- */
+async function greetVisitor() {
+  const A = AGENTS[0]; if (!A || !state.layers.agents || AGX.tour || A.task) return;
+  A.task = true; occupy(A);
+  await Promise.race([goTo(A, standPoint('home')), wait(2500)]);
+  const nm = visitorName() ? ', ' + visitorName() : '';
+  AGX.introduced.add(0);
+  await agentSay(A, `Welcome to the DIWA Spatial Hub${nm}! I’m Emma, and with Suzan and Sofia I look after the supersites here. Tap me for a guided tour, or ask the orb anything.`, false);
+  A.task = false; release(A, 5);
+}
+
+/* ---------- site hosts: greet a visitor who stays at one of their tables ---------- */
+function hostCheck(dt) {
+  const now = performance.now(); if (now < AGX.check) return; AGX.check = now + 500;   // twice a second, in real time
+  if (!entered || AGX.tour || AGX.speech || pano.active || !state.layers.agents || ORB.state !== 'idle' || ai.listening || flight || renderer.xr.isPresenting) return;
+  if (now - AGX.lastGreet < 25000) return;
+  const cp = camera.position; let best = null;
+  tables.forEach(T => { const d = Math.hypot(cp.x - T.site.pos[0], cp.z - T.site.pos[1]); if (d < T.site.r + 7 && cp.y < 9.5 && (!best || d < best.d)) best = { T, d }; });
+  const id = best?.T.site.id;
+  if (!id || AGX.greeted.has(id)) { AGX.cand = null; return; }
+  if (AGX.cand !== id) { AGX.cand = id; AGX.since = now; return; }
+  if (now - AGX.since < 1500) return;
+  const A = AGENTS[HOSTS[id]]; if (A.task) return;
+  AGX.greeted.add(id); AGX.lastGreet = now; hostGreet(A, id);
+}
+async function hostGreet(A, id) {
+  A.task = true; occupy(A);
+  await Promise.race([goTo(A, standPoint(id)), wait(2600)]);
+  await agentSay(A, intro(A) + HOST_LINES[id], false);
+  A.task = false; release(A, 6);
+}
+
+/* ---------- tap an agent: a small menu of what she can show ---------- */
+let agentMenuFor = -1;
+function openAgentMenu(i) {
+  const A = AGENTS[i]; if (!A || !state.layers.agents) return; agentMenuFor = i;
+  $('#amDot').style.background = A.color; $('#amName').textContent = A.name; $('#amRole').textContent = AGENT_ROLE[i];
+  $('#amGrid').innerHTML = Object.entries(AG_ACTIONS).map(([k, a]) => `<button class="am-act${k === 'tour' ? ' main' : ''}" data-k="${k}">${typeof a.label === 'function' ? a.label() : a.label}</button>`).join('');
+  $('#amSites').innerHTML = '<span>Her tables</span>' + Object.entries(HOSTS).filter(([, h]) => h === i).map(([id]) => `<button class="am-site" data-site="${id}">${siteCode(SITE[id])} · ${SITE[id].name.replace(' Research Station', '').replace(' Groundwater Area', '')}</button>`).join('');
+  $('#agentMenu').classList.add('show');
+}
+function closeAgentMenu() { $('#agentMenu').classList.remove('show'); agentMenuFor = -1; }
+function setupAgentUI() {
+  $('#amClose').addEventListener('click', closeAgentMenu);
+  $('#amGrid').addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (b && agentMenuFor >= 0) AG_ACTIONS[b.dataset.k].run(AGENTS[agentMenuFor]); });
+  $('#amSites').addEventListener('click', e => { const b = e.target.closest('[data-site]'); if (b && agentMenuFor >= 0) hostTable(b.dataset.site, AGENTS[agentMenuFor]); });
+  $('#agStop').addEventListener('click', () => { stopTour(); goHome(); });
+}
+
+/* ---------- requests to the orb that an agent can handle without the AI ---------- */
+const SITE_WORDS = { oulanka: /oulanka/, tana: /\b(tana|teno)\b/, pallas: /pallas/, sodankyla: /sodankyl/, kemijoki: /kemijoki/, osp: /oulu region|\boulu\b/, kokkola: /kokkola/, archipelago: /archipelago/, vantaanjoki: /vantaa/ };
+function agentCommand(text) {
+  const t = text.toLowerCase();
+  const named = AGENTS.find(A => new RegExp('\\b' + A.name.toLowerCase() + '\\b').test(t));
+  const asks = /\b(show|take|bring|guide|tour|go to|let me see|can i see|i want to see|open)\b/.test(t);
+  if ((!named && !asks) || !state.layers.agents) return null;
+  let key = null, site = null;
+  if (/\btour\b|show me around|guide me/.test(t)) key = 'tour';
+  else if (/flood/.test(t)) key = 'flood';
+  else if (/\bice\b|ice jam|frozen river/.test(t)) key = 'ice';
+  else if (/northern light|aurora|\bnight\b/.test(t)) key = state.night ? null : 'night';
+  else if (/daylight|\bday\b/.test(t)) key = state.night ? 'night' : null;
+  else if (/winter|snow/.test(t)) key = state.season === 'winter' ? null : 'winter';
+  else if (/summer/.test(t)) key = state.season === 'winter' ? 'winter' : null;
+  else if (/360|panorama|photo/.test(t)) key = 'pano';
+  else if (/video|film|movie/.test(t)) key = 'video';
+  else if (/\bmap\b/.test(t)) key = 'map';
+  else site = Object.keys(SITE_WORDS).find(k => SITE_WORDS[k].test(t)) || null;
+  if (!key && !site) return named ? { A: named, help: true } : null;
+  const A = named || (site ? AGENTS[HOSTS[site]] : key === 'tour' ? AGENTS[0] : AGENTS.filter(B => !B.task).sort((a, b) => a.pos.distanceTo(camera.position) - b.pos.distanceTo(camera.position))[0] || AGENTS[0]);
+  return { A, key, site };
+}
+function runAgentCommand(c) {
+  if (c.help) return agentSay(c.A, intro(c.A) + 'I can give you a tour, or show you the spring flood, river ice, winter, the northern lights, a 360° photo, the video wall or the map. Just ask!');
+  if (c.site) return hostTable(c.site, c.A);
+  AG_ACTIONS[c.key].run(c.A);
+}
+
 function agentsSummary() { return AGENTS.map(A => `${A.name} is ${A.label}`).join('; '); }
 /* for testing without a network: __hub.simulatePeer('id', 'Name', '#ff9f0a', [x, y, z], yaw) */
 function simulatePeer(id, n, c, p, y = 0, talk) { onPose({ p, y, x: 0, n, c }, id); const P = mp.peers.get(id); if (talk !== undefined) P.simLevel = talk; return P; }
@@ -3235,7 +3488,7 @@ function updatePano(dt) {
    AI companion — conversation via proxy + voice (Web Speech API)
    ===================================================================== */
 const ai = { history: [], busy: false, speak: true, rec: null, listening: false, revealTimer: null, hideTimer: null };
-const SUGGEST = ['What can I see in this hall?', 'List the supersites', 'What do the Oulanka sensors measure?', 'Explain spring snowmelt floods simply'];
+const SUGGEST = ['Give me a tour', 'Show me the spring flood', 'What can I see in this hall?', 'List the supersites', 'What do the Oulanka sensors measure?', 'Explain spring snowmelt floods simply'];
 const ORB_STATUS = { idle: 'Tap the orb or hold Space to talk', listening: 'Listening…', thinking: 'Thinking…', speaking: 'Speaking…' };
 function md(t) {
   const esc = t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -3319,7 +3572,7 @@ function hubContext() {
   L.push(`MEDIA WALL at the back of the hall, left to right: a Finland map board with pulsing circles for each supersite; three big video screens (${CONFIG.SCREENS.map(v => v.title).join('; ')}) that play when you walk close and unmute when clicked; and a Latest News board with a slideshow from digitalwaters.fi.`);
   L.push(`Current news on the board: ${CONFIG.NEWS.map(n => `${n.date}: ${n.title}`).join('; ')}.`);
   L.push(`LOUNGES: ${LOUNGES.length} seating corners (sofa, two armchairs, coffee table with two DIWA brochures, a lamp) near the walls, each with a shared whiteboard behind the sofa for drawing and writing together.`);
-  L.push(`RESIDENT AGENTS: ${AGENTS.map(A => A.name).join(', ')} are three friendly agent avatars (coloured circles with a small 'agent' label) who live in the hall: they wander, visit the tables, sit in the lounges and have silent chats. They are part of the demo, not real visitors. Right now: ${agentsSummary()}.`);
+  L.push(`RESIDENT AGENTS: ${AGENTS.map(A => A.name).join(', ')} are three friendly agent avatars (coloured circles with a small 'agent' label) who live in the hall. Emma is the tour guide and greeter; each agent hosts three tables (Emma: Oulankajoki, Kemijoki, Sodankylä; Suzan: Tana, Pallas, Oulu Region; Sofia: Kokkola, Archipelago Sea, Vantaanjoki). Visitors can tap an agent for a tour or to see the spring flood, river ice, winter, the northern lights, a 360° photo, the video wall or the map, or ask you, for example 'show me the spring flood', and an agent will do it. Otherwise they wander, sit in the lounges and chat. They are part of the demo, not real visitors. Right now: ${agentsSummary()}.`);
   L.push('YOU, the assistant, are the glowing sci-fi orb that floats near the user. A big faded DIWA logo is printed on the floor near the entrance.');
   L.push('CONTROLS (top right and bottom dock): day/night toggle (night shows northern lights and stars outside), layers (sensors, rivers, catchment, land cover, 360° photos, clouds, rain/snow, particles), generated lo-fi background music, People (multi-user sessions where visitors appear as coloured circle avatars and talk by voice), VR button for headsets like Meta Quest 3, help. The bottom dock flies to each table; keys 1–9 too. Users can also sit on the sofas.');
   // live state
@@ -3344,6 +3597,13 @@ function hubContext() {
 async function sendAI(text) {
   text = (text ?? $('#aiInput').value).trim(); if (!text || ai.busy) return;
   if (ORB.mode !== 'companion') summonOrb();
+  const cmd = agentCommand(text);
+  if (cmd) {                                   // a guide request: an agent handles it, no AI call needed
+    $('#aiInput').value = ''; autoGrow(); $('#aiSuggest').innerHTML = '';
+    addMsg('user', text); addMsg('bot', cmd.help ? `${cmd.A.name} will answer.` : `${cmd.A.name} will show you.`);
+    caption(text, `<b>${cmd.A.name}</b> ${cmd.help ? 'will answer.' : 'is on her way…'}`, { hideAfter: 3500 }); setOrbState('idle');
+    runAgentCommand(cmd); return;
+  }
   $('#aiInput').value = ''; autoGrow(); $('#aiSuggest').innerHTML = '';
   addMsg('user', text); ai.history.push({ role: 'user', content: text });
   const typing = addMsg('bot', '<span class="typing"><i></i><i></i><i></i></span>', true); ai.busy = true;
@@ -3809,12 +4069,13 @@ function setupInput() {
     else if (u.mapPin) { if (focus.kind !== 'map') focusMap(); openMapCard(u.mapPin); }
     else if (u.mapBoard) { if (focus.kind !== 'map') focusMap(); }
     else if (u.wb) { if (focus.kind !== 'wb' || WB.active?.i !== u.wb - 1) focusWhiteboard(u.wb - 1); }
+    else if (u.agent !== undefined) openAgentMenu(u.agent);
     else if (u.ai) { ORB.mode === 'docked' ? summonOrb() : toggleListening(); }
     else if (u.site) { if (focus.id !== u.site) focusSite(u.site); }
   });
   el.addEventListener('pointermove', e => {
     if (pano.active || e.buttons) return; const o = pick(e);
-    const id = o ? (o.userData.site || (o.userData.globe && 'g:' + o.userData.globe) || (o.userData.pano && 'p:' + o.userData.pano) || (o.userData.live && 'live') || (o.userData.ai && 'ai') || (o.userData.seat !== undefined && 'seat') || (o.userData.screen !== undefined && 'scr') || (o.userData.news && 'news') || (o.userData.mapPin && 'pin') || (o.userData.mapBoard && 'map') || (o.userData.wb && 'wb')) : null;
+    const id = o ? (o.userData.site || (o.userData.globe && 'g:' + o.userData.globe) || (o.userData.pano && 'p:' + o.userData.pano) || (o.userData.live && 'live') || (o.userData.ai && 'ai') || (o.userData.agent !== undefined && 'ag') || (o.userData.seat !== undefined && 'seat') || (o.userData.screen !== undefined && 'scr') || (o.userData.news && 'news') || (o.userData.mapPin && 'pin') || (o.userData.mapBoard && 'map') || (o.userData.wb && 'wb')) : null;
     if (focus.kind === 'wb' && id === 'wb') return; el.style.cursor = id ? 'pointer' : 'grab';
     if (id !== hovered) { hovered = id; globeObjs.forEach(g => g.tag.classList.toggle('show', hovered === 'g:' + g.G.id || sensorCard.G?.id === g.G.id)); Object.entries(panoTags).forEach(([k, el]) => el.classList.toggle('show', hovered === 'p:' + k)); }
   });
@@ -3824,7 +4085,7 @@ function setupInput() {
     if (pano.active) { if (e.key === 'Escape') closePano(); if (e.key === 'ArrowRight') panoStep(1); if (e.key === 'ArrowLeft') panoStep(-1); return; }
     if (e.key === ' ') { e.preventDefault(); document.activeElement?.blur?.(); if (!e.repeat) { ai.spaceHeld = true; startListening(); } return; }
     keys.add(e.key.toLowerCase());
-    if (e.key === 'Escape') { if ($('#liveModal').classList.contains('show')) closeLiveModal(); else if (ai.listening) stopListening(true); else if (story.active) endStory(); else if (sensorCard.G) closeSensorCard(); else goHome(); }
+    if (e.key === 'Escape') { if (AGX.tour) { stopTour(); return; } if ($('#agentMenu').classList.contains('show')) { closeAgentMenu(); return; } if ($('#liveModal').classList.contains('show')) closeLiveModal(); else if (ai.listening) stopListening(true); else if (story.active) endStory(); else if (sensorCard.G) closeSensorCard(); else goHome(); }
     if (e.key === 'h' || e.key === 'H') goHome();
     if (/^[1-9]$/.test(e.key)) focusSite(SITES[+e.key - 1].id);
     if ((e.key === 'p' || e.key === 'P') && focus.id === 'oulanka') togglePlay();
@@ -3899,7 +4160,7 @@ function idleWake() {
 }
 function idleAllowed() {
   if (!entered || pano.active || renderer.xr.isPresenting || story.active || playback.playing || seated >= 0) return false;
-  if (ORB.state !== 'idle' || mp.micOn || WB.drawing) return false;
+  if (ORB.state !== 'idle' || mp.micOn || WB.drawing || AGX.tour || AGX.speech) return false;
   if (SCREENS.some(S => S.playing || !S.muted)) return false;          // someone is watching a video
   if (['wb', 'news', 'map', 'screen'].includes(focus.kind)) return false; // reading a board
   if (document.querySelector('#sitePanel.show, #aiPanel.show, #sensorCard.show, #mapCard.show, #liveModal.show, .pop.show, #wbBar.show')) return false;
@@ -3932,7 +4193,7 @@ function loop() {
   if (pano.active) { updatePano(dt); renderer.render(pano.scene, pano.cam); return; }
   if (playback.playing) { playback.acc += dt * 4 * playback.speed; if (playback.acc >= 1) { const s = Math.floor(playback.acc); playback.acc -= s; if (playback.day + s >= DAYS - 1) { setDay(DAYS - 1); stopPlay(); } else setDay(playback.day + s); } }
   particleMats.forEach(m => m.uniforms.uTime.value = t); snowMats.forEach(m => m.uniforms.uTime.value = t); if (dustMat) dustMat.uniforms.uTime.value = t;
-  updateOrb(dt, t); updateScenario(dt); updateMP(dt); updateClouds(dt, t); updatePrecip(dt, t); updateScreens(dt); updateNews(dt); updateMapPins(t); updateNightSky(t); updateIdle(dt); updateAgents(dt, t);
+  updateOrb(dt, t); updateScenario(dt); updateMP(dt); updateClouds(dt, t); updatePrecip(dt, t); updateScreens(dt); updateNews(dt); updateMapPins(t); updateNightSky(t); updateIdle(dt); updateAgents(dt, t); hostCheck(dt);
   const airT = D.airT[playback.day];
   globeObjs.forEach(o => {
     const p = .5 + .5 * Math.sin(t * 2 + o.phase);
@@ -3969,12 +4230,12 @@ async function boot() {
   await progress(.75, 'Placing sensors and layers');
   buildHeroLayers(tableOf('oulanka')); buildScenarioObjects(); buildScreens(); buildOrb(); makeDust(); buildLounges(); buildAgents(); buildStars(); buildNightSky(); buildLamps(); buildNews(); buildMapBoard(); buildFloorLogo(); buildClouds(); buildPrecip();
   await progress(.88, 'Preparing interface');
-  buildUI(); aiInit(); wbInput(); setupInput(); panoInput(); setupVR();
+  buildUI(); aiInit(); wbInput(); setupInput(); panoInput(); setupVR(); setupAgentUI();
   state.night = ls.get('hub.night') === '1'; applySeason('summer', true); applyLayers(); setDay(playback.day);
   renderer.setAnimationLoop(loop);
   renderer.compile(scene, camera);
   await progress(1, 'Ready');
-  window.__hub = { hubContext, sendAI, IDLE, AGENTS, THREE, scene, camera, controls, focusSite, goHome, focusAI, focusLive, openPano, closePano, openGlobe, startStory, storyStep, applySeason, setDay, state, renderer,
+  window.__hub = { hubContext, sendAI, IDLE, AGENTS, tables, AGX, agentCommand, openAgentMenu, AG_ACTIONS, greetVisitor, THREE, scene, camera, controls, focusSite, goHome, focusAI, focusLive, openPano, closePano, openGlobe, startStory, storyStep, applySeason, setDay, state, renderer,
     summonOrb, dismissOrb, D, cloudSets, precipSets, setOrbState, updateOrb, deliver, caption, applyFlood, applyIce, setIceDay, clearScenario, music, ORB, scen, enter, simulatePeer, sitAt, focusLounge, toggleNight, mp, getAurora: () => aurora, focusLive, focusScreen, focusMap, focusNews, focusWhiteboard, openMapCard, wbApply, SCREENS, WB, BOARDS };
   $('#loader').classList.add('ready');
   const nm = $('#ldName'); nm.value = mp.name; setTimeout(() => { if (!entered) nm.focus(); }, 400);
@@ -3988,6 +4249,7 @@ let entered = false;
 function leaveHub() {
   if (!entered) return;
   try { renderer.xr.getSession()?.end(); } catch { }
+  stopTour(); agentHush(); closeAgentMenu(); AGENTS.forEach(A => { A.task = false; release(A, 2); });
   stopSpeaking(); if (ORB.mode === 'companion') dismissOrb();
   closeAllPanels(); closeMapCard(); standUp(); document.querySelectorAll('.pop').forEach(p => p.classList.remove('show'));
   mpLeave(); music.on = false; music.apply(.6); $('#btnMusic').classList.add('muted');
@@ -4007,7 +4269,8 @@ function enter(sound, auto = false) {
   screensArmed = true;
   $('#loader').classList.add('hide'); setTimeout(() => $('#loader').classList.add('gone'), 1000);
   camera.lookAt(HOME_TGT);
-  flyTo(HOME_POS, HOME_TGT, 3600, () => { setTimeout(() => $('#hint').style.opacity = 0, 6000); screensArmed = true; perf.armed = !/[?&]hq\b/.test(location.search); });
+  AGX.quiet = !sound; AGX.greeted.clear(); AGX.introduced.clear();
+  flyTo(HOME_POS, HOME_TGT, 3600, () => { setTimeout(() => $('#hint').style.opacity = 0, 6000); screensArmed = true; perf.armed = !/[?&]hq\b/.test(location.search); setTimeout(greetVisitor, 1200); });
 }
 boot();
 

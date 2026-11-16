@@ -25,11 +25,12 @@ The **Oulankajoki** supersite at Oulanka Research Station, Kuusamo, is the large
 - **Media wall:** three large video screens that play when you walk up to them, framed by a supersite map of Finland with pulsing points and a slideshow of the latest news from digitalwaters.fi.
 - **AI companion:** a floating orb you can talk to by voice or text. It knows the hall, including the tables, sensors, screens, boards and where you are standing, and answers aloud.
 - **Meet together:** every visitor enters with their name and appears to the others as a glowing circle avatar in a colour chosen by the system. The circle shows a live voice waveform while someone talks, with spatial voice once a visitor turns on their microphone.
-- **Resident agents:** Emma, Suzan and Sofia live in the hall. They wander around, visit the tables, sit in the lounges and have quiet chats with each other.
+- **Resident agents:** Emma, Suzan and Sofia live in the hall. Emma greets each visitor and gives guided tours, and each agent hosts three supersite tables. Tap an agent, or ask the orb ("show me the spring flood"), and she walks there and shows it: floods, river ice, winter, the northern lights, a 360° photo, the video wall or the map.
 - **Lounges and whiteboards:** four seating corners with DIWA brochures, each with a shared whiteboard for drawing, writing and erasing together.
 - **Living sky:** optional clouds drift over the tables, with rain or snow falling at a wind-blown angle, all following the weather of the selected day.
 - **Day and night:** switch between daylight and a night mode with northern lights and twinkling stars over the forest and warm lamps inside, while the tables stay clearly lit.
 - **Showcase mode:** when nobody touches the controls for 10 seconds, the view returns to the overview and circles slowly around the hall.
+- **AR booklet:** a printed booklet whose table images come to life on phones through the AR viewer at /ar.
 - **VR:** works with WebXR headsets such as Meta Quest 3 through the headset's web browser.
 
 ![360° view of the Oulankajoki rapids](docs/preview-360.jpg)
@@ -45,10 +46,12 @@ The **Oulankajoki** supersite at Oulanka Research Station, Kuusamo, is the large
 | Walk | W A S D |
 | Back to the overview | H |
 | Talk to the assistant | Hold Space, or tap the orb |
+| Guided tour | Tap Emma, Suzan or Sofia, or ask the orb "give me a tour" |
 | See who is here | People button; *Unmute* to talk, *Copy invite link* to invite others |
 | Sit in a lounge | Sofa icon in the dock, then click a seat |
 | Whiteboard | Pen icon in the dock, then drag on the board |
 | Day / night | Moon / sun button |
+| Leave | Exit button at the top right: leaves the room and returns to the start screen |
 | VR | *Enter VR* in the headset browser, then point and pull the trigger to teleport |
 
 Chrome or Edge on a laptop or desktop gives the best experience.
