@@ -31,7 +31,7 @@ The **Oulankajoki** supersite at Oulanka Research Station, Kuusamo, is the large
 - **Day and night:** switch between daylight and a night mode with northern lights and twinkling stars over the forest and warm lamps inside, while the tables stay clearly lit.
 - **Showcase mode:** when nobody touches the controls for 10 seconds, the view returns to the overview and circles slowly around the hall.
 - **AR booklet:** a printed booklet whose table images come to life on phones through the AR viewer at /ar.
-- **VR:** works with WebXR headsets such as Meta Quest 3 through the headset's web browser.
+- **VR edition:** a dedicated version for Meta Quest 3 and other WebXR headsets ([open in the headset](https://siamakab.github.io/diwa-spatial-hub/vr.html)), with laser pointers, thumbstick walking and snap turning, teleporting, a menu on your hand, 3D info cards and 360° photos you can step inside.
 
 ![360° view of the Oulankajoki rapids](docs/preview-360.jpg)
 
@@ -52,7 +52,7 @@ The **Oulankajoki** supersite at Oulanka Research Station, Kuusamo, is the large
 | Whiteboard | Pen icon in the dock, then drag on the board |
 | Day / night | Moon / sun button |
 | Leave | Exit button at the top right: leaves the room and returns to the start screen |
-| VR | *Enter VR* in the headset browser, then point and pull the trigger to teleport |
+| VR (Meta Quest 3) | Open the VR edition in the Quest Browser and press *Enter in VR*. Point and pull the trigger to select or teleport, walk with the left stick, turn with the right, and use the menu on your left hand (X hides it) |
 
 Chrome or Edge on a laptop or desktop gives the best experience.
 

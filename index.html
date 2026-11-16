@@ -4108,11 +4108,13 @@ function walk(dt) {
    ===================================================================== */
 let xrBase = null;
 function setupVR() {
+  if (typeof vrSetup === 'function') return vrSetup();      // the VR edition (vr.html) has its own controls
   const b = $('#btnVR'); b.style.display = '';
   let ok = false;
   navigator.xr?.isSessionSupported('immersive-vr').then(v => { ok = v; b.classList.toggle('ready', v); }).catch(() => { });
   b.addEventListener('click', async () => {
     if (!ok) { toast('VR opens in a headset browser — on Meta Quest 3, open this page in the Quest Browser and press VR.', 4200); return; }
+    location.href = 'vr.html' + location.search; return;    // headsets get the full VR edition
     if (renderer.xr.isPresenting) { renderer.xr.getSession()?.end(); return; }
     try { const sess = await navigator.xr.requestSession('immersive-vr', { optionalFeatures: ['local-floor', 'bounded-floor'] }); renderer.xr.setReferenceSpaceType('local-floor'); await renderer.xr.setSession(sess); }
     catch (e) { toast('Couldn’t start VR: ' + e.message); }
@@ -4190,6 +4192,7 @@ function loop() {
   const rawDt = clock.getDelta(), dt = Math.min(rawDt, .05), t = clock.elapsedTime, now = performance.now();
   adaptQuality(rawDt);
   updateTweens(now);
+  if (typeof vrUpdate === 'function') vrUpdate(dt, t);       // VR edition only
   if (pano.active) { updatePano(dt); renderer.render(pano.scene, pano.cam); return; }
   if (playback.playing) { playback.acc += dt * 4 * playback.speed; if (playback.acc >= 1) { const s = Math.floor(playback.acc); playback.acc -= s; if (playback.day + s >= DAYS - 1) { setDay(DAYS - 1); stopPlay(); } else setDay(playback.day + s); } }
   particleMats.forEach(m => m.uniforms.uTime.value = t); snowMats.forEach(m => m.uniforms.uTime.value = t); if (dustMat) dustMat.uniforms.uTime.value = t;
