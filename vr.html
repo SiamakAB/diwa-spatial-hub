@@ -658,6 +658,9 @@ body.hud #hint{color:rgba(160,215,255,.6)}
 .help-credits p{margin:0 0 6px;font-size:12px;line-height:1.45;color:var(--ink-2)}
 .help-credits b{color:var(--ink)}
 .help-credits a{color:var(--accent-2,#7fe3ff);text-decoration:none}.help-credits a:hover{text-decoration:underline}
+.wb-shapes{display:flex;gap:2px}
+.wb-tool.sh{padding:6px;min-width:0}
+.wb-tool.sh svg{width:18px;height:18px}
 
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
@@ -831,6 +834,7 @@ body.hud #hint{color:rgba(160,215,255,.6)}
   <button class="wb-tool" data-tool="pen" id="wbPen"></button>
   <button class="wb-tool" data-tool="erase" id="wbErase"></button>
   <button class="wb-tool" data-tool="text" id="wbTextBtn"></button>
+  <div class="ab-sep"></div><div class="wb-shapes"></div><div class="ab-sep"></div>
   <input id="wbText" maxlength="80" placeholder="Text to place…" autocomplete="off">
   <div class="ab-sep"></div>
   <button class="wb-tool danger" id="wbClear"></button>
@@ -2607,8 +2611,8 @@ function buildAgents() {
   AGENT_DEFS.forEach((d, i) => {
     const av = makeAvatar(d.color, d.name);
     av.tagEl.insertAdjacentHTML('beforeend', '<em class="ag-pill">agent</em>');
-    av.disc.userData.agent = i; pickables.push(av.disc);
-    av.tagEl.style.pointerEvents = 'auto'; av.tagEl.style.cursor = 'pointer'; av.tagEl.addEventListener('click', e => { e.stopPropagation(); openAgentMenu(i); });
+    if (!d.host) { av.disc.userData.agent = i; pickables.push(av.disc); }
+    if (!d.host) { av.tagEl.style.pointerEvents = 'auto'; av.tagEl.style.cursor = 'pointer'; av.tagEl.addEventListener('click', e => { e.stopPropagation(); openAgentMenu(i); }); }
     const A = { ...d, i, av, pos: freeFloorPoint(), goal: null, seat: -1, state: 'idle', timer: rnd(1, 4), partner: null, talk: 0, turn: 0, label: 'arriving' };
     if (d.host) { const neck = new THREE.Mesh(new THREE.TorusGeometry(.068, .0075, 8, 48), new THREE.MeshBasicMaterial({ color: new THREE.Color(1.6, 1.6, 1.6), toneMapped: false })); neck.rotation.x = Math.PI / 2; neck.position.y = -.215; av.bust.add(neck); }
     av.g.position.copy(A.pos); AGENTS.push(A);
@@ -2845,7 +2849,7 @@ async function hostGreet(A, id) {
 /* ---------- tap an agent: a small menu of what she can show ---------- */
 let agentMenuFor = -1;
 function openAgentMenu(i) {
-  const A = AGENTS[i]; if (!A || !state.layers.agents) return; agentMenuFor = i;
+  const A = AGENTS[i]; if (!A || A.host || !state.layers.agents) return; agentMenuFor = i;
   $('#amDot').style.background = A.color; $('#amName').textContent = A.name; $('#amRole').textContent = AGENT_ROLE[i];
   $('#amGrid').innerHTML = Object.entries(AG_ACTIONS).map(([k, a]) => `<button class="am-act${k === 'tour' ? ' main' : ''}" data-k="${k}">${typeof a.label === 'function' ? a.label() : a.label}</button>`).join('');
   $('#amSites').innerHTML = '<span>Her tables</span>' + Object.entries(HOSTS).filter(([, h]) => h === i).map(([id]) => `<button class="am-site" data-site="${id}">${siteCode(SITE[id])} · ${SITE[id].name.replace(' Research Station', '').replace(' Groundwater Area', '')}</button>`).join('');
@@ -2864,7 +2868,7 @@ function setupAgentUI() {
 const SITE_WORDS = { oulanka: /oulanka/, tana: /\b(tana|teno)\b/, pallas: /pallas/, sodankyla: /sodankyl/, kemijoki: /kemijoki/, osp: /oulu region|\boulu\b/, kokkola: /kokkola/, archipelago: /archipelago/, vantaanjoki: /vantaa/ };
 function agentCommand(text) {
   const t = text.toLowerCase();
-  const named = AGENTS.find(A => new RegExp('\\b' + A.name.toLowerCase() + '\\b').test(t));
+  const named = AGENTS.find(A => !A.host && new RegExp('\\b' + A.name.toLowerCase() + '\\b').test(t));
   const asks = /\b(show|take|bring|guide|tour|go to|let me see|can i see|i want to see|open)\b/.test(t);
   if (named && state.layers.agents && /\b(come|here|over here|join me|follow me)\b/.test(t) || named && t.replace(/[^a-z ]/g, '').trim() === named.name.toLowerCase()) return { A: named, come: true };
   if ((!named && !asks) || !state.layers.agents) return null;
@@ -2881,7 +2885,7 @@ function agentCommand(text) {
   else if (/\bmap\b/.test(t)) key = 'map';
   else site = Object.keys(SITE_WORDS).find(k => SITE_WORDS[k].test(t)) || null;
   if (!key && !site) return named ? { A: named, help: true } : null;
-  const A = named || (site ? AGENTS[HOSTS[site]] : key === 'tour' ? AGENTS[0] : AGENTS.filter(B => !B.task).sort((a, b) => a.pos.distanceTo(camera.position) - b.pos.distanceTo(camera.position))[0] || AGENTS[0]);
+  const A = named || (site ? AGENTS[HOSTS[site]] : key === 'tour' ? AGENTS[0] : AGENTS.filter(B => !B.task && !B.host).sort((a, b) => a.pos.distanceTo(camera.position) - b.pos.distanceTo(camera.position))[0] || AGENTS[0]);
   return { A, key, site };
 }
 function runAgentCommand(c) {
@@ -3093,7 +3097,7 @@ function buildLounge(L, li) {
   shade.position.set(lx, 1.95, lz); g.add(shade); NIGHT.emissive.push([shade.material, .6, 2.2]);
   const lglow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0x4fc3ff, transparent: true, opacity: .45, depthWrite: false, blending: THREE.AdditiveBlending })); lglow.scale.setScalar(2.4); lglow.position.set(lx, 1.95, lz); g.add(lglow); NIGHT.sprites.push([lglow.material, .35, .9]);
   buildWhiteboard(L.clone().add(new THREE.Vector3(Math.cos(back) * 4.7, 0, Math.sin(back) * 4.7)), L);
-  [.42, .98].forEach(o => { const sa = back - span / 2 - o, shelf = makeBookshelf(); shelf.position.set(Math.cos(sa) * 3.35, 0, Math.sin(sa) * 3.35); g.add(shelf); shelf.lookAt(L.x, 0, L.z); });
+  [-(span / 2 + .42), span / 2 + .95].forEach(o => { const sa = back + o, shelf = makeBookshelf(); shelf.position.set(Math.cos(sa) * 3.35, 0, Math.sin(sa) * 3.35); g.add(shelf); shelf.lookAt(L.x, 0, L.z); });
   labelAt(g, 2.9, `<div class="ic">${svg('sofa')}</div><div>Lounge ${li + 1}<small>Sit and talk together</small></div>`, '', () => focusLounge(li));
 }
 function buildLounges() { LOUNGES.forEach(buildLounge); }
@@ -3166,9 +3170,23 @@ function wbRepaint(B, c = B.lc.g) {
 }
 function wbDraw(o, B, c = B.lc.g) {
   if (o.t === 's') { c.strokeStyle = o.c; c.lineWidth = o.w; c.lineCap = c.lineJoin = 'round'; c.beginPath(); c.moveTo(o.p[0] * WB.cw, o.p[1] * WB.ch); c.lineTo(o.p[2] * WB.cw, o.p[3] * WB.ch); c.stroke(); }
+  else if (o.t === 'g') wbShape(c, o);
   else if (o.t === 'x') { c.fillStyle = o.c; c.font = `600 ${o.s}px ${DS.font}`; c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillText(o.txt, o.x * WB.cw, o.y * WB.ch); }
   if (B.lc) B.lc.tex.needsUpdate = true;
 }
+// flowchart shapes: rectangle, rounded box, ellipse, decision diamond, line and arrow (drag from corner to corner)
+function wbShape(c, o) {
+  const [a, b, x2, y2] = o.a, x0 = Math.min(a, x2) * WB.cw, y0 = Math.min(b, y2) * WB.ch, w = Math.abs(x2 - a) * WB.cw, h = Math.abs(y2 - b) * WB.ch;
+  c.strokeStyle = o.c; c.fillStyle = o.c; c.lineWidth = 6; c.lineCap = c.lineJoin = 'round'; c.setLineDash(o.k === 'dash' ? [18, 14] : []); c.beginPath();
+  if (o.k === 'rect') c.rect(x0, y0, w, h);
+  else if (o.k === 'round') c.roundRect(x0, y0, w, h, Math.min(28, w / 4, h / 4));
+  else if (o.k === 'ellipse') c.ellipse(x0 + w / 2, y0 + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
+  else if (o.k === 'diamond') { c.moveTo(x0 + w / 2, y0); c.lineTo(x0 + w, y0 + h / 2); c.lineTo(x0 + w / 2, y0 + h); c.lineTo(x0, y0 + h / 2); c.closePath(); }
+  else { const X1 = a * WB.cw, Y1 = b * WB.ch, X2 = x2 * WB.cw, Y2 = y2 * WB.ch; c.moveTo(X1, Y1); c.lineTo(X2, Y2); c.stroke(); c.setLineDash([]);
+    if (o.k === 'arrow' || o.k === 'dash') { const an = Math.atan2(Y2 - Y1, X2 - X1), L = 26; c.beginPath(); c.moveTo(X2, Y2); c.lineTo(X2 - L * Math.cos(an - .45), Y2 - L * Math.sin(an - .45)); c.lineTo(X2 - L * Math.cos(an + .45), Y2 - L * Math.sin(an + .45)); c.closePath(); c.fill(); } return; }
+  c.stroke(); c.setLineDash([]);
+}
+const WB_SHAPES = { rect: '<rect x="4" y="6" width="16" height="12"/>', round: '<rect x="4" y="6" width="16" height="12" rx="4"/>', ellipse: '<ellipse cx="12" cy="12" rx="8.5" ry="6"/>', diamond: '<path d="M12 4l8 8-8 8-8-8z"/>', line: '<path d="M5 19L19 5"/>', arrow: '<path d="M5 19L18 6M18 6h-7M18 6v7"/>', dash: '<path d="M5 19l3-3M11 13l2-2M16 8l2-2M18 6h-6M18 6v6"/>' };
 function wbApply(o, fromPeer) {
   if (o.t === 'state') { (o.boards || []).forEach((ops, i) => { const B = BOARDS[i]; if (B && Array.isArray(ops) && ops.length > B.ops.length) { B.ops = ops.slice(0, 20000); wbRepaint(B); } }); return; }
   const B = BOARDS[o.b ?? 0]; if (!B) return;
@@ -3188,21 +3206,27 @@ function wbInput() {
     const uv = wbUV(e); if (!uv) return;
     e.stopImmediatePropagation(); e.preventDefault();
     const b = WB.active.i;
+    if (WB_SHAPES[WB.tool]) { WB.shape = { a: uv, b: uv }; return; }
     if (WB.tool === 'text') { const txt = $('#wbText').value.trim(); if (!txt) { toast('Type your text in the toolbar first', 2000); $('#wbText').focus(); return; } wbApply({ t: 'x', b, c: WB.color, s: 46, txt: txt.slice(0, 80), x: uv[0], y: uv[1] }); $('#wbText').value = ''; return; }
     WB.drawing = true; WB.last = uv;
   }, true);
   addEventListener('pointermove', e => {
+    if (WB.shape) { const uv = wbUV(e); if (!uv) return; WB.shape.b = uv; const B = WB.active; wbRepaint(B); wbDraw({ t: 'g', k: WB.tool, c: WB.color, a: [...WB.shape.a, ...uv] }, B); return; }
     if (!WB.drawing) return; const uv = wbUV(e); if (!uv) return;
     const er = WB.tool === 'erase';
     wbApply({ t: 's', b: WB.active.i, c: er ? '#ffffff' : WB.color, w: er ? 46 : 6, p: [+WB.last[0].toFixed(4), +WB.last[1].toFixed(4), +uv[0].toFixed(4), +uv[1].toFixed(4)] });
     WB.last = uv;
   }, true);
-  addEventListener('pointerup', () => { WB.drawing = false; }, true);
+  addEventListener('pointerup', () => {
+    if (WB.shape) { const S = WB.shape; WB.shape = null; if (Math.hypot(S.b[0] - S.a[0], S.b[1] - S.a[1]) > .01) wbApply({ t: 'g', b: WB.active.i, k: WB.tool, c: WB.color, a: [...S.a, ...S.b].map(v => +v.toFixed(4)) }); else wbRepaint(WB.active); }
+    WB.drawing = false; }, true);
   const bar = $('#wbBar');
+  bar.querySelector('.wb-shapes').innerHTML = Object.entries(WB_SHAPES).map(([k, d]) => `<button class="wb-tool sh" data-tool="${k}" title="${{ rect: 'Box', round: 'Rounded box (process)', ellipse: 'Ellipse (start / end)', diamond: 'Diamond (decision)', line: 'Line', arrow: 'Arrow', dash: 'Dashed arrow' }[k]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg></button>`).join('');
   bar.querySelector('.wb-colors').innerHTML = ['#1d1d1f', '#1770b8', '#4ca9ff', '#ff3b30', '#34c759', '#ff9f0a'].map(c => `<button data-c="${c}" style="background:${c}" class="${c === WB.color ? 'on' : ''}" aria-label="Pen colour"></button>`).join('');
   const setTool = t => { WB.tool = t; bar.querySelectorAll('[data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === t)); renderer.domElement.style.cursor = t === 'erase' ? 'cell' : t === 'text' ? 'text' : 'crosshair'; };
+  const pickTool = e => { const b = e.target.closest('[data-tool]'); if (b) setTool(b.dataset.tool); };
   bar.querySelectorAll('.wb-colors button').forEach(b => b.addEventListener('click', () => { WB.color = b.dataset.c; bar.querySelectorAll('.wb-colors button').forEach(x => x.classList.toggle('on', x === b)); if (WB.tool === 'erase') setTool('pen'); }));
-  bar.querySelectorAll('[data-tool]').forEach(b => b.addEventListener('click', () => setTool(b.dataset.tool)));
+  bar.addEventListener('click', pickTool);
   $('#wbPen').innerHTML = svg('pen') + 'Pen'; $('#wbErase').innerHTML = svg('eraser') + 'Eraser'; $('#wbTextBtn').innerHTML = svg('textT') + 'Text';
   $('#wbClear').innerHTML = svg('trash') + 'Clear all'; $('#wbDone').innerHTML = svg('close');
   $('#wbClear').addEventListener('click', () => { if (WB.active && confirmClear()) wbApply({ t: 'clr', b: WB.active.i }); });
@@ -3355,9 +3379,14 @@ function buildWallSign() {
     c.shadowColor = 'rgba(60,180,255,.9)'; c.shadowBlur = 40; c.fillStyle = '#ffffff'; c.font = `700 250px ${DS.font}`; c.fillText('DIWA Spatial Hub', 1024, 440, 1980);
     c.shadowBlur = 0; c.strokeStyle = 'rgba(140,220,255,.8)'; c.lineWidth = 4; c.beginPath(); c.moveTo(260, 620); c.lineTo(1788, 620); c.stroke(); tex.needsUpdate = true; };
   draw(null); loadImg(ASSET.logoWhite).then(draw);
-  const phi = 2.485, x = HALL.rx * Math.cos(phi) * .975, z = HALL.rz * Math.sin(phi) * .975;
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(15.5, 5.81), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, toneMapped: false }));
-  m.position.set(x, 8.3, z); m.lookAt(0, 8.3, z * .35); m.renderOrder = 3; scene.add(m);
+  // a curved strip that follows the elliptical glass wall, just inside it
+  const W = 15.5, H = 5.81, Y = 8.3, k = .982, phiC = 2.485, P = phi => new THREE.Vector3(HALL.rx * k * Math.cos(phi), 0, HALL.rz * k * Math.sin(phi));
+  const half = (dir) => { let ph = phiC, len = 0; while (len < W / 2) { const n = ph + dir * .002; len += P(n).distanceTo(P(ph)); ph = n; } return ph; };
+  const p0 = half(-1), p1 = half(1), N = 60, pos = [], uv = [], idx = [];
+  for (let i = 0; i <= N; i++) { const ph = lerp(p0, p1, i / N), v = P(ph); pos.push(v.x, Y - H / 2, v.z, v.x, Y + H / 2, v.z); uv.push(i / N, 0, i / N, 1); if (i < N) { const q = i * 2; idx.push(q, q + 2, q + 1, q + 1, q + 2, q + 3); } }
+  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); geo.setIndex(idx);
+  const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, toneMapped: false, side: THREE.DoubleSide }));
+  m.renderOrder = 3; scene.add(m);
 }
 function buildFloorLogo() {
   const mk = src => { const t = new THREE.TextureLoader().load(src); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; };
@@ -4958,7 +4987,7 @@ function knDraw(c, w, h) {
   const bg = c.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#0b2a58'); bg.addColorStop(1, '#061a3a'); c.fillStyle = bg; c.fillRect(0, 0, w, h);
   c.strokeStyle = 'rgba(120,200,255,.10)'; c.lineWidth = 1; for (let x = 0; x <= w; x += 30) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, h); c.stroke(); } for (let y = 0; y <= h; y += 30) { c.beginPath(); c.moveTo(0, y); c.lineTo(w, y); c.stroke(); }
   c.strokeStyle = 'rgba(140,215,255,.22)'; for (let x = 0; x <= w; x += 150) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, h); c.stroke(); } for (let y = 0; y <= h; y += 150) { c.beginPath(); c.moveTo(0, y); c.lineTo(w, y); c.stroke(); }
-  c.strokeStyle = 'rgba(150,220,255,.7)'; c.lineWidth = 3; c.strokeRect(22, 22, w - 44, h - 44); c.lineWidth = 1; c.strokeRect(32, 32, w - 64, h - 64);
+  c.strokeStyle = 'rgba(150,220,255,.7)'; c.lineWidth = 3; rrect(c, 22, 22, w - 44, h - 44, 22); c.stroke(); c.lineWidth = 1; rrect(c, 32, 32, w - 64, h - 64, 16); c.stroke();
   if (knLogo === null) { knLogo = false; loadImg(ASSET.logoWhite).then(im => { knLogo = im; knPaint(); }); }
   if (knLogo) c.drawImage(knLogo, 64, 58, 70 * knLogo.width / knLogo.height, 70);
   c.fillStyle = '#e6f6ff'; c.font = `700 52px ${F}`; c.textAlign = 'right'; c.fillText('DIWA KNOWLEDGE', w - 64, 110);
@@ -5039,7 +5068,7 @@ function buildKnowledgeSeats(panel) {
     const ch = new THREE.Group(); ch.position.copy(p); ch.lookAt(look.x, 0, look.z); scene.add(ch);
     const b = new THREE.Mesh(cg.body, fabric); b.position.y = .1; b.castShadow = true; const cu = new THREE.Mesh(cg.cush, accent[s > 0 ? 0 : 2]); cu.position.y = .1; ch.add(b, cu); seat(p, 1.15);
   });
-  [4.4, 6.1].forEach(o => { const shelf = makeBookshelf(); shelf.position.copy(centre).addScaledVector(side, o).addScaledVector(fwd, .4); shelf.lookAt(look.x, 0, look.z); scene.add(shelf); });
+  [4.4, -4.4].forEach(o => { const shelf = makeBookshelf(); shelf.position.copy(centre).addScaledVector(side, o).addScaledVector(fwd, .4); shelf.lookAt(look.x, 0, look.z); scene.add(shelf); });
   // rug with a running light edge
   const rug = new THREE.Mesh(new THREE.CircleGeometry(3.8, 96), new THREE.MeshStandardMaterial({ color: 0x08111e, roughness: .5, metalness: .3 })); rug.rotation.x = -Math.PI / 2; rug.position.copy(centre).addScaledVector(fwd, -.9).setY(.02); scene.add(rug);
   const edge = new THREE.Mesh(new THREE.RingGeometry(3.72, 3.8, 128), hudMat(HUD_COMET_FS, { uSpeed: { value: .4 }, uBase: { value: .35 } }, { blending: THREE.AdditiveBlending })); edge.rotation.x = -Math.PI / 2; edge.position.copy(rug.position).setY(.025); scene.add(edge);
@@ -5072,7 +5101,7 @@ async function boot() {
   renderer.setAnimationLoop(loop);
   renderer.compile(scene, camera);
   await progress(1, 'Ready');
-  window.__hub = { KN, focusKnowledge, knLoadFiles, kAsk, knSearch, sitAt, SEATS, hubContext, sendAI, IDLE, AGENTS, tables, AGX, agentCommand, openAgentMenu, AG_ACTIONS, greetVisitor, THREE, scene, camera, controls, focusSite, goHome, focusAI, focusLive, openPano, closePano, openGlobe, startStory, storyStep, applySeason, setDay, state, renderer,
+  window.__hub = { BOARDS, wbApply, KN, focusKnowledge, knLoadFiles, kAsk, knSearch, sitAt, SEATS, hubContext, sendAI, IDLE, AGENTS, tables, AGX, agentCommand, openAgentMenu, AG_ACTIONS, greetVisitor, THREE, scene, camera, controls, focusSite, goHome, focusAI, focusLive, openPano, closePano, openGlobe, startStory, storyStep, applySeason, setDay, state, renderer,
     summonOrb, dismissOrb, D, cloudSets, precipSets, setOrbState, updateOrb, deliver, caption, applyFlood, applyIce, setIceDay, clearScenario, music, ORB, scen, enter, simulatePeer, sitAt, focusLounge, toggleNight, mp, getAurora: () => aurora, focusLive, focusScreen, focusMap, focusNews, focusWhiteboard, openMapCard, wbApply, SCREENS, WB, BOARDS };
   $('#loader').classList.add('ready');
   const nm = $('#ldName'); nm.value = mp.name; setTimeout(() => { if (!entered) nm.focus(); }, 400);
