@@ -723,8 +723,8 @@ body.hud #hint{color:rgba(160,215,255,.6)}
     <p class="pp-text" id="mpState">Connecting you to the room…</p>
     <button class="btn" id="mpJoin" style="width:100%;margin-top:6px">Reconnect</button>
   </div>
+  <div id="peopleList"></div>
   <div id="mpOn" style="display:none">
-    <div id="peopleList"></div>
     <div class="btn-row"><button class="btn ghost" id="mpMute"></button><button class="btn secondary" id="mpInvite"></button></div>
   </div>
   <div class="small-note" style="padding:4px 8px 2px">Peer-to-peer: voice goes directly between participants. Others join with the same link (add <b>?room=name</b> for a private room).</div>
@@ -2388,7 +2388,15 @@ function makeAvatar(color, name) {
   const head = new THREE.Mesh(AG.head, hm); const wire = new THREE.LineSegments(AG.wire, new THREE.LineBasicMaterial({ color: hc, transparent: true, opacity: .28, toneMapped: false, depthWrite: false, blending: THREE.AdditiveBlending }));
   const visor = new THREE.Mesh(AG.visor, new THREE.MeshBasicMaterial({ color: new THREE.Color(1.4, 1.6, 1.8), transparent: true, opacity: .55, side: THREE.DoubleSide, toneMapped: false, depthWrite: false, blending: THREE.AdditiveBlending }));
   const hands = [-1, 1].map(sx => { const h = new THREE.Mesh(AG.hand, hm); h.position.set(sx * .19, -.27, -.09); h.rotation.z = sx * .35; bust.add(h); return h; });
-  bust.add(head, wire, visor); bust.traverse(o => o.renderOrder = 4);
+  const neck = new THREE.Group(); neck.position.y = -.16; bust.add(neck); bust.rotation.order = 'YXZ';
+  [head, wire, visor].forEach(o => { o.position.y += .16; neck.add(o); }); bust.traverse(o => o.renderOrder = 4);
+  // a book the avatar can hold: closed (carrying) or open with a turning page (reading, showing)
+  const bk = new THREE.Group(); bk.position.set(0, -.3, -.19); bk.visible = false; bust.add(bk);
+  const cover = new THREE.MeshStandardMaterial({ color: 0x23518a, roughness: .5, emissive: 0x23518a, emissiveIntensity: .25 }), pageM = new THREE.MeshStandardMaterial({ color: 0xeef5fb, roughness: .8, emissive: 0xffffff, emissiveIntensity: .15, side: THREE.DoubleSide });
+  const closed = new THREE.Mesh(new THREE.BoxGeometry(.13, .19, .025), [cover, cover, cover, cover, cover, cover]); closed.rotation.x = -.25; bk.add(closed);
+  const open = new THREE.Group(); open.rotation.x = -1.05; bk.add(open);
+  [-1, 1].forEach(sx => { const h = new THREE.Mesh(new THREE.BoxGeometry(.12, .17, .012), [pageM, pageM, pageM, pageM, pageM, cover]); h.position.set(sx * .061, 0, 0); h.rotation.y = sx * -.18; open.add(h); });
+  const flip = new THREE.Group(); open.add(flip); const leaf = new THREE.Mesh(new THREE.PlaneGeometry(.115, .165), pageM); leaf.position.x = .058; flip.add(leaf); flip.position.z = .008;
   // face: eyes, brows and mouth on the front of the head (the bust looks along −z)
   const fm = new THREE.MeshBasicMaterial({ color: new THREE.Color(color).lerp(new THREE.Color(0xffffff), .65).multiplyScalar(1.6), transparent: true, opacity: .95, toneMapped: false, depthWrite: false, blending: THREE.AdditiveBlending });
   const dot = new THREE.SphereGeometry(1, 14, 10), face2 = new THREE.Group(); bust.add(face2);
@@ -2402,9 +2410,10 @@ function makeAvatar(color, name) {
   const tagEl = el.firstElementChild; tagEl.querySelector('span').textContent = name || 'Guest';
   const tag = new CSS2DObject(el); tag.position.y = .34; g.add(tag);
   g.scale.setScalar(1.3); scene.add(g);
-  return { g, face, disc, rimMat, bars, barMat, ripples, halo, floor, tagEl, tag, color, phase: Math.random() * 10, level: 0, bust, hm, wire, hands, eyes, brows, mouth, fm, talk: 0, blink: 2 + Math.random() * 3, mOpen: 0 };
+  return { g, face, disc, rimMat, bars, barMat, ripples, halo, floor, tagEl, tag, color, phase: Math.random() * 10, level: 0, bust, hm, wire, hands, eyes, brows, mouth, fm, talk: 0, blink: 2 + Math.random() * 3, mOpen: 0, neck, bk, closed, open, flip, cover, holdK: 0, readK: 0, hold: 0, read: false };
 }
 const _bo = new THREE.Object3D();
+const _hv = new THREE.Vector3(), smoothK = x => x * x * (3 - 2 * x);
 function animateAvatar(A, level, t) {
   A.face.quaternion.copy(camera.quaternion);                  // the voice ring always faces the viewer
   if (A.bust) {
@@ -2414,9 +2423,14 @@ function animateAvatar(A, level, t) {
     // talking: smoothed so gestures ease in and out
     A.talk += ((level > .04 ? 1 : 0) - A.talk) * (level > .04 ? .08 : .03);
     const T_ = A.talk, ph = A.phase;
+    A.holdK += ((A.hold ? 1 : 0) - A.holdK) * .08; A.readK += ((A.read ? 1 : 0) - A.readK) * .05;
+    A.neck.rotation.x = -.5 * A.readK + Math.sin(t * .7 + ph) * .03 * A.readK;   // reading: the head bends down over the book
+    A.bk.visible = A.holdK > .05; A.closed.visible = A.hold === 1; A.open.visible = A.hold === 2;
+    if (A.hold === 2) { const f = (t * .35 + ph) % 1; A.flip.rotation.y = f < .25 ? -Math.PI * smoothK(f / .25) : 0; }   // turn a page now and then
     A.hands.forEach((h, k) => { const sx = k ? 1 : -1, g1 = Math.sin(t * 2.1 + ph + k * 2.3), g2 = Math.sin(t * 1.3 + ph * 2 + k);
       h.position.set(sx * (.19 + .035 * T_ * (.5 + .5 * g2)), -.27 + Math.sin(t * 1.4 + ph + k * 1.7) * .018 + T_ * (.05 + .035 * g1), -.09 - T_ * (.05 + .02 * g2));
-      h.rotation.set(-T_ * (.5 + .25 * g1), 0, sx * (.35 + T_ * .3 * g2)); });
+      h.rotation.set(-T_ * (.5 + .25 * g1), 0, sx * (.35 + T_ * .3 * g2));
+      if (A.holdK > .01) { h.position.lerp(_hv.set(sx * (A.hold === 2 ? .13 : .075), -.31, -.19), A.holdK); h.rotation.x *= 1 - A.holdK; } });
     // mouth follows the voice with small syllable variation; eyes blink; brows lift a little on emphasis
     const syl = .55 + .45 * Math.abs(Math.sin(t * 11 + ph) * Math.sin(t * 7.3 + ph * 3));
     A.mOpen += (Math.min(1, level * 2.4) * syl - A.mOpen) * .35;
@@ -2570,10 +2584,9 @@ function renderPeople() {
   $('#mpJoin').textContent = mp.joining ? 'Connecting…' : 'Reconnect'; $('#mpJoin').disabled = mp.joining; $('#mpJoin').style.display = mp.joining || !entered ? 'none' : '';
   $('#mpState').textContent = mp.joining || !entered ? 'Connecting you to the room…' : 'Not connected to the shared room. Check the network and try again.';
   $('#mpRoom').textContent = mp.roomId;
-  if (!mp.joined) return;
   const row = (id, name, color, sub) => `<div class="person" data-id="${id}"><i style="background:${color}"></i><div><b></b><span>${sub}</span></div><em>${svg('speaker')}</em></div>`;
-  $('#peopleList').innerHTML = row('me', '', mp.color, mp.micOn ? 'You · mic on' : 'You · muted') + [...mp.peers.values()].map(P => row(P.id, '', P.color, P.voice ? 'Voice connected' : 'Connecting voice…')).join('');
-  if (!hostIn) $('#peopleList').innerHTML += `<div class="person host"><i style="background:#e6f6ff"></i><div><b>Siamak</b></div></div>`;
+  const host = hostIn ? '' : `<div class="person host"><i style="background:#e6f6ff"></i><div><b>Siamak</b></div></div>`;   // Siamak is always listed, as a person
+  $('#peopleList').innerHTML = (mp.joined ? row('me', '', mp.color, mp.micOn ? 'You · mic on' : 'You · muted') : '') + host + (mp.joined ? [...mp.peers.values()].map(P => row(P.id, '', P.color, P.voice ? 'Voice connected' : 'Connecting voice…')).join('') : '');
   $('#peopleList').innerHTML += state.layers.agents ? AGENTS.filter(A => !A.host).map(A => `<div class="person agent" data-id="ag-${A.i}"><i style="background:${A.color}"></i><div><b>${A.name}</b><span>Resident agent</span></div></div>`).join('') : '';
   $('#peopleList').querySelectorAll('.person:not(.agent):not(.host)').forEach(r => { const id = r.dataset.id; r.querySelector('b').textContent = id === 'me' ? mp.name : mp.peers.get(id)?.name || 'Guest'; });
   $('#mpMute').innerHTML = svg('mic') + (mp.micOn ? 'Mute' : 'Unmute'); $('#mpMute').classList.toggle('muted', !mp.micOn);
@@ -2621,7 +2634,41 @@ function buildAgents() {
 }
 function agentGo(A, p, after, label) { A.goal = p.clone(); A.after = after; A.state = 'walk'; A.label = label; }
 function agentFree(A) { A.seat = -1; if (A.partner) { const B = A.partner; A.partner = null; if (B.partner === A) { B.partner = null; B.state = 'idle'; B.timer = rnd(1, 3); } } }
+/* reading: take a DIWA book from a shelf, read it on a seat (or show it to another agent), then put it back in its place */
+function bookDrop(A) { if (!A.book) return; A.book.mesh.visible = true; A.book = null; A.av.hold = 0; A.av.read = false; }
+function shelfFront(sh) { const p = new THREE.Vector3(), d = new THREE.Vector3(); sh.getWorldPosition(p); sh.getWorldDirection(d); d.y = 0; d.normalize(); return { at: p.clone().addScaledVector(d, .95).setY(AG.STAND), look: p }; }
+function faceTo(A, p) { A.av.yaw = Math.atan2(-(p.x - A.pos.x), -(p.z - A.pos.z)); }
+function agentBook(A, show) {
+  const inUse = new Set(AGENTS.filter(B => B.book).map(B => B.book.mesh)), opts = [];
+  SHELVES.forEach(sh => (sh.userData.books || []).forEach(m => { if (m.visible && !inUse.has(m)) opts.push([sh, m]); }));
+  if (!opts.length) return false;
+  const [sh, mesh] = opts[Math.floor(Math.random() * opts.length)], F = shelfFront(sh);
+  agentGo(A, F.at, 'take', 'choosing a book');
+  A.next = () => {                                                              // at the shelf: take the book
+    faceTo(A, F.look); mesh.visible = false; A.book = { mesh, sh }; A.av.cover.color.copy(mesh.material[0].color); A.av.cover.emissive.copy(mesh.material[0].color); A.av.hold = 1;
+    A.state = 'take'; A.timer = 1.2;
+    A.next = () => {
+      const others = AGENTS.filter(B => B !== A && !B.partner && !B.busy && !B.book && B.state !== 'walk' && !B.attending);
+      const putBack = () => { agentFree(A); A.av.hold = 1; A.av.read = false; agentGo(A, F.at, 'putback', 'putting a book back');
+        A.next = () => { faceTo(A, F.look); A.state = 'putback'; A.timer = 1.2; A.next = () => { bookDrop(A); agentNext(A); }; }; };
+      if (show && others.length) {                                              // show the book to another agent and talk about it
+        const B = others[Math.floor(Math.random() * others.length)]; agentFree(B);
+        const m = freeFloorPoint(), off = new THREE.Vector3(.7, 0, 0); A.partner = B; B.partner = A; A.fixT = B.fixT = 10; A.av.hold = 2;
+        agentGo(A, m.clone().add(off), 'chat', `showing ${B.name} a book`); agentGo(B, m.clone().sub(off), 'chat', `looking at a book with ${A.name}`);
+        A.next = putBack;
+      } else {                                                                  // read it on a free seat for ten seconds
+        const taken = new Set(AGENTS.map(B => B.seat).concat([seated])), free = SEATS.map((S, k) => k).filter(k => !taken.has(k));
+        if (!free.length) return putBack();
+        const k = free[Math.floor(Math.random() * free.length)]; A.seat = k; A.fixT = 10;
+        agentGo(A, SEATS[k].pos.clone().setY(AG.STAND), 'read', 'reading a book');
+        A.next = () => { A.seat = -1; putBack(); };
+      }
+    };
+  };
+  return true;
+}
 function agentNext(A) {
+  if (A.book) bookDrop(A); A.next = null;
   agentFree(A);
   const pick = Math.random(), others = AGENTS.filter(B => B !== A && !B.partner && !B.busy && B.state !== 'walk');
   if (pick < .3) {                                                             // look at a table
@@ -2629,7 +2676,9 @@ function agentNext(A) {
     let p = new THREE.Vector3(T.site.pos[0] + Math.cos(a) * (T.site.r + .9), AG.STAND, T.site.pos[1] + Math.sin(a) * (T.site.r + .9));
     if (p.z < -24) p.z = T.site.pos[1] + Math.abs(Math.sin(a)) * (T.site.r + .9);
     agentGo(A, p, 'look', `looking at the ${T.site.name} table`);
-  } else if (pick < .52) {                                                     // sit on a free seat
+  } else if (pick < .4 && agentBook(A, false)) {                              // read a book
+  } else if (pick < .48 && others.length && agentBook(A, true)) {             // show a book to someone
+  } else if (pick < .6) {                                                      // sit on a free seat
     const taken = new Set(AGENTS.map(B => B.seat).concat([seated])), free = SEATS.map((S, k) => k).filter(k => !taken.has(k));
     if (!free.length) return agentNext(A);
     const k = free[Math.floor(Math.random() * free.length)], S = SEATS[k];
@@ -2649,7 +2698,8 @@ function updateAgents(dt, t) {
       _ag.copy(A.goal).sub(A.pos); _ag.y = 0; const d = _ag.length();
       if (d < .08) {
         if (A.busy) { A.state = 'held'; const f = A.arrive; A.arrive = null; f && f(); }
-        else { A.state = A.after; A.timer = rnd(5, 10); if (A.state === 'sit') A.label = 'sitting in a lounge'; }
+        else { A.state = A.after; A.timer = A.fixT ?? (A.next && A.state !== 'chat' ? .01 : rnd(5, 10)); A.fixT = undefined; if (A.state === 'sit') A.label = 'sitting in a lounge';
+          if (A.state === 'read') { A.av.hold = 2; A.av.read = true; const S = SEATS[A.seat]; if (S) faceTo(A, S.look || S.center); } }
       }
       else {
         _ag.multiplyScalar(Math.min(d, (A.busy ? A.speed : AG.SPEED) * dt) / d);
@@ -2662,19 +2712,20 @@ function updateAgents(dt, t) {
       A.pos.y = lerp(A.pos.y, AG.STAND, .1);                                  // on a task: wait where the task left her
     } else {
       A.timer -= dt;
-      if (A.state === 'sit') { if (seated === A.seat) A.timer = 0; const S = SEATS[A.seat]; if (S) A.pos.lerp(_ag.set(S.pos.x, AG.SIT, S.pos.z), .08); }
+      if (A.state === 'sit' || A.state === 'read') { if (seated === A.seat) A.timer = 0; const S = SEATS[A.seat]; if (S) A.pos.lerp(_ag.set(S.pos.x, AG.SIT, S.pos.z), .08); }
       if (A.state === 'chat') {
         const B = A.partner;
         if (!B) A.timer = 0;
         else if (B.state === 'chat') {                                       // take turns, like a real conversation
+          faceTo(A, B.pos);
           if (A.i < B.i) { A.turn -= dt; if (A.turn <= 0) { A.turn = rnd(1.4, 3.2); A.talk = A.talk ? 0 : 1; B.talk = 1 - A.talk; } B.timer = A.timer; }
           level = A.talk ? .25 + .25 * Math.abs(Math.sin(t * 5.3 + A.i) * Math.sin(t * 2.1)) : 0;
         } else A.timer = Math.max(A.timer, 1);
       }
-      if (A.timer <= 0) agentNext(A);
+      if (A.timer <= 0) { if (A.next) { const f = A.next; A.next = null; f(); } else agentNext(A); }
     }
     if (A.speaking) level = tts.an ? Math.min(1, .15 + ttsLevel() * 5) : .28 + .26 * Math.abs(Math.sin(t * 6.1 + A.i) * Math.sin(t * 2.3));
-    if (A._pp) { const dx = A.pos.x - A._pp.x, dz = A.pos.z - A._pp.z; if (dx * dx + dz * dz > 1e-6) A.av.yaw = Math.atan2(-dx, -dz); } A._pp = (A._pp || new THREE.Vector3()).copy(A.pos);
+    if (A._pp && A.state === 'walk') { const dx = A.pos.x - A._pp.x, dz = A.pos.z - A._pp.z; if (dx * dx + dz * dz > 1e-6) A.av.yaw = Math.atan2(-dx, -dz); } A._pp = (A._pp || new THREE.Vector3()).copy(A.pos);
     A.av.g.position.copy(A.pos); A.av.g.position.y += Math.sin(t * 1.1 + A.i * 2) * .015 + (A.state === 'walk' ? Math.abs(Math.sin(t * 6 + A.i)) * .02 : 0);
     animateAvatar(A.av, level, t);
   });
@@ -2715,7 +2766,7 @@ function standPoint(where) {
   return beside(c, T.view().pos, T.site.r + .9, T.site.r * .62);
 }
 function occupy(A) {
-  agentFree(A); if (A.seat >= 0) A.seat = -1;
+  bookDrop(A); A.next = null; agentFree(A); if (A.seat >= 0) A.seat = -1;
   A.busy = true; A.state = 'held'; A.label = 'guiding a visitor';
 }
 function release(A, after = 4) { if (!A.busy) return; A.busy = false; A.state = 'idle'; A.timer = rnd(after, after + 3); A.label = 'walking around'; }
@@ -3105,7 +3156,7 @@ function buildLounge(L, li) {
   shade.position.set(lx, 1.95, lz); g.add(shade); NIGHT.emissive.push([shade.material, .6, 2.2]);
   const lglow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0x4fc3ff, transparent: true, opacity: .45, depthWrite: false, blending: THREE.AdditiveBlending })); lglow.scale.setScalar(2.4); lglow.position.set(lx, 1.95, lz); g.add(lglow); NIGHT.sprites.push([lglow.material, .35, .9]);
   buildWhiteboard(L.clone().add(new THREE.Vector3(Math.cos(back) * 4.7, 0, Math.sin(back) * 4.7)), L);
-  [[-(span / 2 + .42), 3.35], [2.02, 3.3]].forEach(([o, r]) => { const sa = back + o, shelf = makeBookshelf(); shelf.position.set(Math.cos(sa) * r, 0, Math.sin(sa) * r); g.add(shelf); shelf.lookAt(L.x, 0, L.z); });   // one beside the sofa, one between the lamp and the armchair
+  [[-(span / 2 + .42), 3.35], [2.02, 3.3]].forEach(([o, r]) => { const sa = back + o, shelf = makeBookshelf(); shelf.position.set(Math.cos(sa) * r, 0, Math.sin(sa) * r); g.add(shelf); shelf.lookAt(L.x, 0, L.z); SHELVES.push(shelf); });   // one beside the sofa, one between the lamp and the armchair
   labelAt(g, 2.9, `<div class="ic">${svg('sofa')}</div><div>Lounge ${li + 1}<small>Sit and talk together</small></div>`, '', () => focusLounge(li));
 }
 function buildLounges() { LOUNGES.forEach(buildLounge); }
@@ -3122,6 +3173,7 @@ function spineMat(k) {
   const side = new THREE.MeshStandardMaterial({ color: bg, roughness: .55, emissive: bg, emissiveIntensity: .12 });
   return _spine[k] = [side, side, side, side, new THREE.MeshStandardMaterial({ map: tex, roughness: .5, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: .18 }), side];
 }
+const SHELVES = [];
 const KN_BOOKS = ['Digital Waters · DIWA Flagship', 'Rivers of the Boreal North', 'Snow, Soil and Peatlands', 'Sensing Finnish Waters', 'Ice, Floods and a Changing Climate', 'Spatial Computing for Hydrology'];
 function makeBookshelf() {
   const g = new THREE.Group(), W = 1.6, H = 1.0, Dp = .36, r = mulberry32(Math.floor(Math.random() * 1e6));
@@ -3138,7 +3190,8 @@ function makeBookshelf() {
     while (x < end - .03) {
       const bw = .035 + r() * .045, bh = .26 + r() * .13; if (x + bw > end) break;
       const tilt = r() < .07 && x > -W / 2 + .2 ? .22 : 0;
-      const b = box(bw, bh, .21 + r() * .06, x + bw / 2, y + .02 + bh / 2, .02, r() < .8 ? spineMat(Math.floor(r() * SPINE_TITLES.length)) : bm[Math.floor(r() * bm.length)]);   // 80% carry a DIWA title on the spine b.rotation.z = tilt; if (tilt) b.position.x += bh * .1;
+      const titled = r() < .8, b = box(bw, bh, .21 + r() * .06, x + bw / 2, y + .02 + bh / 2, .02, titled ? spineMat(Math.floor(r() * SPINE_TITLES.length)) : bm[Math.floor(r() * bm.length)]);
+      if (titled && !tilt) (g.userData.books ||= []).push(b);   // 80% carry a DIWA title on the spine b.rotation.z = tilt; if (tilt) b.position.x += bh * .1;
       x += bw + .004 + (tilt ? .06 : 0);
     }
     if (si % 2) { const orb = new THREE.Mesh(new THREE.IcosahedronGeometry(.09, 1), new THREE.MeshBasicMaterial({ color: new THREE.Color(.4, 1, 1.8), wireframe: true, toneMapped: false })); orb.position.set(W / 2 - .22, y + .13, .02); g.add(orb); }
@@ -5144,7 +5197,7 @@ async function boot() {
   renderer.setAnimationLoop(loop);
   renderer.compile(scene, camera);
   await progress(1, 'Ready');
-  window.__hub = { agentAttend, BOARDS, wbApply, KN, focusKnowledge, knLoadFiles, kAsk, knSearch, sitAt, SEATS, hubContext, sendAI, IDLE, AGENTS, tables, AGX, agentCommand, openAgentMenu, AG_ACTIONS, greetVisitor, THREE, scene, camera, controls, focusSite, goHome, focusAI, focusLive, openPano, closePano, openGlobe, startStory, storyStep, applySeason, setDay, state, renderer,
+  window.__hub = { agentBook, agentAttend, BOARDS, wbApply, KN, focusKnowledge, knLoadFiles, kAsk, knSearch, sitAt, SEATS, hubContext, sendAI, IDLE, AGENTS, tables, AGX, agentCommand, openAgentMenu, AG_ACTIONS, greetVisitor, THREE, scene, camera, controls, focusSite, goHome, focusAI, focusLive, openPano, closePano, openGlobe, startStory, storyStep, applySeason, setDay, state, renderer,
     summonOrb, dismissOrb, D, cloudSets, precipSets, setOrbState, updateOrb, deliver, caption, applyFlood, applyIce, setIceDay, clearScenario, music, ORB, scen, enter, simulatePeer, sitAt, focusLounge, toggleNight, mp, getAurora: () => aurora, focusLive, focusScreen, focusMap, focusNews, focusWhiteboard, openMapCard, wbApply, SCREENS, WB, BOARDS };
   $('#loader').classList.add('ready');
   const nm = $('#ldName'); nm.value = mp.name; setTimeout(() => { if (!entered) nm.focus(); }, 400);
