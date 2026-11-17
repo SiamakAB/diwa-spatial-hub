@@ -653,6 +653,11 @@ body.hud #hint{color:rgba(160,215,255,.6)}
 .kn-connect{position:fixed;right:16px;top:84px;z-index:12;display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;border:1px solid rgba(90,200,255,.45);color:#dff4ff;font:600 13px var(--font);cursor:pointer;letter-spacing:.02em}
 .kn-connect svg{width:16px;height:16px;stroke:#7fe3ff;fill:none;stroke-width:2}
 .kn-connect:hover{box-shadow:0 0 18px rgba(60,180,255,.5)}
+.help-credits{margin-top:12px;padding-top:10px;border-top:1px solid var(--hair)}
+.help-credits h5{margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--accent-2,#7fd0ff)}
+.help-credits p{margin:0 0 6px;font-size:12px;line-height:1.45;color:var(--ink-2)}
+.help-credits b{color:var(--ink)}
+.help-credits a{color:var(--accent-2,#7fe3ff);text-decoration:none}.help-credits a:hover{text-decoration:underline}
 
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
@@ -733,6 +738,11 @@ body.hud #hint{color:rgba(160,215,255,.6)}
   <div class="kbd-row">Play / pause timeline<span><kbd>P</kbd></span></div>
   <div class="kbd-row">Close / back<span><kbd>Esc</kbd></span></div>
   <div class="small-note">Click a table, a floating label or a dock icon to fly there. Glowing globes on the Oulankajoki table are sensor stations on the pine heath and the fen; camera pins open 360° views. Table terrain shows the concept only.</div>
+  <div class="help-credits">
+    <h5>Credits</h5>
+    <p><b>Siamak Bazzaz</b> · Spatial Computing Architect<br>Concept, design and development · DIWA Flagship, University of Oulu</p>
+    <p><a href="https://www.linkedin.com/in/siamakbazzaz/" target="_blank" rel="noopener">LinkedIn</a> · <a href="https://www.oulu.fi/en/researchers/siamak-bazzaz" target="_blank" rel="noopener">University of Oulu profile</a> · <a href="mailto:siamak.bazzaz@oulu.fi">siamak.bazzaz@oulu.fi</a></p>
+  </div>
 </div>
 
 <div id="dock" class="glass ui hide-in-pano"></div>
@@ -964,6 +974,7 @@ const ICON = {
   people: '<circle cx="9" cy="8" r="3.2"/><path d="M3 19.5c.6-3.3 3-5.2 6-5.2s5.4 1.9 6 5.2"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.4.2 4 1.8 4.5 4.6"/>',
   cloud: '<path d="M7 18.5h10.5a4 4 0 0 0 .4-8 5.5 5.5 0 0 0-10.6-1.2A4.6 4.6 0 0 0 7 18.5z"/>',
   map: '<path d="M3.5 6.5 9 4l6 2.5L20.5 4v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>',
+  book: '<path d="M4 5.5c2.6-1 5.3-1 8 .8 2.7-1.8 5.4-1.8 8-.8v13c-2.6-1-5.3-1-8 .8-2.7-1.8-5.4-1.8-8-.8z"/><path d="M12 6.3v13"/>',
   news: '<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M7 9h10M7 12.5h10M7 16h6"/>',
   pen: '<path d="M4 20l1-4.5L15.5 5a2.1 2.1 0 0 1 3 3L8 18.5z"/><path d="M13.5 7l3 3"/>',
   eraser: '<path d="M8.5 19.5h11"/><path d="M4.6 14.6 13.8 5.4a2 2 0 0 1 2.8 0l3 3a2 2 0 0 1 0 2.8l-7.6 7.6a2 2 0 0 1-1.4.7H8.4a2 2 0 0 1-1.4-.6l-2.4-2.4a2 2 0 0 1 0-2.9z"/><path d="m9.5 9.5 5 5"/>',
@@ -1614,13 +1625,13 @@ function buildTable(site) {
   // hologram name band on the table body, facing the entrance and the far side
   {
     const cv = document.createElement('canvas'); cv.width = 2048; cv.height = 256; const c = cv.getContext('2d');
-    c.font = `700 112px ${DS.font}`; c.textAlign = 'center'; c.textBaseline = 'middle';
-    const txt = `${siteCode(site)}  ·  ${site.name.toUpperCase()}`, tw = Math.min(1980, c.measureText(txt).width + 120);
+    c.font = `700 138px ${DS.font}`; c.textAlign = 'center'; c.textBaseline = 'middle';
+    const txt = site.name.toUpperCase(), tw = Math.min(1980, c.measureText(txt).width + 120);
     c.strokeStyle = 'rgba(120,215,255,.85)'; c.lineWidth = 3; c.beginPath(); c.moveTo(1024 - tw / 2, 40); c.lineTo(1024 + tw / 2, 40); c.moveTo(1024 - tw / 2, 216); c.lineTo(1024 + tw / 2, 216); c.stroke();
     c.shadowColor = '#3fc0ff'; c.shadowBlur = 24; c.fillStyle = '#ffffff'; c.fillText(txt, 1024, 132, 1960); c.shadowBlur = 0;
     const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
     const m = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, toneMapped: false, color: new THREE.Color(1.15, 1.2, 1.3), side: THREE.FrontSide });
-    const span = Math.min(2.8, (tw / 2048) * 4.2 / R + .15), h = .44, rTop = R * 1.032 + .012, rBot = R * .94 + .012;
+    const span = Math.min(3.0, (tw / 2048) * 4.8 / R + .15), h = .5, rTop = R * 1.032 + .012, rBot = R * .94 + .012;
     [0, Math.PI].forEach(off => { const th = Math.atan2(toHome.x, toHome.y) + off;
       const band = new THREE.Mesh(new THREE.CylinderGeometry(rTop, rBot, h, 64, 1, true, th - span / 2, span), m);
       band.position.y = .98 - h / 2 - .02; band.renderOrder = 2; g.add(band); });
@@ -2165,7 +2176,7 @@ const panoTags = {};
 /* =====================================================================
    Live screen (YouTube) and the AI companion orb
    ===================================================================== */
-const ORB_POS = new THREE.Vector3(-7.5, 0, 16.5);
+const ORB_POS = new THREE.Vector3(36.2, 0, 8.2), ORB_DOCK_Y = 4.1;
 function roundedRectShape(w, h, r) {
   const s = new THREE.Shape(), x = -w / 2, y = -h / 2;
   s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r);
@@ -2221,11 +2232,11 @@ function buildOrb() {
   const ped = new THREE.Group(); ped.position.copy(ORB_POS); scene.add(ped);
   const el = document.createElement('div');
   el.innerHTML = `<div class="lbl ai"><div class="ic">${svg('ai')}</div><div>Ask the Hub<small>AI companion · voice & text</small></div></div>`;
-  const lo = new CSS2DObject(el); lo.position.set(0, 3.7, 0); ped.add(lo);
+  const lo = new CSS2DObject(el); lo.position.set(0, ORB_DOCK_Y + 1.1, 0); ped.add(lo);
   ORB.pedestalLbl = el.firstElementChild;
   ORB.pedestalLbl.addEventListener('click', e => { e.stopPropagation(); ORB.mode === 'docked' ? summonOrb() : dismissOrb(); });
   // orb
-  const g = new THREE.Group(); g.position.copy(ORB_POS).setY(2.4); scene.add(g); ORB.group = g;
+  const g = new THREE.Group(); g.position.copy(ORB_POS).setY(ORB_DOCK_Y); scene.add(g); ORB.group = g;
   const inner = new THREE.Group(); g.add(inner); ORB.inner = inner;
   ORB.mat = new THREE.ShaderMaterial({ vertexShader: ORB_VS, fragmentShader: ORB_FS, transparent: true, toneMapped: false, depthWrite: true,
     uniforms: { uTime: { value: 0 }, uEnergy: { value: .2 }, uSwirl: { value: .15 }, uFlash: { value: 0 }, uA: { value: ORB.A }, uB: { value: ORB.B }, uC: { value: ORB.C } } });
@@ -2245,7 +2256,19 @@ function buildOrb() {
     const mesh = new THREE.Mesh(new THREE.RingGeometry(r0, r1, 160, 1), m); mesh.rotation.set(...rot); inner.add(mesh); ORB.hud.push(mesh); return mesh;
   };
   hud(.86, .874, 0, .22, [1.25, .25, 0]); hud(1.0, 1.035, 48, -.14, [1.6, -.4, .3]); hud(1.15, 1.162, 5, .38, [.4, .9, 0]); hud(1.3, 1.31, 90, .08, [Math.PI / 2, 0, 0]);
-  const sp = makeRingParticles(1.15, -.85); sp.material.uniforms.uColor.value = new THREE.Color(.7, .8, 1.1); sp.material.uniforms.uSize.value = 20; inner.add(sp); ORB.sparks = sp;
+  // simpler look: core, one wire shell and a soft glow; the rings, inner shell, nodes and sparks are switched off
+  inner.scale.setScalar(.72); ORB.hud.forEach(m => m.visible = false); ORB.wires[1].visible = false; ORB.nodes.visible = false; ORB.halo.material.opacity = .3;
+  // floating platform hanging from the ceiling on three thin cables
+  { const P = new THREE.Group(); P.position.copy(ORB_POS).setY(ORB_DOCK_Y - .78); scene.add(P);
+    const m = new THREE.MeshPhysicalMaterial({ color: 0x0a1626, roughness: .2, metalness: .8, clearcoat: 1, emissive: 0x020a16 });
+    const disc = new THREE.Mesh(new THREE.CylinderGeometry(.95, .62, .14, 6), m); disc.castShadow = true; P.add(disc);
+    const top = new THREE.Mesh(new THREE.CircleGeometry(.82, 6), hudMat(HUD_COMET_FS, { uSpeed: { value: .9 }, uBase: { value: .18 } }, { blending: THREE.AdditiveBlending })); top.rotation.x = -Math.PI / 2; top.position.y = .072; P.add(top);
+    const edge = new THREE.Mesh(new THREE.TorusGeometry(.95, .012, 6, 6), new THREE.MeshBasicMaterial({ color: new THREE.Color(.35, .95, 1.8), toneMapped: false })); edge.rotation.x = Math.PI / 2; edge.position.y = .07; P.add(edge);
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(.42, .62, 1.0, 32, 1, true), hudMat(HUD_WALL_FS, {}, { blending: THREE.AdditiveBlending })); beam.position.y = .58; P.add(beam);
+    const ceil = HALL.h - 1.2 - (ORB_DOCK_Y - .78);
+    for (let k = 0; k < 3; k++) { const a = k / 3 * Math.PI * 2 + .5, c = new THREE.Mesh(new THREE.CylinderGeometry(.008, .008, ceil, 4), new THREE.MeshBasicMaterial({ color: 0x5f86a8 })); c.position.set(Math.cos(a) * .8, ceil / 2, Math.sin(a) * .8); P.add(c); }
+    const under = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0x2fb6ff, transparent: true, opacity: .35, depthWrite: false, blending: THREE.AdditiveBlending })); under.scale.setScalar(2.4); under.position.y = -.2; P.add(under); }
+  const sp = makeRingParticles(1.15, -.85); sp.material.uniforms.uColor.value = new THREE.Color(.7, .8, 1.1); sp.material.uniforms.uSize.value = 20; inner.add(sp); ORB.sparks = sp; sp.visible = false;
 }
 function orbPanelSide() { return ($('#sitePanel').classList.contains('show') || $('#aiPanel').classList.contains('show')) ? -1 : 1; }
 const _of = new THREE.Vector3(), _or = new THREE.Vector3(), _ou = new THREE.Vector3(), _ot = new THREE.Vector3(), _op = new THREE.Vector3();
@@ -2255,7 +2278,7 @@ function updateOrb(dt, t) {
     camera.getWorldDirection(_of); _or.crossVectors(_of, camera.up).normalize(); _ou.crossVectors(_or, _of).normalize();
     const narrow = innerWidth < 820, side = narrow ? 0 : orbPanelSide();
     _ot.copy(camera.position).addScaledVector(_of, 1.9).addScaledVector(_or, (narrow ? 0 : .8) * side).addScaledVector(_ou, narrow ? .32 : -.16);
-  } else _ot.copy(ORB_POS).setY(2.4);
+  } else _ot.copy(ORB_POS).setY(ORB_DOCK_Y);
   O.group.position.lerp(_ot, 1 - Math.exp(-dt * (O.mode === 'companion' ? 3.4 : 2.0)));
   const sc = O.mode === 'companion' ? .24 : 1; O.scale = lerp(O.scale, sc, 1 - Math.exp(-dt * 3)); O.group.scale.setScalar(O.scale);
   O.inner.position.y = Math.sin(t * 1.3) * .06;
@@ -2366,7 +2389,7 @@ function makeAvatar(color, name) {
   const dot = new THREE.SphereGeometry(1, 14, 10), face2 = new THREE.Group(); bust.add(face2);
   const eyes = [-1, 1].map(sx => { const e = new THREE.Mesh(dot, fm); e.position.set(sx * .038, .038, -.124); e.scale.set(.014, .01, .005); e.visible = false; face2.add(e); return e; });
   const brows = [-1, 1].map(sx => { const b = new THREE.Mesh(new THREE.BoxGeometry(.034, .0045, .004), fm); b.position.set(sx * .039, .064, -.121); b.rotation.z = sx * -.12; face2.add(b); return b; });
-  const mouth = new THREE.Mesh(dot, fm); mouth.position.set(0, -.042, -.118); mouth.scale.set(.022, .0025, .005); face2.add(mouth); face2.traverse(o => o.renderOrder = 5);
+  const mouth = new THREE.Mesh(dot, fm); mouth.position.set(0, -.042, -.118); mouth.scale.set(.022, .0025, .005); face2.add(mouth); face2.visible = false;   // brows and lips switched off; the white eye strap stays
   // soft marker on the floor below the person
   const floor = new THREE.Mesh(new THREE.CircleGeometry(.32, 48), new THREE.MeshBasicMaterial({ map: glowTex, color: new THREE.Color(color), transparent: true, opacity: .55, depthWrite: false, blending: THREE.AdditiveBlending }));
   floor.rotation.x = -Math.PI / 2; scene.add(floor);
@@ -2546,7 +2569,7 @@ function renderPeople() {
   const row = (id, name, color, sub) => `<div class="person" data-id="${id}"><i style="background:${color}"></i><div><b></b><span>${sub}</span></div><em>${svg('speaker')}</em></div>`;
   $('#peopleList').innerHTML = row('me', '', mp.color, mp.micOn ? 'You · mic on' : 'You · muted') + [...mp.peers.values()].map(P => row(P.id, '', P.color, P.voice ? 'Voice connected' : 'Connecting voice…')).join('');
   if (!hostIn) $('#peopleList').innerHTML += `<div class="person host"><i style="background:#e6f6ff"></i><div><b>Siamak</b></div></div>`;
-  $('#peopleList').innerHTML += state.layers.agents ? AGENTS.map(A => `<div class="person agent" data-id="ag-${A.i}"><i style="background:${A.color}"></i><div><b>${A.name}</b><span>Resident agent</span></div></div>`).join('') : '';
+  $('#peopleList').innerHTML += state.layers.agents ? AGENTS.filter(A => !A.host).map(A => `<div class="person agent" data-id="ag-${A.i}"><i style="background:${A.color}"></i><div><b>${A.name}</b><span>Resident agent</span></div></div>`).join('') : '';
   $('#peopleList').querySelectorAll('.person:not(.agent):not(.host)').forEach(r => { const id = r.dataset.id; r.querySelector('b').textContent = id === 'me' ? mp.name : mp.peers.get(id)?.name || 'Guest'; });
   $('#mpMute').innerHTML = svg('mic') + (mp.micOn ? 'Mute' : 'Unmute'); $('#mpMute').classList.toggle('muted', !mp.micOn);
 }
@@ -2566,7 +2589,7 @@ function mpInitUI() {
    sit in the lounges and have silent chats with each other. Every action lasts 5–10 s.
    (Local to each visitor's view; they are not part of the shared session.)
    ===================================================================== */
-const AGENT_DEFS = [{ name: 'Emma', color: '#e04fa0' }, { name: 'Suzan', color: '#00c7be' }, { name: 'Sofia', color: '#ff6b3d' }];
+const AGENT_DEFS = [{ name: 'Emma', color: '#e04fa0' }, { name: 'Suzan', color: '#00c7be' }, { name: 'Sofia', color: '#ff6b3d' }, { name: 'Siamak', color: '#3d8bff', host: true }];
 const AGENTS = [];
 const AG = { STAND: 1.62, SIT: 1.18, SPEED: 1.15 };
 const rnd = (a, b) => a + Math.random() * (b - a);
@@ -2587,6 +2610,7 @@ function buildAgents() {
     av.disc.userData.agent = i; pickables.push(av.disc);
     av.tagEl.style.pointerEvents = 'auto'; av.tagEl.style.cursor = 'pointer'; av.tagEl.addEventListener('click', e => { e.stopPropagation(); openAgentMenu(i); });
     const A = { ...d, i, av, pos: freeFloorPoint(), goal: null, seat: -1, state: 'idle', timer: rnd(1, 4), partner: null, talk: 0, turn: 0, label: 'arriving' };
+    if (d.host) { const neck = new THREE.Mesh(new THREE.TorusGeometry(.068, .0075, 8, 48), new THREE.MeshBasicMaterial({ color: new THREE.Color(1.6, 1.6, 1.6), toneMapped: false })); neck.rotation.x = Math.PI / 2; neck.position.y = -.215; av.bust.add(neck); }
     av.g.position.copy(A.pos); AGENTS.push(A);
   });
 }
@@ -2656,7 +2680,7 @@ function updateAgents(dt, t) {
    and show features on request (tap an agent, or ask the orb "show me the spring flood").
    Everything they say is prepared text: only the voice uses the cloud allowance.
    ===================================================================== */
-const AGENT_ROLE = ['Tour guide · hosts OU, KE, SO', 'Site host · TA, PA, OR', 'Site host · KO, AR, VA'];
+const AGENT_ROLE = ['Tour guide · hosts OU, KE, SO', 'Site host · TA, PA, OR', 'Site host · KO, AR, VA', 'Creator of the DIWA Spatial Hub'];
 const HOSTS = { oulanka: 0, kemijoki: 0, sodankyla: 0, tana: 1, pallas: 1, osp: 1, kokkola: 2, archipelago: 2, vantaanjoki: 2 };
 const HOST_LINES = {
   oulanka: 'Welcome to the Oulankajoki River, our centre table and the first fully interactive supersite. The glowing globes are sensor stations; tap one to see its data.',
@@ -2825,6 +2849,7 @@ function openAgentMenu(i) {
   $('#amDot').style.background = A.color; $('#amName').textContent = A.name; $('#amRole').textContent = AGENT_ROLE[i];
   $('#amGrid').innerHTML = Object.entries(AG_ACTIONS).map(([k, a]) => `<button class="am-act${k === 'tour' ? ' main' : ''}" data-k="${k}">${typeof a.label === 'function' ? a.label() : a.label}</button>`).join('');
   $('#amSites').innerHTML = '<span>Her tables</span>' + Object.entries(HOSTS).filter(([, h]) => h === i).map(([id]) => `<button class="am-site" data-site="${id}">${siteCode(SITE[id])} · ${SITE[id].name.replace(' Research Station', '').replace(' Groundwater Area', '')}</button>`).join('');
+  $('#amSites').style.display = Object.values(HOSTS).includes(i) ? '' : 'none';
   $('#agentMenu').classList.add('show');
 }
 function closeAgentMenu() { $('#agentMenu').classList.remove('show'); agentMenuFor = -1; }
@@ -2841,6 +2866,7 @@ function agentCommand(text) {
   const t = text.toLowerCase();
   const named = AGENTS.find(A => new RegExp('\\b' + A.name.toLowerCase() + '\\b').test(t));
   const asks = /\b(show|take|bring|guide|tour|go to|let me see|can i see|i want to see|open)\b/.test(t);
+  if (named && state.layers.agents && /\b(come|here|over here|join me|follow me)\b/.test(t) || named && t.replace(/[^a-z ]/g, '').trim() === named.name.toLowerCase()) return { A: named, come: true };
   if ((!named && !asks) || !state.layers.agents) return null;
   let key = null, site = null;
   if (/\btour\b|show me around|guide me/.test(t)) key = 'tour';
@@ -2859,11 +2885,20 @@ function agentCommand(text) {
   return { A, key, site };
 }
 function runAgentCommand(c) {
+  if (c.come) return agentCome(c.A);
   if (c.help) return agentSay(c.A, intro(c.A) + 'I can give you a tour, or show you the spring flood, river ice, winter, the northern lights, a 360° photo, the video wall or the map. Just ask!');
   if (c.site) return hostTable(c.site, c.A);
   AG_ACTIONS[c.key].run(c.A);
 }
 
+// called by name: walk over to the visitor, stop a little in front of them and turn to face them
+async function agentCome(A) {
+  occupy(A); const cam = camera.position, f = new THREE.Vector3(); camera.getWorldDirection(f); f.y = 0; f.normalize();
+  const p = new THREE.Vector3(cam.x + f.x * 2.2, AG.STAND, cam.z + f.z * 2.2);
+  await goTo(A, p); A.av.yaw = undefined;
+  await agentSay(A, `Hi${visitorName() ? ' ' + visitorName() : ''}, I’m here. Click me to see what I can do for you.`);
+  release(A, 25);
+}
 function agentsSummary() { return AGENTS.map(A => `${A.name} is ${A.label}`).join('; '); }
 /* for testing without a network: __hub.simulatePeer('id', 'Name', '#ff9f0a', [x, y, z], yaw) */
 function simulatePeer(id, n, c, p, y = 0, talk) { onPose({ p, y, x: 0, n, c }, id); const P = mp.peers.get(id); if (talk !== undefined) P.simLevel = talk; return P; }
@@ -3058,23 +3093,24 @@ function buildLounge(L, li) {
   shade.position.set(lx, 1.95, lz); g.add(shade); NIGHT.emissive.push([shade.material, .6, 2.2]);
   const lglow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0x4fc3ff, transparent: true, opacity: .45, depthWrite: false, blending: THREE.AdditiveBlending })); lglow.scale.setScalar(2.4); lglow.position.set(lx, 1.95, lz); g.add(lglow); NIGHT.sprites.push([lglow.material, .35, .9]);
   buildWhiteboard(L.clone().add(new THREE.Vector3(Math.cos(back) * 4.7, 0, Math.sin(back) * 4.7)), L);
-  { const sa = back - span / 2 - .42, shelf = makeBookshelf(); shelf.position.set(Math.cos(sa) * 3.35, 0, Math.sin(sa) * 3.35); g.add(shelf); shelf.lookAt(L.x, 0, L.z); }
+  [.42, .98].forEach(o => { const sa = back - span / 2 - o, shelf = makeBookshelf(); shelf.position.set(Math.cos(sa) * 3.35, 0, Math.sin(sa) * 3.35); g.add(shelf); shelf.lookAt(L.x, 0, L.z); });
   labelAt(g, 2.9, `<div class="ic">${svg('sofa')}</div><div>Lounge ${li + 1}<small>Sit and talk together</small></div>`, '', () => focusLounge(li));
 }
 function buildLounges() { LOUNGES.forEach(buildLounge); }
 /* cozy bookshelf in the hologram style: dark metal frame, cyan-lit shelf edges, books in blues */
+const KN_BOOKS = ['Digital Waters · DIWA Flagship', 'Rivers of the Boreal North', 'Snow, Soil and Peatlands', 'Sensing Finnish Waters', 'Ice, Floods and a Changing Climate', 'Spatial Computing for Hydrology'];
 function makeBookshelf() {
-  const g = new THREE.Group(), W = 1.7, H = 2.15, Dp = .36, r = mulberry32(Math.floor(Math.random() * 1e6));
+  const g = new THREE.Group(), W = 1.6, H = 1.0, Dp = .36, r = mulberry32(Math.floor(Math.random() * 1e6));
   const metal = new THREE.MeshStandardMaterial({ color: 0x0b1626, roughness: .3, metalness: .75, emissive: 0x020812 });
   const box = (w, h, d, x, y, z, m = metal) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(x, y, z); b.castShadow = b.receiveShadow = true; g.add(b); return b; };
   box(.05, H, Dp, -W / 2, H / 2, 0); box(.05, H, Dp, W / 2, H / 2, 0); box(W, H, .03, 0, H / 2, -Dp / 2 + .015, new THREE.MeshStandardMaterial({ color: 0x07101c, roughness: .5, metalness: .4 }));
   const edge = new THREE.MeshBasicMaterial({ color: new THREE.Color(.35, .95, 1.8), toneMapped: false });
-  const shelfY = [.06, .5, .94, 1.38, 1.82, H - .02];
+  const shelfY = [.06, .5, H - .02];
   shelfY.forEach(y => { box(W, .035, Dp, 0, y, 0); box(W - .02, .008, .01, 0, y + .021, Dp / 2 - .004, edge); });
   const cols = [0x1a3a66, 0x23518a, 0x0f2a4c, 0x2f6bb0, 0x5aa7e0, 0xd8e8f6, 0x163055, 0x3c86c8];
   const bm = cols.map(c => new THREE.MeshStandardMaterial({ color: c, roughness: .55, metalness: .1, emissive: c, emissiveIntensity: .12 }));
-  shelfY.slice(0, 5).forEach((y, si) => {
-    let x = -W / 2 + .06; const end = W / 2 - .06 - (si % 2 ? .38 : 0);
+  shelfY.slice(0, 2).forEach((y, si) => {
+    let x = -W / 2 + .06 + (si === 1 ? .2 : 0); const end = W / 2 - .06 - (si % 2 ? .38 : 0);
     while (x < end - .03) {
       const bw = .035 + r() * .045, bh = .26 + r() * .13; if (x + bw > end) break;
       const tilt = r() < .07 && x > -W / 2 + .2 ? .22 : 0;
@@ -3083,13 +3119,23 @@ function makeBookshelf() {
     }
     if (si % 2) { const orb = new THREE.Mesh(new THREE.IcosahedronGeometry(.09, 1), new THREE.MeshBasicMaterial({ color: new THREE.Color(.4, 1, 1.8), wireframe: true, toneMapped: false })); orb.position.set(W / 2 - .22, y + .13, .02); g.add(orb); }
   });
-  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0x2fb6ff, transparent: true, opacity: .25, depthWrite: false, blending: THREE.AdditiveBlending })); glow.scale.set(2.6, 2.8, 1); glow.position.set(0, H / 2, -.05); g.add(glow);
+  // two thin DIWA books standing at the front of the middle shelf, titles on their spines
+  const T2 = [...KN_BOOKS].sort(() => r() - .5).slice(0, 2);
+  T2.forEach((title, k) => {
+    const cv = document.createElement('canvas'); cv.width = 96; cv.height = 900; const c = cv.getContext('2d');
+    c.fillStyle = k ? '#0f3a6e' : '#e9f3fb'; c.fillRect(0, 0, 96, 900); c.fillStyle = k ? '#5fe0ff' : '#1770b8'; c.fillRect(0, 40, 96, 8); c.fillRect(0, 852, 96, 8);
+    c.save(); c.translate(48, 450); c.rotate(Math.PI / 2); c.fillStyle = k ? '#ffffff' : '#0c2a4c'; c.font = `700 46px ${DS.font}`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(title, 0, 2, 760); c.restore();
+    const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+    const side = new THREE.MeshStandardMaterial({ color: k ? 0x0f3a6e : 0xe9f3fb, roughness: .6 }), spine = new THREE.MeshStandardMaterial({ map: tex, roughness: .5, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: .25 });
+    const b = new THREE.Mesh(new THREE.BoxGeometry(.034, .34, .24), [side, side, side, side, spine, side]); b.position.set(-W / 2 + .1 + k * .045, .5 + .02 + .17, .04); b.castShadow = true; g.add(b);
+  });
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0x2fb6ff, transparent: true, opacity: .22, depthWrite: false, blending: THREE.AdditiveBlending })); glow.scale.set(2.4, 1.4, 1); glow.position.set(0, H / 2, -.05); g.add(glow);
   return g;
 }
 let seated = -1;
 function sitAt(i) {
   enterSpot(SEATS[i].knowledge ? 'knowledge' : 'lounge'); seated = i; const p = SEATS[i].pos, look = SEATS[i].look ? SEATS[i].look.clone() : SEATS[i].center.clone().setY(.95);
-  if (SEATS[i].knowledge) setTimeout(() => { summonOrb(); knShowConnect(); }, 1700);
+  if (SEATS[i].knowledge) setTimeout(() => summonOrb(), 1700);
   flyTo(p.clone(), look.clone().lerp(p, .02), 1600, () => { controls.minDistance = .01; toast('You’re seated · drag to look around · press H to stand up', 3000); });
 }
 function focusLounge(i = 0) {
@@ -3310,8 +3356,8 @@ function buildWallSign() {
     c.shadowBlur = 0; c.strokeStyle = 'rgba(140,220,255,.8)'; c.lineWidth = 4; c.beginPath(); c.moveTo(260, 620); c.lineTo(1788, 620); c.stroke(); tex.needsUpdate = true; };
   draw(null); loadImg(ASSET.logoWhite).then(draw);
   const phi = 2.485, x = HALL.rx * Math.cos(phi) * .975, z = HALL.rz * Math.sin(phi) * .975;
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(13, 4.875), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, toneMapped: false }));
-  m.position.set(x, 9.2, z); m.lookAt(0, 9.2, z * .35); m.renderOrder = 3; scene.add(m);
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(15.5, 5.81), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, toneMapped: false }));
+  m.position.set(x, 8.3, z); m.lookAt(0, 8.3, z * .35); m.renderOrder = 3; scene.add(m);
 }
 function buildFloorLogo() {
   const mk = src => { const t = new THREE.TextureLoader().load(src); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; };
@@ -3439,6 +3485,7 @@ function buildUI() {
   item('', 'pano', '360° views', () => openPano(CONFIG.PANORAMAS[0].id));
   item('', 'map', 'Supersite map', focusMap);
   item('', 'news', 'Latest DIWA News', focusNews);
+  item('', 'book', 'DIWA Knowledge', focusKnowledge);
   item('', 'sofa', 'Lounge · sit and talk', () => focusLounge(0));
   item('', 'pen', 'Shared whiteboard (nearest)', () => focusWhiteboard());
   item('ai', 'ai', 'Ask the Hub · AI', focusAI);
@@ -4876,8 +4923,8 @@ const KN_TOPICS = [
 function knChartFor(q) { for (const [rx, f] of KN_TOPICS) if (rx.test(q)) return f(); return { title: 'Water level, Oulankajoki', unit: 'm', data: D.WL, color: '#4fd1ff' }; }
 function knPage(c, x, y, w, h, rot, seed) {
   const r = mulberry32(seed); c.save(); c.translate(x + w / 2, y + h / 2); c.rotate(rot); c.translate(-w / 2, -h / 2);
-  c.shadowColor = 'rgba(0,0,0,.55)'; c.shadowBlur = 30; c.shadowOffsetY = 12; c.fillStyle = '#eaf3fb'; c.fillRect(0, 0, w, h); c.shadowColor = 'transparent';
-  c.strokeStyle = 'rgba(120,200,255,.9)'; c.lineWidth = 2; c.strokeRect(0, 0, w, h);
+  c.shadowColor = 'rgba(0,0,0,.55)'; c.shadowBlur = 30; c.shadowOffsetY = 12; c.fillStyle = '#eaf3fb'; rrect(c, 0, 0, w, h, 14); c.fill(); c.shadowColor = 'transparent';
+  c.strokeStyle = 'rgba(120,200,255,.9)'; c.lineWidth = 2; rrect(c, 0, 0, w, h, 14); c.stroke();
   const P = 34, bar = (bx, by, bw, bh, col) => { c.fillStyle = col; c.fillRect(bx, by, bw, bh); };
   bar(P, 30, 90, 10, '#2a78d6'); bar(w - P - 120, 30, 120, 10, '#9db3c8');
   bar(P, 70, w * .78, 22, '#13233a'); bar(P, 100, w * .55, 22, '#13233a');
@@ -4936,19 +4983,17 @@ function knDraw(c, w, h) {
   } else {
     knPage(c, L + 40, top + 40, 520, 700, -.07, 3);
     knPage(c, L + 230, top + 80, 520, 700, .045, 7);
-    c.fillStyle = '#7fd0ff'; c.font = `600 20px ${mono}`; c.fillText('SOURCE PAPERS APPEAR HERE', L, h - 72);
   }
   // right: conversation in a typographic layout, newest at the bottom, figure underneath
   const ch = KN.chart, chartH = ch ? 330 : 0, bottom = h - 80 - (ch ? chartH + 30 : 0);
-  const lines = []; c.font = `400 28px ${F}`;
-  KN.chat.forEach((m, i) => { const last = i === KN.chat.length - 1, t = last && !m.user ? m.t.slice(0, KN.reveal) : m.t; lines.push({ head: m.who, user: m.user }); knWrap(c, t, RW - (m.user ? 40 : 0)).forEach(l => lines.push({ l, user: m.user })); lines.push({ gap: true }); });
-  const LH = 38, maxL = Math.floor((bottom - top) / LH), vis = lines.slice(-maxL); let y = bottom - (vis.length - 1) * LH;
-  if (!KN.chat.length) { c.fillStyle = '#e6f6ff'; c.font = `700 40px ${F}`; c.fillText('Ask about DIWA research.', R, top + 70); c.fillStyle = '#8fb8d8'; c.font = `400 28px ${F}`; ['Your questions and the answers appear here,', 'with the sources and figures behind them.'].forEach((l, i) => c.fillText(l, R, top + 120 + i * 40)); }
-  vis.forEach(v => {
-    if (v.head) { c.font = `700 20px ${mono}`; c.fillStyle = v.user ? '#ffd27a' : '#5fe0ff'; c.fillText((v.user ? '› ' : '◆ ') + v.head.toUpperCase(), R, y); }
-    else if (v.l !== undefined) { c.font = v.user ? `italic 500 28px ${F}` : `400 28px ${F}`; let x = R + (v.user ? 40 : 0); v.l.split(/(\[\d+\])/).forEach(part => { c.fillStyle = /^\[\d+\]$/.test(part) ? '#ffd27a' : v.user ? '#fff2d6' : '#e8f6ff'; c.fillText(part, x, y); x += c.measureText(part).width; }); }
-    y += LH;
-  });
+  // only the latest answer, set in large type and revealed slowly
+  const ans = [...KN.chat].reverse().find(m => !m.user);
+  if (ans && ans.t !== '…') {
+    c.font = `300 34px ${F}`; const LH = 50, all = knWrap(c, ans.t.slice(0, KN.reveal), RW), maxL = Math.floor((bottom - top) / LH); let y = top + 40;
+    c.fillStyle = '#5fe0ff'; c.fillRect(R, top, 56, 4);
+    all.slice(0, maxL).forEach((l, i) => { let x = R; l.split(/(\[\d+\])/).forEach(part => { c.fillStyle = /^\[\d+\]$/.test(part) ? '#ffd27a' : '#eef8ff'; c.fillText(part, x, y + 22); x += c.measureText(part).width; }); y += LH; });
+  } else if (ans) { c.fillStyle = '#7fd0ff'; c.font = `300 34px ${F}`; c.fillText('…', R, top + 62); }
+  else { c.fillStyle = '#e6f6ff'; c.font = `700 40px ${F}`; c.fillText('Ask about DIWA research.', R, top + 70); c.fillStyle = '#8fb8d8'; c.font = `300 30px ${F}`; ['Answers appear here, with the sources', 'and figures behind them.'].forEach((l, i) => c.fillText(l, R, top + 124 + i * 44)); }
   if (ch && KN.chartK > 0) { c.strokeStyle = 'rgba(150,220,255,.35)'; c.beginPath(); c.moveTo(R, h - 80 - chartH - 10); c.lineTo(R + RW, h - 80 - chartH - 10); c.stroke(); knChart(c, R, h - 80 - chartH, RW, chartH, ch, KN.chartK); }
 }
 function updateKnowledge(dt, t) {
@@ -4967,7 +5012,7 @@ function buildKnowledge() {
   const mesh = new THREE.Mesh(normalizeUV(new THREE.ShapeGeometry(roundedRectShape(KN.W, KN.H, .3), 18), KN.W, KN.H), new THREE.MeshBasicMaterial({ map: knLC.tex, toneMapped: false }));
   mesh.position.set(0, KN.y0 + KN.H / 2, 0); mesh.userData.knowledge = true; g.add(mesh); pickables.push(mesh); KN.mesh = mesh;
   const f = hudFrame(KN.W, KN.H, .3, .06, .45); f.position.set(0, KN.y0 + KN.H / 2, .03); g.add(f);
-  labelAt(g, KN.y0 + KN.H + .9, `<div class="ic">${svg('ai')}</div><div>DIWA Knowledge<small>Ask the DIWA library</small></div>`, 'ai', focusKnowledge);
+  labelAt(g, KN.y0 + KN.H + .9, `<div class="ic">${svg('book')}</div><div>DIWA Knowledge<small>Ask the DIWA library</small></div>`, 'ai', focusKnowledge);
   buildKnowledgeSeats(g);
   loadKnowledgeIndex();
 }
@@ -4994,14 +5039,14 @@ function buildKnowledgeSeats(panel) {
     const ch = new THREE.Group(); ch.position.copy(p); ch.lookAt(look.x, 0, look.z); scene.add(ch);
     const b = new THREE.Mesh(cg.body, fabric); b.position.y = .1; b.castShadow = true; const cu = new THREE.Mesh(cg.cush, accent[s > 0 ? 0 : 2]); cu.position.y = .1; ch.add(b, cu); seat(p, 1.15);
   });
-  { const shelf = makeBookshelf(); shelf.position.copy(centre).addScaledVector(side, 4.6).addScaledVector(fwd, .6); shelf.lookAt(look.x, 0, look.z); scene.add(shelf); }
+  [4.4, 6.1].forEach(o => { const shelf = makeBookshelf(); shelf.position.copy(centre).addScaledVector(side, o).addScaledVector(fwd, .4); shelf.lookAt(look.x, 0, look.z); scene.add(shelf); });
   // rug with a running light edge
   const rug = new THREE.Mesh(new THREE.CircleGeometry(3.8, 96), new THREE.MeshStandardMaterial({ color: 0x08111e, roughness: .5, metalness: .3 })); rug.rotation.x = -Math.PI / 2; rug.position.copy(centre).addScaledVector(fwd, -.9).setY(.02); scene.add(rug);
   const edge = new THREE.Mesh(new THREE.RingGeometry(3.72, 3.8, 128), hudMat(HUD_COMET_FS, { uSpeed: { value: .4 }, uBase: { value: .35 } }, { blending: THREE.AdditiveBlending })); edge.rotation.x = -Math.PI / 2; edge.position.copy(rug.position).setY(.025); scene.add(edge);
 }
 function focusKnowledge() {
   enterSpot('knowledge'); const v = faceFrom(KN.g.position, KN.look, KN.y0 + KN.H / 2, 13.5);
-  flyTo(v.pos, v.tgt, 1700, () => { summonOrb(); toast(KN.docs.length ? 'Ask a question about DIWA research' : 'Connect the DIWA library to start', 2600); knShowConnect(); });
+  flyTo(v.pos, v.tgt, 1700, () => { summonOrb(); toast('Ask a question about DIWA research', 2600); });
 }
 function knShowConnect() {
   if ($('#knConnect')) return;
