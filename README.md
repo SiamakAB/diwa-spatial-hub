@@ -16,6 +16,8 @@ The **Oulankajoki** supersite at Oulanka Research Station, Kuusamo, is the large
 
 ## Features
 
+- **Oulanka AR Table** (`/ar-table/`): print the A4 or A3 marker sheet, scan its QR code, and the real Oulanka map rises above it as a 1 m hologram table that slowly rotates. Switch summer and winter, the spring flood, river ice and night, and tap the 360° points. On Android phones that support WebXR you can also place the table in the room at full size; every device can view it in 3D without the camera.
+
 - **DIWA Knowledge panel:** a large screen beside the news panel, with a sofa and two armchairs in front. Questions about DIWA research are answered from a library of DIWA papers and data files: the paper the answer relies on most is shown on the left with the supporting passage highlighted, and the conversation on the right. Connect a local folder from the panel (the files are read in your browser and stay on your computer), or publish a prepared library as `knowledge/index.json` with `tools/build_knowledge.py`.
 
 - **Hologram HUD design:** a navy and black hall with cyan light: animated floor grid, holographic tables with running rim lights, light frames on the video wall, news and map, a blueprint map of the supersites, and HUD-style panels and charts.
