@@ -745,7 +745,7 @@ body.hud #hint{color:rgba(160,215,255,.6)}
   <div class="help-credits">
     <h5>Credits</h5>
     <p><b>Siamak Bazzaz</b> · Spatial Computing Architect<br>Concept, design and development</p>
-    <p><a href="https://www.linkedin.com/in/siamakbazzaz/" target="_blank" rel="noopener">LinkedIn</a> · <a href="mailto:siamak.bazzaz@oulu.fi">siamak.bazzaz@oulu.fi</a></p>
+    <p><a href="https://www.linkedin.com/in/siamakbazzaz/" target="_blank" rel="noopener">LinkedIn</a> · <a href="https://metaparametric.com" target="_blank" rel="noopener">MetaParametric.com</a></p>
   </div>
 </div>
 
@@ -2691,7 +2691,18 @@ function agentNext(A) {
   } else agentGo(A, freeFloorPoint(), 'pause', 'walking around');
 }
 const _ag = new THREE.Vector3();
+// make sure the hall sees some reading: a book outing starts at least every 60–100 s (the first after about 20 s)
+let bookClock = 20, bookShow = false;
+function bookScheduler(dt) {
+  bookClock -= dt; if (bookClock > 0) return;
+  if (AGENTS.some(A => A.book || A.label === 'choosing a book')) { bookClock = 15; return; }
+  const ok = AGENTS.filter(A => !A.busy && !A.partner && !A.attending && !A.book && ['idle', 'look', 'pause', 'sit'].includes(A.state));
+  if (!ok.length) { bookClock = 5; return; }
+  const A = ok[Math.floor(Math.random() * ok.length)]; A.next = null; agentFree(A);
+  if (agentBook(A, bookShow)) { bookShow = !bookShow; bookClock = rnd(60, 100); } else bookClock = 10;
+}
 function updateAgents(dt, t) {
+  if (state.layers.agents) bookScheduler(dt);
   AGENTS.forEach(A => {
     let level = 0;
     if (A.state === 'walk') {
@@ -3376,7 +3387,7 @@ function buildMapBoard() {
     const bg = c.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#0b2a58'); bg.addColorStop(1, '#061a3a'); c.fillStyle = bg; c.fillRect(0, 0, w, h);
     c.strokeStyle = 'rgba(120,200,255,.10)'; c.lineWidth = 1; for (let x = 0; x <= w; x += 25) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, h); c.stroke(); } for (let y = 0; y <= h; y += 25) { c.beginPath(); c.moveTo(0, y); c.lineTo(w, y); c.stroke(); }
     c.strokeStyle = 'rgba(140,215,255,.22)'; for (let x = 0; x <= w; x += 125) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, h); c.stroke(); } for (let y = 0; y <= h; y += 125) { c.beginPath(); c.moveTo(0, y); c.lineTo(w, y); c.stroke(); }
-    c.strokeStyle = 'rgba(150,220,255,.7)'; c.lineWidth = 3; c.strokeRect(22, 22, w - 44, h - 44); c.lineWidth = 1; c.strokeRect(32, 32, w - 64, h - 64);
+    c.strokeStyle = 'rgba(150,220,255,.7)'; c.lineWidth = 3; rrect(c, 22, 22, w - 44, h - 44, 22); c.stroke(); c.lineWidth = 1; rrect(c, 32, 32, w - 64, h - 64, 16); c.stroke();
     const L = await loadImg(ASSET.logoWhite); if (L) c.drawImage(L, 58, 62, 66 * L.width / L.height, 66);
     c.fillStyle = '#e6f6ff'; c.font = `700 46px ${DS.font}`; c.textAlign = 'right'; c.fillText('SUPERSITES', w - 58, 112); c.textAlign = 'left';
     const M = await loadImg(ASSET.mapBP); if (M) c.drawImage(M, mapX, top, mapW, mapH);   // pre-rendered by tools/make_blueprint_map.py
@@ -5197,7 +5208,7 @@ async function boot() {
   renderer.setAnimationLoop(loop);
   renderer.compile(scene, camera);
   await progress(1, 'Ready');
-  window.__hub = { agentBook, agentAttend, BOARDS, wbApply, KN, focusKnowledge, knLoadFiles, kAsk, knSearch, sitAt, SEATS, hubContext, sendAI, IDLE, AGENTS, tables, AGX, agentCommand, openAgentMenu, AG_ACTIONS, greetVisitor, THREE, scene, camera, controls, focusSite, goHome, focusAI, focusLive, openPano, closePano, openGlobe, startStory, storyStep, applySeason, setDay, state, renderer,
+  window.__hub = { bookNow: () => bookClock = 0, agentBook, agentAttend, BOARDS, wbApply, KN, focusKnowledge, knLoadFiles, kAsk, knSearch, sitAt, SEATS, hubContext, sendAI, IDLE, AGENTS, tables, AGX, agentCommand, openAgentMenu, AG_ACTIONS, greetVisitor, THREE, scene, camera, controls, focusSite, goHome, focusAI, focusLive, openPano, closePano, openGlobe, startStory, storyStep, applySeason, setDay, state, renderer,
     summonOrb, dismissOrb, D, cloudSets, precipSets, setOrbState, updateOrb, deliver, caption, applyFlood, applyIce, setIceDay, clearScenario, music, ORB, scen, enter, simulatePeer, sitAt, focusLounge, toggleNight, mp, getAurora: () => aurora, focusLive, focusScreen, focusMap, focusNews, focusWhiteboard, openMapCard, wbApply, SCREENS, WB, BOARDS };
   $('#loader').classList.add('ready');
   const nm = $('#ldName'); nm.value = mp.name; setTimeout(() => { if (!entered) nm.focus(); }, 400);
