@@ -38,7 +38,7 @@ The **Oulankajoki** supersite at Oulanka Research Station, Kuusamo, is the large
 - **Living sky:** optional clouds drift over the tables, with rain or snow falling at a wind-blown angle, all following the weather of the selected day.
 - **Day and night:** switch between daylight and a night mode with northern lights and twinkling stars over the forest and warm lamps inside, while the tables stay clearly lit.
 - **Showcase mode:** when nobody touches the controls for 10 seconds, the view returns to the overview and circles slowly around the hall.
-- **AR booklet:** a printed booklet whose table images come to life on phones through the AR viewer at /ar.
+- **AR booklet** (`/flipbook/`): *Immersive DIWA Supersites*, a 16-page booklet in the blueprint style. Read it online as a flipbook with page-curl animation, thumbnails, zoom, full screen and links that open each table in 3D, or print `flipbook/immersive-diwa-supersites-print-A4.pdf` (two A5 pages per A4 sheet with a white margin and cut marks). Point a phone at any table in a scan frame, on paper or on screen, and the AR viewer at `/ar/` raises it in 3D. The Oulankajoki page shows the real-data Oulanka model, shared with the AR Table.
 - **VR edition:** a dedicated version for Meta Quest 3 and other WebXR headsets ([open in the headset](https://siamakab.github.io/diwa-spatial-hub/vr.html)), with laser pointers, thumbstick walking, snap turning and rising for a view from above, teleporting, raised viewpoints over each table, a menu on your hand, 3D info cards and 360° photos you can step inside.
 
 ![360° view of the Oulankajoki rapids](docs/preview-360.jpg)
