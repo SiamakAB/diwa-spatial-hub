@@ -482,38 +482,38 @@ body.assist-on #lcLegend{bottom:238px}
 .name-tag.talking{transform:scale(1.06)}.name-tag.talking .spk{display:block}
 
 /* ---------- v0.4: night theme (tables and live screen keep their own light) ---------- */
-body.night{--ink:#f5f5f7;--ink-2:#c7c7cc;--ink-3:#8e8e93;--glass:rgba(28,31,38,.62);--hair:rgba(255,255,255,.1);--hair-light:rgba(255,255,255,.12);--glass-dark:rgba(10,18,32,.66);background:#0b1424}
-body.night .glass{box-shadow:0 18px 50px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08)}
-body.night .card,body.night .stat,body.night .scen-row,body.night .msg.bot,body.night .suggest button{background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 .5px rgba(255,255,255,.1)}
-body.night .scen-row.active{background:rgba(10,132,255,.18)}
-body.night .composer textarea,body.night .field{background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 .5px rgba(255,255,255,.14);color:var(--ink)}
-body.night .seg{background:rgba(118,118,128,.28)}
-body.night .seg .seg-thumb{background:#636366;box-shadow:0 3px 8px rgba(0,0,0,.35)}
-body.night .dock-item:not(.ai){background:linear-gradient(180deg,rgba(72,76,86,.95),rgba(44,47,55,.9));box-shadow:0 2px 6px rgba(0,0,0,.35), inset 0 0 0 .5px rgba(255,255,255,.08)}
-body.night .dock-item:not(.ai):not(.live) svg{stroke:#9fd0ff}
-body.night .x,body.night .btn.ghost,body.night .round.ghost,body.night .round.mic,body.night .round.spk,body.night .var-pills button,body.night .chip.gray{background:rgba(255,255,255,.12);color:var(--ink-2)}
-body.night .x svg{stroke:var(--ink-2)}
-body.night .var-pills button.active{background:#f5f5f7;color:#1d1d1f}
-body.night .chip{background:rgba(10,132,255,.22);color:#8cc4ff}
-body.night .btn.secondary{background:rgba(10,132,255,.22);color:#6cb6ff}
-body.night .chart .grid line{stroke:rgba(255,255,255,.08)}
-body.night .chart .tip{background:rgba(40,43,50,.96);box-shadow:0 6px 18px rgba(0,0,0,.4)}
-body.night .toggle-row:hover,body.night .list-row:hover{background:rgba(255,255,255,.06)}
-body.night .badge{background:rgba(255,255,255,.12)}
-body.night .play{background:#f5f5f7}body.night .play svg{fill:#1d1d1f}
-body.night .icon-btn.on{background:rgba(10,132,255,.25)}
-body.night .ab-main input{color:var(--ink)}
-body.night #hint{color:rgba(230,236,245,.55)}
-body.night .ab-sep,body.night .dock-sep{background:rgba(255,255,255,.14)}
-body.night .mini-table td,body.night .mini-table th{border-color:rgba(255,255,255,.1)}
+body.night, body.hud{--ink:#f5f5f7;--ink-2:#c7c7cc;--ink-3:#8e8e93;--glass:rgba(28,31,38,.62);--hair:rgba(255,255,255,.1);--hair-light:rgba(255,255,255,.12);--glass-dark:rgba(10,18,32,.66);background:#0b1424}
+body.night .glass, body.hud .glass{box-shadow:0 18px 50px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08)}
+body.night .card, body.night .stat, body.night .scen-row, body.night .msg.bot, body.night .suggest button, body.hud .card, body.hud .stat, body.hud .scen-row, body.hud .msg.bot, body.hud .suggest button{background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 .5px rgba(255,255,255,.1)}
+body.night .scen-row.active, body.hud .scen-row.active{background:rgba(10,132,255,.18)}
+body.night .composer textarea, body.night .field, body.hud .composer textarea, body.hud .field{background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 .5px rgba(255,255,255,.14);color:var(--ink)}
+body.night .seg, body.hud .seg{background:rgba(118,118,128,.28)}
+body.night .seg .seg-thumb, body.hud .seg .seg-thumb{background:#636366;box-shadow:0 3px 8px rgba(0,0,0,.35)}
+body.night .dock-item:not(.ai), body.hud .dock-item:not(.ai){background:linear-gradient(180deg,rgba(72,76,86,.95),rgba(44,47,55,.9));box-shadow:0 2px 6px rgba(0,0,0,.35), inset 0 0 0 .5px rgba(255,255,255,.08)}
+body.night .dock-item:not(.ai):not(.live) svg, body.hud .dock-item:not(.ai):not(.live) svg{stroke:#9fd0ff}
+body.night .x, body.night .btn.ghost, body.night .round.ghost, body.night .round.mic, body.night .round.spk, body.night .var-pills button, body.night .chip.gray, body.hud .x, body.hud .btn.ghost, body.hud .round.ghost, body.hud .round.mic, body.hud .round.spk, body.hud .var-pills button, body.hud .chip.gray{background:rgba(255,255,255,.12);color:var(--ink-2)}
+body.night .x svg, body.hud .x svg{stroke:var(--ink-2)}
+body.night .var-pills button.active, body.hud .var-pills button.active{background:#f5f5f7;color:#1d1d1f}
+body.night .chip, body.hud .chip{background:rgba(10,132,255,.22);color:#8cc4ff}
+body.night .btn.secondary, body.hud .btn.secondary{background:rgba(10,132,255,.22);color:#6cb6ff}
+body.night .chart .grid line, body.hud .chart .grid line{stroke:rgba(255,255,255,.08)}
+body.night .chart .tip, body.hud .chart .tip{background:rgba(40,43,50,.96);box-shadow:0 6px 18px rgba(0,0,0,.4)}
+body.night .toggle-row:hover, body.night .list-row:hover, body.hud .toggle-row:hover, body.hud .list-row:hover{background:rgba(255,255,255,.06)}
+body.night .badge, body.hud .badge{background:rgba(255,255,255,.12)}
+body.night .play, body.hud .play{background:#f5f5f7}body.night .play svg{fill:#1d1d1f}
+body.night .icon-btn.on, body.hud .icon-btn.on{background:rgba(10,132,255,.25)}
+body.night .ab-main input, body.hud .ab-main input{color:var(--ink)}
+body.night #hint, body.hud #hint{color:rgba(230,236,245,.55)}
+body.night .ab-sep, body.night .dock-sep, body.hud .ab-sep, body.hud .dock-sep{background:rgba(255,255,255,.14)}
+body.night .mini-table td, body.night .mini-table th, body.hud .mini-table td, body.hud .mini-table th{border-color:rgba(255,255,255,.1)}
 
 @media (max-width:1500px){ #seasonSeg button:not(.active) span{display:none} #seasonSeg button{padding:8px 11px} }
 @media (max-width:1100px){ .brand span{display:none} }
 
 .sel-row{padding:0 8px 8px}
 .sel-row select{width:100%;height:36px;border:none;outline:none;border-radius:11px;padding:0 10px;font:inherit;font-size:13px;background:rgba(255,255,255,.9);box-shadow:inset 0 0 0 .5px rgba(0,0,0,.12);color:var(--ink);cursor:pointer}
-body.night .sel-row select{background:rgba(255,255,255,.1);color:var(--ink)}
-body.night .sel-row option{color:#1d1d1f}
+body.night .sel-row select, body.hud .sel-row select{background:rgba(255,255,255,.1);color:var(--ink)}
+body.night .sel-row option, body.hud .sel-row option{color:#1d1d1f}
 
 /* ---------- v0.7 ---------- */
 .ld-logo{height:64px;width:auto}
@@ -523,7 +523,7 @@ body.night .sel-row option{color:#1d1d1f}
 .lbl.sound .ic{box-shadow:0 0 0 3px rgba(52,199,89,.6),0 0 14px rgba(255,80,60,.6)}
 .dock-item.code .dock-code{font-size:14px;font-weight:750;color:#0b4f9c;letter-spacing:.02em}
 .dock-item.hero .dock-code{color:#0a84ff}
-body.night .dock-item.code .dock-code{color:#9fd0ff}
+body.night .dock-item.code .dock-code, body.hud .dock-item.code .dock-code{color:#9fd0ff}
 #wbBar{position:fixed;left:50%;bottom:92px;transform:translateX(-50%) translateY(18px);display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .35s, transform .55s var(--spring)}
 #wbBar.show{opacity:1;transform:translateX(-50%);pointer-events:auto}
 #wbBar:not(.show) *{pointer-events:none}
@@ -535,8 +535,8 @@ body.night .dock-item.code .dock-code{color:#9fd0ff}
 .wb-tool.on{background:var(--accent);color:#fff}
 .wb-tool.danger{color:var(--red)}
 #wbText{height:34px;width:150px;border:none;outline:none;border-radius:11px;padding:0 10px;font:inherit;font-size:13px;background:rgba(255,255,255,.9);box-shadow:inset 0 0 0 .5px rgba(0,0,0,.12);color:var(--ink)}
-body.night #wbText{background:rgba(255,255,255,.1)}
-body.night .wb-tool:not(.on){background:rgba(255,255,255,.12)}
+body.night #wbText, body.hud #wbText{background:rgba(255,255,255,.1)}
+body.night .wb-tool:not(.on), body.hud .wb-tool:not(.on){background:rgba(255,255,255,.12)}
 #mapCard{position:fixed;left:16px;top:84px;width:360px;max-width:calc(100vw - 32px);border-radius:var(--r-xl);opacity:0;transform:scale(.92) translateY(10px);transform-origin:20% 10%;pointer-events:none;transition:opacity .35s var(--ease), transform .55s var(--spring)}
 #mapCard.show{opacity:1;transform:none;pointer-events:auto}
 #mapCard:not(.show) *{pointer-events:none}
@@ -545,7 +545,7 @@ body.night .wb-tool:not(.on){background:rgba(255,255,255,.12)}
 .code-badge{width:42px;height:42px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:750;font-size:15px;color:#fff;background:radial-gradient(circle at 35% 30%,#7fd0ff,#1770b8 70%);box-shadow:0 0 14px rgba(76,169,255,.55)}
 #copy{position:fixed;right:14px;bottom:8px;font-size:10.5px;color:rgba(20,30,50,.5);font-weight:500;letter-spacing:.01em}
 #copy a{color:inherit;text-decoration:none}#copy a:hover{text-decoration:underline}
-body.night #copy{color:rgba(230,236,245,.45)}
+body.night #copy, body.hud #copy{color:rgba(230,236,245,.45)}
 body.assist-on #wbBar{bottom:158px}
 .sp-code{color:#fff;font-size:15px;font-weight:750;letter-spacing:.02em}
 
@@ -585,8 +585,8 @@ body.assist-on #wbBar{bottom:158px}
 #loader{--ink:#1d1d1f;--ink-2:#515154;--ink-3:#86868b;color:var(--ink)}
 #loader .ld-title{color:#1d1d1f}
 #loader .ld-intro p{color:#3a3a3c}
-body.night #loader .field{background:rgba(255,255,255,.92);color:#1d1d1f;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.14),0 6px 18px rgba(12,42,76,.08)}
-body.night #loader .field::placeholder{color:#8e8e93}
+body.night #loader .field, body.hud #loader .field{background:rgba(255,255,255,.92);color:#1d1d1f;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.14),0 6px 18px rgba(12,42,76,.08)}
+body.night #loader .field::placeholder, body.hud #loader .field::placeholder{color:#8e8e93}
 .leave-btn:hover{color:#ff3b30}
 
 /* v1.0 — agent tasks: tap menu and speech caption */
@@ -611,13 +611,45 @@ body.night #loader .field::placeholder{color:#8e8e93}
 #agCapDot{flex:none;width:26px;height:26px;border-radius:50%;margin-top:2px;box-shadow:0 0 0 3px rgba(255,255,255,.7)}
 .ac-body{flex:1;min-width:0}.ac-body b{display:block;font-size:13px;color:var(--ink)}.ac-body p{margin:2px 0 0;font-size:14px;line-height:1.45;color:var(--ink-2)}
 .ac-stop{flex:none;align-self:center;min-height:36px;border-radius:999px;border:0;background:rgba(255,59,48,.12);color:#c62d22;font:inherit;font-size:12.5px;font-weight:650;padding:0 14px;cursor:pointer}
-body.night .ac-stop{color:#ff8a80}
+body.night .ac-stop, body.hud .ac-stop{color:#ff8a80}
 @media (min-width: 900px){body:has(#sitePanel.show) #agentCap,body:has(#sitePanel.show) #agentMenu{left:calc(50% - 210px)}}
 .place-tag{pointer-events:none;padding:2px 7px;border-radius:7px;font-size:10px;font-weight:600;color:#fff;background:rgba(10,25,48,.5);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);white-space:nowrap;text-align:center;line-height:1.25;text-shadow:0 1px 2px rgba(0,0,0,.3)}
 .place-tag small{display:block;font-size:8.5px;font-weight:500;opacity:.8}
 .place-tag.key{font-size:11.5px;background:rgba(10,25,48,.72);padding:3px 9px}
 .place-tag.river{background:rgba(20,90,140,.62);font-style:italic}
 .place-tag.road{background:rgba(70,70,74,.62)}
+
+/* ---------- v1.3: Hologram HUD theme (navy and black with cyan light) ---------- */
+body.hud{--ink:#e8f6ff;--ink-2:#a9cbe6;--ink-3:#6f93b3;--accent:#2fb6ff;--accent-2:#7fe3ff;--glass:rgba(4,14,30,.74);--glass-strong:rgba(4,14,30,.86);--glass-dark:rgba(3,12,26,.7);--hair:rgba(90,200,255,.16);--hair-light:rgba(90,200,255,.28);--surface-1:#061428;--series-1:#4fd1ff;--series-2:#ff9f43;--series-3:#5ff0b0;background:#030a14}
+body.hud .glass{background:linear-gradient(180deg,rgba(8,26,52,.78),rgba(3,12,26,.82));border:1px solid rgba(90,200,255,.32);box-shadow:0 0 0 1px rgba(40,140,255,.08),0 0 28px rgba(30,150,255,.16),0 18px 50px rgba(0,0,0,.5),inset 0 1px 0 rgba(140,220,255,.16)}
+body.hud .card,body.hud .stat,body.hud .scen-row,body.hud .msg.bot,body.hud .suggest button{background:rgba(40,140,255,.07);box-shadow:inset 0 0 0 1px rgba(90,200,255,.14)}
+body.hud .stat .k,body.hud .card h3 .note,body.hud .small-note{letter-spacing:.04em}
+body.hud .stat .v{font-family:ui-monospace,"SF Mono",Menlo,monospace;color:#bfeaff;text-shadow:0 0 12px rgba(60,180,255,.45)}
+body.hud .card h3,body.hud .stat .k{text-transform:uppercase;font-size:11px;letter-spacing:.09em;color:#7fd0ff}
+body.hud .chart .grid line{stroke:rgba(90,200,255,.12)}
+body.hud .chart text{fill:#8fb8d8}
+body.hud .icon-btn{border:1px solid rgba(90,200,255,.22)}
+body.hud .icon-btn svg{stroke:#9fe0ff}
+body.hud .icon-btn:hover{box-shadow:0 0 16px rgba(60,180,255,.45)}
+body.hud .dock-item:not(.ai){background:linear-gradient(180deg,rgba(14,40,74,.95),rgba(5,16,32,.95));box-shadow:inset 0 0 0 1px rgba(90,200,255,.25)}
+body.hud .dock-item:not(.ai):hover{box-shadow:inset 0 0 0 1px rgba(120,220,255,.6),0 0 14px rgba(60,180,255,.5)}
+body.hud .dock-item.code .dock-code{color:#9fe8ff;text-shadow:0 0 8px rgba(60,180,255,.6)}
+body.hud .seg{background:rgba(40,140,255,.12);box-shadow:inset 0 0 0 1px rgba(90,200,255,.2)}
+body.hud .seg .seg-thumb{background:linear-gradient(180deg,#1b5fa8,#0d3a6e);box-shadow:0 0 12px rgba(60,180,255,.5)}
+body.hud .play{background:#7fe3ff}body.hud .play svg{fill:#031020}
+body.hud .switch.on{background:#1aa3ff;box-shadow:0 0 10px rgba(40,170,255,.6)}
+body.hud .btn:not(.ghost):not(.secondary){background:linear-gradient(180deg,#1f8ef0,#0b5fb8);box-shadow:0 0 14px rgba(40,160,255,.45)}
+body.hud .lbl{background:rgba(3,14,30,.72);border:1px solid rgba(90,200,255,.45);border-radius:6px;box-shadow:0 0 14px rgba(40,160,255,.25);color:#e6f6ff;font-family:var(--font);letter-spacing:.02em;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+body.hud .lbl small{color:#7fd0ff;text-transform:uppercase;letter-spacing:.08em;font-size:9.5px}
+body.hud .lbl .ic{border-radius:4px;background:linear-gradient(135deg,rgba(80,200,255,.35),rgba(20,90,180,.5));box-shadow:inset 0 0 0 1px rgba(140,220,255,.6)}
+body.hud .lbl.live .ic{background:linear-gradient(135deg,rgba(255,90,80,.5),rgba(160,20,20,.5));box-shadow:inset 0 0 0 1px rgba(255,140,130,.7)}
+body.hud .lbl.dim{opacity:0;pointer-events:none}
+body.hud .globe-tag{background:rgba(3,14,30,.72);border:1px solid rgba(90,200,255,.4);border-radius:4px;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-weight:600;letter-spacing:.03em;color:#cfefff}
+body.hud .place-tag{background:rgba(3,14,30,.6);border:1px solid rgba(90,200,255,.32);border-radius:4px;color:#dff4ff}
+body.hud .place-tag.key{border-color:rgba(120,220,255,.7);box-shadow:0 0 10px rgba(40,160,255,.35)}
+body.hud .place-tag.river{background:rgba(10,60,110,.6)}
+body.hud .scen-tag{border:1px solid rgba(90,200,255,.45)}
+body.hud #hint{color:rgba(160,215,255,.6)}
 
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
@@ -1410,7 +1442,7 @@ const CONIFER = { summer: 0x24502a, spring: 0x2c5a2e, autumn: 0x234a26, winter: 
 const PINE = { summer: 0x3d6b33, spring: 0x46733a, autumn: 0x3b6331, winter: 0xd6e0da };
 const DECID = { summer: 0x6a9a3a, spring: 0xa6cf6c, autumn: [0xe0a326, 0xd0662a, 0xc9b23a], winter: 0xa39a90 };
 const tables = [];
-const state = { season: 'summer', landcover: false, layers: { clouds: false, precip: false, sensors: true, rivers: true, catchment: true, landcover: false, pano: true, particles: true, agents: true } };
+const state = { season: 'summer', landcover: false, layers: { clouds: false, precip: false, sensors: true, rivers: true, catchment: true, landcover: false, pano: true, particles: true, agents: true, places: true } };
 
 function siteShape(site) {
   const N = makeNoise(site.seed), rnd = mulberry32(site.seed * 3 + 1);
@@ -1490,6 +1522,7 @@ function buildTable(site) {
   T.rimMat = rimMat;
   const wall = new THREE.Mesh(new THREE.CylinderGeometry(Rt, Rt, .14, 160, 1, true), new THREE.MeshStandardMaterial({ color: 0x0f2740, roughness: .3, metalness: .2, side: THREE.BackSide }));
   wall.position.y = TOP + .02; g.add(wall);
+  T.rim = rim; T.wall = wall; T.fr = fr; T.fg = fg;
   if (site.hero && OUL) buildRealTerrain(T);
   else {
   // terrain
@@ -1567,7 +1600,7 @@ function buildTable(site) {
     c.fillText(site.name, 146, h / 2 + 2);
   }) }));
   const pr = R * 1.0;
-  plate.position.set(toHome.x * pr, .86, toHome.y * pr); plate.lookAt(px + toHome.x * 10, .86 + 3.2, pz + toHome.y * 10); g.add(plate);
+  plate.position.set(toHome.x * pr, .86, toHome.y * pr); plate.lookAt(px + toHome.x * 10, .86 + 3.2, pz + toHome.y * 10);   // rim plate retired in the HUD design
   // particles around ring
   T.particles = makeRingParticles(R, TOP); g.add(T.particles);
   T.snowfall = makeSnowfall(Rt, TOP); g.add(T.snowfall);
@@ -1687,7 +1720,7 @@ function buildRealTerrain(T) {
   for (let s = 0; s <= SEG; s++) { const a = s / SEG * Math.PI * 2, x = Math.cos(a), z = Math.sin(a); sp.push(x * Rt, Y0 + T.surfaceAt(x * .999, z * .999), z * Rt, x * Rt, TOP - .025, z * Rt); sc.push(.33, .26, .19, .1, .08, .065); }
   for (let s = 0; s < SEG; s++) { const a = s * 2; si.push(a, a + 2, a + 1, a + 2, a + 3, a + 1); }
   const skg = new THREE.BufferGeometry(); skg.setAttribute('position', new THREE.Float32BufferAttribute(sp, 3)); skg.setAttribute('color', new THREE.Float32BufferAttribute(sc, 3)); skg.setIndex(si); skg.computeVertexNormals();
-  g.add(new THREE.Mesh(skg, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, side: THREE.DoubleSide })));
+  T.skirt = new THREE.Mesh(skg, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .6, metalness: .3, side: THREE.DoubleSide })); g.add(T.skirt);
   // water: follows the real river and lake levels; raising the mesh floods the low ground
   const wgeo = new THREE.BufferGeometry(); wgeo.setAttribute('position', new THREE.BufferAttribute(wpos, 3)); wgeo.setIndex(widx); wgeo.computeVertexNormals();
   const wMat = glowPatch(new THREE.MeshStandardMaterial({ color: WATER.summer.color, transparent: true, opacity: .85, roughness: .06, metalness: .15, emissive: 0x06203a, emissiveIntensity: .35, envMapIntensity: 1.4 }));
@@ -1986,7 +2019,7 @@ function applyLighting(instant) {
   const fogTo = new THREE.Color(n ? 0x0b1424 : season === 'winter' ? 0xe8eef4 : 0xd9e6ef);
   const F = { gFrom: groundMat.color.clone(), fogFrom: scene.fog.color.clone(), sunC: sun.color.clone(), sunI: sun.intensity, hS: hemi.color.clone(), hG: hemi.groundColor.clone(), hI: hemi.intensity,
     glow: nightGlow.value, env: scene.environmentIntensity, night: outsideMat ? outsideMat.uniforms.uNight.value : 0, st: stars ? stars.material.uniforms.uOpacity.value : 0, nx: NIGHT.v, ceil: HALLREF.ceil ? HALLREF.ceil.emissiveIntensity : .12, fill: HALLREF.fills[0]?.intensity ?? 18 };
-  const T = { sunC: new THREE.Color(n ? 0xa9bfff : 0xfff0d6), sunI: n ? .5 : 2.4, hS: new THREE.Color(n ? 0x51648f : 0xe3f0ff), hG: new THREE.Color(n ? 0x241d17 : 0xb38a5c), hI: n ? .28 : .75 };
+  const T = { sunC: new THREE.Color(n ? 0xa9bfff : 0xfff0d6), sunI: n ? .5 : 2.4, hS: new THREE.Color(n ? 0x51648f : 0xe3f0ff), hG: new THREE.Color(n ? 0x0a1220 : 0x15253c), hI: n ? .28 : .6 };
   if (!outsideMat) sky.visible = !n;
   document.body.classList.toggle('night', n);
   tween(instant ? 1 : 1500, e => {
@@ -2060,37 +2093,39 @@ function buildHeroLayers(T) {
   road.forEach(v => v.y = Math.max(v.y, T.wlBase + .02));
   T.group.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(road), 160, .009, 4), new THREE.MeshStandardMaterial({ color: 0x8c8a84, roughness: .9 })));
   }
-  // sensor globes
-  const core = new THREE.SphereGeometry(.04, 20, 14), shell = new THREE.SphereGeometry(.092, 32, 20);
+  // sensor stations: thin HUD markers (stem, hexagon reticle, pulse ring on the ground)
+  const hexTex = canvasTex(128, 128, (c, w) => {
+    const hx = (r, lw, al) => { c.strokeStyle = `rgba(255,255,255,${al})`; c.lineWidth = lw; c.beginPath(); for (let k = 0; k <= 6; k++) { const a = k / 6 * Math.PI * 2 + Math.PI / 6; c[k ? 'lineTo' : 'moveTo'](w / 2 + Math.cos(a) * r, w / 2 + Math.sin(a) * r); } c.stroke(); };
+    hx(54, 5, 1); hx(40, 2, .55); c.fillStyle = '#fff'; c.beginPath(); c.arc(w / 2, w / 2, 13, 0, 7); c.fill();
+    [0, 1, 2, 3].forEach(k => { const a = k * Math.PI / 2; c.fillRect(w / 2 + Math.cos(a) * 58 - 2, w / 2 + Math.sin(a) * 58 - 2, 4, 4); });
+  });
+  const SH = T.real ? .3 : .42, SS = T.real ? .085 : .12;
   GLOBES.forEach((G, i) => {
     const grp = new THREE.Group(); const base = T.local(G.at[0], G.at[1], 0); if (T.real) base.y = T.surfY(G.at[0], G.at[1]); grp.position.copy(base);
-    const coreMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(.5, 1.4, 2.0), toneMapped: false });
-    const c = new THREE.Mesh(core, coreMat); c.position.y = .42;
-    const s = new THREE.Mesh(shell, new THREE.MeshPhysicalMaterial({ color: 0xdff4ff, transparent: true, opacity: .32, roughness: .04, metalness: 0, clearcoat: 1, envMapIntensity: 2, depthWrite: false }));
-    s.position.y = .42; s.userData.globe = G.id; pickables.push(s);
-    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0x6fd0ff, transparent: true, opacity: .55, depthWrite: false, blending: THREE.AdditiveBlending }));
-    halo.scale.setScalar(.45); halo.position.y = .42;
-    const stem = new THREE.Mesh(new THREE.CylinderGeometry(.004, .004, .38, 6), new THREE.MeshBasicMaterial({ color: 0x9fdcff, transparent: true, opacity: .6 })); stem.position.y = .2;
-    const ring = new THREE.Mesh(new THREE.RingGeometry(.05, .065, 40), new THREE.MeshBasicMaterial({ color: new THREE.Color(.5, 1.3, 2), toneMapped: false, transparent: true, side: THREE.DoubleSide, depthWrite: false }));
-    ring.rotation.x = -Math.PI / 2; ring.position.y = .012;
-    // plot dots
+    const mark = new THREE.Sprite(new THREE.SpriteMaterial({ map: hexTex, color: new THREE.Color(.5, 1.4, 2.0), transparent: true, depthWrite: false, toneMapped: false })); mark.scale.setScalar(SS); mark.position.y = SH;
+    const coreMat = mark.material;
+    const s = new THREE.Mesh(new THREE.SphereGeometry(SS * .7, 12, 8), new THREE.MeshBasicMaterial({ visible: false })); s.position.y = SH; s.userData.globe = G.id; pickables.push(s);
+    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0x6fd0ff, transparent: true, opacity: .4, depthWrite: false, blending: THREE.AdditiveBlending })); halo.scale.setScalar(SS * 1.6); halo.position.y = SH;
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(.0018, .0018, SH, 4), new THREE.MeshBasicMaterial({ color: new THREE.Color(.4, 1.1, 1.8), toneMapped: false, transparent: true, opacity: .75 })); stem.position.y = SH / 2;
+    const ring = new THREE.Mesh(new THREE.RingGeometry(SS * .32, SS * .36, 48), new THREE.MeshBasicMaterial({ color: new THREE.Color(.5, 1.3, 2), toneMapped: false, transparent: true, side: THREE.DoubleSide, depthWrite: false }));
+    ring.rotation.x = -Math.PI / 2; ring.position.y = .006;
     if (G.id !== 'snow-block' && !G.water) {
-      const pm = new THREE.InstancedMesh(new THREE.CylinderGeometry(.009, .009, .012, 10), new THREE.MeshBasicMaterial({ color: 0xffffff }), 18); const o = new THREE.Object3D(); const r = mulberry32(i + 5);
-      for (let k = 0; k < 18; k++) { const a = r() * 6.283, d = (T.real ? .035 + r() * .05 : .1 + r() * .16), x = G.at[0] + Math.cos(a) * d / T.Rt * 1.0, z = G.at[1] + Math.sin(a) * d / T.Rt; o.position.copy(T.local(x, z, .008)).sub(base); o.updateMatrix(); pm.setMatrixAt(k, o.matrix); }
+      const pm = new THREE.InstancedMesh(new THREE.CylinderGeometry(.004, .004, .006, 6), new THREE.MeshBasicMaterial({ color: new THREE.Color(.6, 1.3, 1.9), toneMapped: false }), 18); const o = new THREE.Object3D(); const r = mulberry32(i + 5);
+      for (let k = 0; k < 18; k++) { const a = r() * 6.283, d = (T.real ? .035 + r() * .05 : .1 + r() * .16), x = G.at[0] + Math.cos(a) * d / T.Rt, z = G.at[1] + Math.sin(a) * d / T.Rt; o.position.copy(T.local(x, z, .004)).sub(base); if (T.real) o.position.y = T.surfY(x, z) + .004 - base.y; o.updateMatrix(); pm.setMatrixAt(k, o.matrix); }
       grp.add(pm);
     }
     const tagEl = document.createElement('div'); tagEl.innerHTML = `<div class="globe-tag">${G.short}</div>`;
-    const tag = new CSS2DObject(tagEl); tag.position.y = .62;
-    grp.add(c, s, halo, stem, ring, tag);
+    const tag = new CSS2DObject(tagEl); tag.position.y = SH + SS * .9;
+    grp.add(mark, s, halo, stem, ring, tag);
     heroLayers.sensors.add(grp);
     globeObjs.push({ G, grp, coreMat, halo, ring, shell: s, tag: tagEl.firstElementChild, phase: i * 1.3 });
   });
   // 360 pins
-  const pinTex = canvasTex(192, 192, (g, w) => {
-    const grd = g.createLinearGradient(0, 8, 0, w - 8); grd.addColorStop(0, DS.navyA); grd.addColorStop(1, DS.navyB);
-    g.fillStyle = grd; g.beginPath(); g.arc(w / 2, w / 2, w / 2 - 8, 0, 7); g.fill(); g.strokeStyle = DS.edge; g.lineWidth = 5; g.stroke();
-    drawIcon(g, 'pano', w / 2, w / 2 - 14, 74, '#fff', 2.2);
-    g.fillStyle = '#9fdcff'; g.font = `700 30px ${DS.font}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('360°', w / 2, w / 2 + 44);
+  const pinTex = canvasTex(160, 160, (g, w) => {
+    g.strokeStyle = '#ffffff'; g.lineWidth = 6; g.beginPath(); g.arc(w / 2, w / 2, w / 2 - 10, 0, 7); g.stroke();
+    g.lineWidth = 2; g.globalAlpha = .55; g.beginPath(); g.arc(w / 2, w / 2, w / 2 - 22, -.6, 3.74); g.stroke(); g.globalAlpha = 1;
+    g.fillStyle = 'rgba(6,20,40,.55)'; g.beginPath(); g.arc(w / 2, w / 2, w / 2 - 13, 0, 7); g.fill();
+    g.fillStyle = '#ffffff'; g.font = `700 38px ui-monospace, Menlo, monospace`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('360', w / 2, w / 2 + 2);
   });
   const main = sh.paths.find(p => p.main).pts.filter(([x, z]) => Math.hypot(x, z) < .9);
   const riverAt = (u, off) => {
@@ -2101,10 +2136,10 @@ function buildHeroLayers(T) {
   CONFIG.PANORAMAS.forEach(P => {
     const [x, z] = P.river ? riverAt(P.river[0], P.river[1]) : P.at;
     const pos = T.local(x, z, 0); pos.y = T.real ? T.surfY(x, z) : Math.max(pos.y, T.wlBase);
-    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: pinTex, depthTest: true })); sp.scale.setScalar(T.real ? .085 : .15); sp.position.copy(pos).add(new THREE.Vector3(0, .3, 0)); sp.userData.pano = P.id; pickables.push(sp);
-    const st = new THREE.Mesh(new THREE.CylinderGeometry(.003, .003, .22, 6), new THREE.MeshBasicMaterial({ color: 0xffffff })); st.position.copy(pos).add(new THREE.Vector3(0, .11, 0));
+    const PH = T.real ? .2 : .3; const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: pinTex, color: new THREE.Color(.55, 1.2, 1.9), depthTest: true, toneMapped: false })); sp.scale.setScalar(T.real ? .06 : .11); sp.position.copy(pos).add(new THREE.Vector3(0, PH, 0)); sp.userData.pano = P.id; pickables.push(sp);
+    const st = new THREE.Mesh(new THREE.CylinderGeometry(.0015, .0015, PH - .03, 4), new THREE.MeshBasicMaterial({ color: new THREE.Color(.5, 1.1, 1.8), toneMapped: false, transparent: true, opacity: .7 })); st.position.copy(pos).add(new THREE.Vector3(0, (PH - .03) / 2, 0));
     const tagEl = document.createElement('div'); tagEl.innerHTML = `<div class="globe-tag">360° · ${P.title}</div>`;
-    const tag = new CSS2DObject(tagEl); tag.position.copy(pos).add(new THREE.Vector3(0, .46, 0));
+    const tag = new CSS2DObject(tagEl); tag.position.copy(pos).add(new THREE.Vector3(0, PH + .1, 0));
     heroLayers.pano.add(sp, st, tag); panoTags[P.id] = tagEl.firstElementChild;
   });
 }
@@ -2676,12 +2711,13 @@ async function greetVisitor() {
   await Promise.race([goTo(A, standPoint('home')), wait(2500)]);
   const nm = visitorName() ? ', ' + visitorName() : '';
   AGX.introduced.add(0);
-  await agentSay(A, `Welcome to the DIWA Spatial Hub${nm}! I’m Emma, and with Suzan and Sofia I look after the supersites here. Tap me for a guided tour, or ask the orb anything.`, false);
+  await agentSay(A, `Welcome to the DIWA Spatial Hub${nm}! I’m Emma. Suzan, Sofia and I are around the hall. If you need anything, just click one of us.`, false);
   A.task = false; release(A, 5);
 }
 
 /* ---------- site hosts: greet a visitor who stays at one of their tables ---------- */
 function hostCheck(dt) {
+  return;   // agents no longer offer help on their own: visitors click them when they want something
   const now = performance.now(); if (now < AGX.check) return; AGX.check = now + 500;   // twice a second, in real time
   if (!entered || AGX.tour || AGX.speech || pano.active || !state.layers.agents || ORB.state !== 'idle' || ai.listening || flight || renderer.xr.isPresenting) return;
   if (now - AGX.lastGreet < 25000) return;
@@ -2894,11 +2930,11 @@ function chairGeo() {
 function buildLounge(L, li) {
   const g = new THREE.Group(); g.position.copy(L); scene.add(g);
   const face = Math.atan2(-L.z, -L.x), back = face + Math.PI, span = .82 * Math.PI;
-  const fabric = new THREE.MeshStandardMaterial({ color: li % 2 ? 0xcfd6dd : 0xd9cfc0, roughness: .95 });
-  const fabric2 = new THREE.MeshStandardMaterial({ color: li % 2 ? 0xbcc6d0 : 0xc8bba7, roughness: .95 });
-  const pillowM = [0x4ca9ff, 0x1770b8, 0xd98e5f].map(c => new THREE.MeshStandardMaterial({ color: c, roughness: .9 }));
-  const rug = new THREE.Mesh(new THREE.CircleGeometry(4.2, 96), new THREE.MeshStandardMaterial({ color: li % 2 ? 0x6f7d8a : 0x8a7f73, roughness: 1 })); rug.rotation.x = -Math.PI / 2; rug.position.y = .02; rug.receiveShadow = true; g.add(rug);
-  const rugEdge = new THREE.Mesh(new THREE.RingGeometry(4.0, 4.2, 96), new THREE.MeshStandardMaterial({ color: 0x4d555e, roughness: 1 })); rugEdge.rotation.x = -Math.PI / 2; rugEdge.position.y = .022; g.add(rugEdge);
+  const fabric = new THREE.MeshStandardMaterial({ color: li % 2 ? 0x13233a : 0x17283f, roughness: .7, metalness: .1 });
+  const fabric2 = new THREE.MeshStandardMaterial({ color: li % 2 ? 0x1d3352 : 0x213a5c, roughness: .75 });
+  const pillowM = [0x2fb4ff, 0x1a5fb4, 0x7fe0ff].map(c => new THREE.MeshStandardMaterial({ color: c, roughness: .6, emissive: c, emissiveIntensity: .12 }));
+  const rug = new THREE.Mesh(new THREE.CircleGeometry(4.2, 96), new THREE.MeshStandardMaterial({ color: 0x08111e, roughness: .5, metalness: .3 })); rug.rotation.x = -Math.PI / 2; rug.position.y = .02; rug.receiveShadow = true; g.add(rug);
+  const rugEdge = new THREE.Mesh(new THREE.RingGeometry(4.12, 4.2, 128), hudMat(HUD_COMET_FS, { uSpeed: { value: .4 }, uBase: { value: .35 } }, { blending: THREE.AdditiveBlending })); rugEdge.rotation.x = -Math.PI / 2; rugEdge.position.y = .022; g.add(rugEdge);
   const a0 = -(back + span / 2), a1 = -(back - span / 2);
   const seat = new THREE.Mesh(slab(sectorShape(2.05, 2.95, a0, a1), .3), fabric); seat.position.y = .12; seat.castShadow = seat.receiveShadow = true; g.add(seat);
   const cush = new THREE.Mesh(slab(sectorShape(2.1, 2.85, a0 + .02, a1 - .02), .1, .05), fabric2); cush.position.y = .48; cush.castShadow = true; g.add(cush);
@@ -2924,7 +2960,7 @@ function buildLounge(L, li) {
     body.position.y = .1; cu.position.y = .1; ch.add(body, cu); seatHit(x, z, 1.15);
   }
   // coffee table with two DIWA brochures
-  const wood = new THREE.MeshStandardMaterial({ map: WOOD_H, roughness: .45 });
+  const wood = new THREE.MeshPhysicalMaterial({ color: 0x0c1a2c, roughness: .15, metalness: .4, clearcoat: 1, emissive: 0x041428 });
   const top = new THREE.Mesh(new THREE.CylinderGeometry(.95, .95, .07, 64), wood); top.position.y = .46; top.castShadow = top.receiveShadow = true; g.add(top);
   const leg = new THREE.Mesh(new THREE.CylinderGeometry(.2, .32, .42, 32), new THREE.MeshStandardMaterial({ color: 0x2c2f35, roughness: .4, metalness: .5 })); leg.position.y = .21; g.add(leg);
   const cup = new THREE.Mesh(new THREE.CylinderGeometry(.06, .05, .11, 20), new THREE.MeshStandardMaterial({ color: 0xf4f2ee, roughness: .3 })); cup.position.set(.45, .55, -.35); g.add(cup);
@@ -2937,9 +2973,9 @@ function buildLounge(L, li) {
   // floor lamp
   const lampA = back + span / 2 + .3, lx = Math.cos(lampA) * 3.05, lz = Math.sin(lampA) * 3.05;
   const pole = new THREE.Mesh(new THREE.CylinderGeometry(.025, .025, 1.9, 12), leg.material); pole.position.set(lx, .95, lz); g.add(pole);
-  const shade = new THREE.Mesh(new THREE.CylinderGeometry(.24, .34, .36, 32, 1, true), new THREE.MeshStandardMaterial({ color: 0xfff1d8, emissive: 0xffd9a0, emissiveIntensity: .6, side: THREE.DoubleSide, roughness: .8 }));
+  const shade = new THREE.Mesh(new THREE.CylinderGeometry(.24, .34, .36, 32, 1, true), new THREE.MeshStandardMaterial({ color: 0x9fdcff, emissive: 0x2fb6ff, emissiveIntensity: .6, side: THREE.DoubleSide, roughness: .8 }));
   shade.position.set(lx, 1.95, lz); g.add(shade); NIGHT.emissive.push([shade.material, .6, 2.2]);
-  const lglow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffd9a0, transparent: true, opacity: .45, depthWrite: false, blending: THREE.AdditiveBlending })); lglow.scale.setScalar(2.4); lglow.position.set(lx, 1.95, lz); g.add(lglow); NIGHT.sprites.push([lglow.material, .35, .9]);
+  const lglow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0x4fc3ff, transparent: true, opacity: .45, depthWrite: false, blending: THREE.AdditiveBlending })); lglow.scale.setScalar(2.4); lglow.position.set(lx, 1.95, lz); g.add(lglow); NIGHT.sprites.push([lglow.material, .35, .9]);
   buildWhiteboard(L.clone().add(new THREE.Vector3(Math.cos(back) * 4.7, 0, Math.sin(back) * 4.7)), L);
   labelAt(g, 2.9, `<div class="ic">${svg('sofa')}</div><div>Lounge ${li + 1}<small>Sit and talk together</small></div>`, '', () => focusLounge(li));
 }
@@ -3088,11 +3124,14 @@ function buildMapBoard() {
   const CW = 1000, CH = Math.round(CW * MAPB.H / MAPB.W), top = 190, mapH = CH - top - 40, mapW = mapH * 975 / 1362, mapX = (CW - mapW) / 2;
   MAPB.rect = { x: mapX / CW, y: top / CH, w: mapW / CW, h: mapH / CH };
   const lc = liveCanvas(CW, CH, async (c, w, h) => {
-    c.fillStyle = '#ffffff'; c.fillRect(0, 0, w, h);
-    const L = await loadImg(ASSET.logo); if (L) c.drawImage(L, 50, 40, 110 * L.width / L.height, 110);
-    c.fillStyle = DIWA.ink; c.font = `700 50px ${DS.font}`; c.textAlign = 'right'; c.fillText('Supersites', w - 50, 92);
-    c.fillStyle = '#6b7a8c'; c.font = `500 28px ${DS.font}`; c.fillText('Click a pulsing point', w - 50, 138); c.textAlign = 'left';
-    const M = await loadImg(ASSET.map); if (M) c.drawImage(M, mapX, top, mapW, mapH);
+    const bg = c.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#0b2a58'); bg.addColorStop(1, '#061a3a'); c.fillStyle = bg; c.fillRect(0, 0, w, h);
+    c.strokeStyle = 'rgba(120,200,255,.10)'; c.lineWidth = 1; for (let x = 0; x <= w; x += 25) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, h); c.stroke(); } for (let y = 0; y <= h; y += 25) { c.beginPath(); c.moveTo(0, y); c.lineTo(w, y); c.stroke(); }
+    c.strokeStyle = 'rgba(140,215,255,.22)'; for (let x = 0; x <= w; x += 125) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, h); c.stroke(); } for (let y = 0; y <= h; y += 125) { c.beginPath(); c.moveTo(0, y); c.lineTo(w, y); c.stroke(); }
+    c.strokeStyle = 'rgba(150,220,255,.7)'; c.lineWidth = 3; c.strokeRect(22, 22, w - 44, h - 44); c.lineWidth = 1; c.strokeRect(32, 32, w - 64, h - 64);
+    const L = await loadImg(ASSET.logoWhite); if (L) c.drawImage(L, 56, 50, 100 * L.width / L.height, 100);
+    c.fillStyle = '#e6f6ff'; c.font = `700 48px ${DS.font}`; c.textAlign = 'right'; c.fillText('SUPERSITES', w - 56, 96);
+    c.fillStyle = '#7fd0ff'; c.font = `500 25px ui-monospace, Menlo, monospace`; c.fillText('DIWA · FINLAND · CLICK A POINT', w - 56, 138); c.textAlign = 'left';
+    const M = await loadImg(ASSET.map); if (M) c.drawImage(blueprintImage(M), mapX, top, mapW, mapH);
   });
   const mesh = new THREE.Mesh(new THREE.PlaneGeometry(MAPB.W, MAPB.H), new THREE.MeshBasicMaterial({ map: lc.tex, toneMapped: false }));
   mesh.position.set(0, MAPB.y0 + MAPB.H / 2, 0); mesh.userData.mapBoard = true; g.add(mesh); pickables.push(mesh);
@@ -3100,7 +3139,7 @@ function buildMapBoard() {
   SITES.forEach(s => {
     const f = MAP_PINS[s.id]; if (!f) return;
     const x = (R.x + f[0] * R.w - .5) * MAPB.W, y = MAPB.y0 + (1 - (R.y + f[1] * R.h)) * MAPB.H;
-    const col = new THREE.Color(s.hero ? 0xff9f0a : 0x1770b8).multiplyScalar(1.3);
+    const col = new THREE.Color(s.hero ? 0xff9f0a : 0x5fe0ff).multiplyScalar(1.3);
     const dot = new THREE.Mesh(new THREE.CircleGeometry(.055, 32), new THREE.MeshBasicMaterial({ color: col, toneMapped: false })); dot.position.set(x, y, .012);
     const rings = [0, 1].map(k => { const r = new THREE.Mesh(new THREE.RingGeometry(.068, .085, 48), new THREE.MeshBasicMaterial({ color: col, transparent: true, toneMapped: false, depthWrite: false })); r.position.set(x, y, .011); g.add(r); return r; });
     const hit = new THREE.Mesh(new THREE.CircleGeometry(.26, 16), new THREE.MeshBasicMaterial({ visible: false })); hit.position.set(x, y, .02); hit.userData.mapPin = s.id; pickables.push(hit);
@@ -3286,7 +3325,7 @@ function buildUI() {
   // layers popover
   const L = [
     ['sensors', 'Sensor stations', 'sensor', '#0a84ff'], ['rivers', 'River network', 'river', '#30b0c7'], ['catchment', 'Catchment boundary', 'boundary', '#ff9f0a'],
-    ['landcover', 'Land cover', 'landcover', '#34c759'], ['pano', '360° points', 'pano', '#5856d6'], ['particles', 'Light particles', 'sparkle', '#ff9f6b'], ['clouds', 'Clouds over the tables', 'cloud', '#8e9bb0'], ['precip', 'Rain and snow', 'drop', '#5ac8fa'], ['agents', 'Agents · Emma, Suzan, Sofia', 'people', '#e04fa0'],
+    ['landcover', 'Land cover', 'landcover', '#34c759'], ['pano', '360° points', 'pano', '#5856d6'], ['particles', 'Light particles', 'sparkle', '#ff9f6b'], ['clouds', 'Clouds over the tables', 'cloud', '#8e9bb0'], ['precip', 'Rain and snow', 'drop', '#5ac8fa'], ['places', 'Place names', 'textT', '#64d2ff'], ['agents', 'Agents · Emma, Suzan, Sofia', 'people', '#e04fa0'],
   ];
   $('#layerRows').innerHTML = L.map(([k, n, ic, c]) => `<div class="toggle-row" data-k="${k}"><div class="sw-ic" style="background:${c}">${svg(ic)}</div>${n}<div class="switch ${state.layers[k] ? 'on' : ''}"></div></div>`).join('') + '<div class="small-note" style="padding:0 8px 4px">Map layers apply to the Oulankajoki table. Its terrain, river, roads and buildings come from National Land Survey data; sensor positions are approximate. Clouds, rain and snow follow the weather of the timeline date.</div>';
   $('#layerRows').querySelectorAll('.toggle-row').forEach(r => r.addEventListener('click', () => { const k = r.dataset.k; state.layers[k] = !state.layers[k]; r.querySelector('.switch').classList.toggle('on', state.layers[k]); applyLayers(); }));
@@ -3329,7 +3368,7 @@ const tableOf = id => tables.find(t => t.site.id === id);
 const focus = { kind: 'home', id: null };
 function syncHeroLabels() {
   if (heroLayers.catchLabel) heroLayers.catchLabel.visible = state.layers.catchment && focus.id === 'oulanka';
-  if (heroLayers.places) heroLayers.places.children.forEach(o => o.visible = focus.id === 'oulanka' && !scen.kind);
+  if (heroLayers.places) heroLayers.places.children.forEach(o => o.visible = state.layers.places && focus.id === 'oulanka' && !scen.kind);
 }
 function setDockCurrent(id) { document.querySelectorAll('.dock-item').forEach(b => b.classList.toggle('current', !!id && b.dataset.site === id)); syncHeroLabels(); }
 function setLabelsFocus(id, hideAll = false) { tables.forEach(T => { T.lbl.classList.toggle('hidden', hideAll || T.site.id === id); T.lbl.classList.toggle('dim', !!id && T.site.id !== id); }); }
@@ -3430,8 +3469,8 @@ function chart(el, { series, unit, height = 132, type = 'line', decimals = 1, la
   charts.add(api); api.setDay(playback.day);
   return api;
 }
-const C1 = '#2a78d6', C2 = '#eb6834', C3 = '#1baf7a';
-const SEQ = ['#9ec5f0', '#4a8fe0', '#1d4f99'];
+const C1 = '#4fd1ff', C2 = '#ff9f43', C3 = '#5ff0b0';
+const SEQ = ['#bfe8ff', '#4fc3ff', '#1f7fd6'];
 
 /* ---------- site panel ---------- */
 let siteTab = 'overview';
@@ -4448,6 +4487,7 @@ function loop() {
     T.rimMat.color.setRGB(.35 + .25 * T.hover, .85 + .4 * T.hover, 1.6 + .8 * T.hover);
     if (T.waterTarget !== undefined) T.water.position.y = lerp(T.water.position.y, T.waterTarget, .08);
     if (T.foamMat) T.foamMat.uniforms.uTime.value = t;
+  updateHUD(t);
   });
   if (!renderer.xr.isPresenting) {
     walk(dt);
@@ -4463,6 +4503,139 @@ addEventListener('resize', () => {
 });
 
 /* =====================================================================
+   Hologram HUD theme: navy and black with cyan light, applied after the hall is built
+   ===================================================================== */
+const HUD = { t: [], cyan: new THREE.Color(.28, .9, 1.7), soft: new THREE.Color(.14, .45, .85) };
+const hudU = () => { const u = { uTime: { value: 0 } }; HUD.t.push(u); return u; };
+function updateHUD(t) { HUD.t.forEach(u => u.uTime.value = t); }
+// animated floor: dark glass with a fine grid, hex rings radiating from the centre and a slow scan sweep
+const HUD_FLOOR_FS = `
+  uniform float uTime; varying vec2 vP;
+  float line(float v, float w){ float f = abs(fract(v) - .5); return smoothstep(w, 0., .5 - f); }
+  void main(){
+    vec2 p = vP; float r = length(p / vec2(43., 35.));
+    float g1 = max(line(p.x / 2., .025), line(p.y / 2., .025)) * .22;
+    float g2 = max(line(p.x / 10., .012), line(p.y / 10., .012)) * .45;
+    float rings = line(length(p) / 6. - uTime * .08, .02) * .35;
+    float ang = atan(p.y, p.x), sweep = pow(max(0., cos(ang - uTime * .25)), 60.) * smoothstep(1., .2, r) * .6;
+    float fade = smoothstep(1.02, .55, r);
+    vec3 base = vec3(.012, .03, .06);
+    vec3 c = base + vec3(.16, .62, 1.) * (g1 + g2 + rings + sweep) * fade;
+    gl_FragColor = vec4(c, .9);
+  }`;
+const HOLO_VS = `varying vec2 vUv; varying vec2 vP; void main(){ vUv = uv; vP = position.xy; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }`;
+// table hologram wall: a thin glass cylinder with rising scan lines
+const HUD_WALL_FS = `
+  uniform float uTime; varying vec2 vUv;
+  void main(){
+    float y = vUv.y, scan = smoothstep(.0, .06, fract(y * 6. - uTime * .35)) * smoothstep(.12, .06, fract(y * 6. - uTime * .35));
+    float edge = smoothstep(.12, 0., y) * .5 + smoothstep(.85, 1., y) * .8;
+    float a = .05 + scan * .1 + edge * .35;
+    gl_FragColor = vec4(vec3(.25, .8, 1.5), a * (1. - y * .35));
+  }`;
+// moving light around a ring (angle-driven comets)
+const HUD_COMET_FS = `
+  uniform float uTime; uniform float uSpeed; uniform float uBase; varying vec2 vP;
+  void main(){
+    float a = atan(vP.y, vP.x);
+    float c1 = pow(max(0., cos(a - uTime * uSpeed)), 80.), c2 = pow(max(0., cos(a + 3.1416 - uTime * uSpeed)), 80.);
+    float pulse = .75 + .25 * sin(uTime * 1.7);
+    float k = uBase * pulse + (c1 + c2) * 1.6;
+    gl_FragColor = vec4(vec3(.3, .95, 1.8) * k, clamp(k, 0., 1.));
+  }`;
+// rectangular frame: light runs along the edge of a panel
+const HUD_FRAME_FS = `
+  uniform float uTime; uniform vec2 uSize; varying vec2 vP;
+  void main(){
+    float a = atan(vP.y / uSize.y, vP.x / uSize.x);
+    float c1 = pow(max(0., cos(a - uTime * .6)), 40.), c2 = pow(max(0., cos(a + 3.1416 - uTime * .6)), 40.);
+    float k = .38 + .12 * sin(uTime * 2. + a * 2.) + (c1 + c2) * 1.5;
+    gl_FragColor = vec4(vec3(.3, .9, 1.7) * k, clamp(k, 0., 1.));
+  }`;
+// blueprint shimmer over the supersite map: scan line and a fine moving grid
+const HUD_BP_FS = `
+  uniform float uTime; uniform vec2 uSize; varying vec2 vUv;
+  float line(float v, float w){ float f = abs(fract(v) - .5); return smoothstep(w, 0., .5 - f); }
+  void main(){
+    vec2 p = vUv * uSize;
+    float grid = max(line(p.x * 4., .03), line(p.y * 4. + uTime * .05, .03)) * .07;
+    float s = fract(uTime * .09); float scan = smoothstep(.025, 0., abs(vUv.y - (1. - s))) * .5 + smoothstep(.25, 0., (1. - s) - vUv.y) * step(vUv.y, 1. - s) * .06;
+    gl_FragColor = vec4(vec3(.45, .9, 1.4) * (grid + scan), grid + scan);
+  }`;
+function hudMat(fs, extra = {}, opts = {}) {
+  return new THREE.ShaderMaterial({ vertexShader: HOLO_VS, fragmentShader: fs, uniforms: Object.assign(hudU(), extra), transparent: true, depthWrite: false, toneMapped: false, side: THREE.DoubleSide, ...opts });
+}
+function hudFrame(W, H, pad = .12, thick = .05, r = .2) {
+  const outer = roundedRectShape(W + 2 * (pad + thick), H + 2 * (pad + thick), r + pad + thick), inner = roundedRectShape(W + 2 * pad, H + 2 * pad, r + pad);
+  outer.holes.push(new THREE.Path(inner.getPoints(48).reverse()));
+  return new THREE.Mesh(new THREE.ShapeGeometry(outer, 24), hudMat(HUD_FRAME_FS, { uSize: { value: new THREE.Vector2(W / 2, H / 2) } }, { blending: THREE.AdditiveBlending }));
+}
+function applyHUD() {
+  document.body.classList.add('hud');
+  // structure: dark blue metal instead of wood
+  [woodMat, woodMatV].forEach(m => { m.map = null; m.color.setHex(0x0c1828); m.roughness = .32; m.metalness = .75; m.emissive = new THREE.Color(0x020812); m.needsUpdate = true; });
+  floorOverlay.material = hudMat(HUD_FLOOR_FS, {}, { side: THREE.FrontSide }); floorOverlay.material.depthWrite = false;
+  hall.traverse(o => {
+    if (!o.isMesh || !o.material || o === floorOverlay) return;
+    const m = o.material;
+    if (m.isMeshBasicMaterial && m.color && m.color.r > 1.2 && m.color.g > 1.2) m.color.set(.3, 1.0, 1.9);           // ceiling light lines → cyan
+    else if (m.isMeshStandardMaterial && !m.isMeshPhysicalMaterial && m.color.getHex() === 0xd9d3c8) m.color.setHex(0x07101c);  // plinth
+    else if (m.isMeshStandardMaterial && m.color.getHex() === 0x2c3036) { m.color.setHex(0x0a1422); m.emissive = new THREE.Color(0x05182c); }   // mullions
+    else if (m.isMeshPhysicalMaterial && m.transparent) { m.color.setHex(0x8fd4ff); m.opacity = .07; }              // glass wall
+  });
+  if (HALLREF.ceil) { HALLREF.ceil.color.setHex(0x0a1422); HALLREF.ceil.emissive.setHex(0x0d3358); }
+  if (HALLREF.top) HALLREF.top.material.color.setHex(0xbfe6ff);
+  HALLREF.fills.forEach(l => l.color.setHex(0xbfdcff));
+  NIGHT.emissive.forEach(([m]) => { m.color?.setHex(0x9fdcff); m.emissive?.setHex(0x2fb6ff); });
+  NIGHT.sprites.forEach(([m]) => m.color.setHex(0x4fc3ff)); NIGHT.lights.forEach(l => l.color.setHex(0x5aa8ff));
+  if (floorLogo) { floorLogo.day = floorLogo.night; floorLogo.mat.map = floorLogo.night; floorLogo.mat.color.setHex(0x9fe0ff); floorLogo.mat.opacity = .5; floorLogo.mat.needsUpdate = true; }
+  particleMats.forEach(m => m.uniforms.uColor.value.set(.45, .85, 1.5)); if (dustMat) dustMat.uniforms.uColor.value.set(.5, .8, 1.3);
+  // tables: the whole landscape sits inside a thin hologram cylinder with a running light on its rim
+  tables.forEach(T => {
+    let top;
+    if (T.real) { let mx = -1e9; const N = OUL.grid; for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) { const x = -1 + 2 * i / (N - 1), z = -1 + 2 * j / (N - 1); if (x * x + z * z > 1) continue; const k = j * N + i; mx = Math.max(mx, OUL.H[k], OUL.L[k] > OUL.base + 5 ? OUL.L[k] : -1e9); } top = T.wlBase + T.ym(mx); }
+    else top = T.TOP - .03 + Math.max(...T.meta.map(m => m.h), T.shape.wl);
+    top += .035; T.topY = top;
+    const g = T.group, Rt = T.Rt, h = top - (T.TOP - .1);
+    if (T.wall) g.remove(T.wall);
+    const wall = new THREE.Mesh(new THREE.CylinderGeometry(Rt + .004, Rt + .004, h, 200, 1, true), hudMat(HUD_WALL_FS, {}, { blending: THREE.AdditiveBlending }));
+    wall.position.y = T.TOP - .1 + h / 2; g.add(wall); T.wall = wall;
+    if (T.rim) { T.rim.geometry.dispose(); T.rim.geometry = new THREE.TorusGeometry(Rt + .006, .007, 6, 240); T.rim.position.y = top; }
+    const ring = new THREE.Mesh(new THREE.RingGeometry(Rt + .012, Rt + .06, 240), hudMat(HUD_COMET_FS, { uSpeed: { value: .5 + (T.site.hero ? 0 : (T.site.seed % 5) * .07) }, uBase: { value: .22 } }, { blending: THREE.AdditiveBlending }));
+    ring.rotation.x = -Math.PI / 2; ring.position.y = top + .001; g.add(ring);
+    const base = new THREE.Mesh(new THREE.RingGeometry(T.R * .78, T.R * .84, 200), hudMat(HUD_COMET_FS, { uSpeed: { value: -.35 }, uBase: { value: .3 } }, { blending: THREE.AdditiveBlending }));
+    base.rotation.x = -Math.PI / 2; base.position.y = .035; g.add(base);
+    if (T.fr) T.fr.visible = false; if (T.fg) T.fg.material.color.setHex(0x3fb6ff);
+    if (T.skirt) { const c = T.skirt.geometry.attributes.color; for (let i = 0; i < c.count; i++) { const topV = i % 2 === 0; c.setXYZ(i, topV ? .06 : .02, topV ? .16 : .05, topV ? .28 : .09); } c.needsUpdate = true; }
+  });
+  // video wall, news and supersite map: running light frames
+  SCREENS.forEach(S => { const f = hudFrame(14.4, 8.1, .32, .06, .45); f.position.set(0, 1.8 + 8.1 / 2, .03); S.g.add(f); S.g.traverse(o => { if (o.material?.isMeshPhysicalMaterial) o.material.color.setHex(0x0a1422); }); });
+  [[NEWS, NEWS.W, NEWS.H, NEWS.y0], [MAPB, MAPB.W, MAPB.H, MAPB.y0]].forEach(([B, W, H, y0]) => { const f = hudFrame(W, H, .12, .035, .1); f.position.set(0, y0 + H / 2, .02); B.g.add(f); });
+  BOARDS.forEach(B => { const g = B.g || B.mesh?.parent; if (!g) return; const f = hudFrame(WB.W, WB.H, .1, .03, .08); f.position.set(0, WB.y0 + WB.H / 2, .02); g.add(f); });
+  // blueprint shimmer over the map
+  const bp = new THREE.Mesh(new THREE.PlaneGeometry(MAPB.W, MAPB.H), hudMat(HUD_BP_FS, { uSize: { value: new THREE.Vector2(MAPB.W, MAPB.H) } }, { blending: THREE.AdditiveBlending }));
+  bp.position.set(0, MAPB.y0 + MAPB.H / 2, .006); MAPB.g.add(bp);
+  // stand boards in dark metal
+  [NEWS.g, MAPB.g, ...BOARDS.map(B => B.g)].forEach(g => g && g.traverse(o => { if (o.material?.isMeshPhysicalMaterial) o.material.color.setHex(0x0a1422); }));
+}
+// blueprint version of the Finland map image: sea and land in blues, lines and text in light cyan
+function blueprintImage(img) {
+  const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+  const d = g.getImageData(0, 0, c.width, c.height), a = d.data;
+  for (let i = 0; i < a.length; i += 4) {
+    if (a[i + 3] < 10) continue;
+    const r = a[i], gg = a[i + 1], b = a[i + 2], L = (.3 * r + .59 * gg + .11 * b) / 255, blue = b - r > 18;
+    let o;
+    if (L < .62) { const k = Math.min(1, (.62 - L) / .4); o = [lerp(40, 200, k), lerp(110, 240, k), 255]; }
+    else if (blue) o = [10, 38, 84];
+    else if (L < .93) o = [26, 92, 150];
+    else o = [16, 58, 110];
+    a[i] = o[0]; a[i + 1] = o[1]; a[i + 2] = o[2];
+  }
+  g.putImageData(d, 0, 0); return c;
+}
+
+/* =====================================================================
    Boot
    ===================================================================== */
 async function boot() {
@@ -4472,7 +4645,7 @@ async function boot() {
   await progress(.3, 'Shaping the tables');
   for (let i = 0; i < SITES.length; i++) { buildTable(SITES[i]); if (i % 3 === 2) await progress(.3 + .4 * (i + 1) / SITES.length, `Shaping the tables · ${i + 1}/${SITES.length}`); }
   await progress(.75, 'Placing sensors and layers');
-  buildHeroLayers(tableOf('oulanka')); buildScenarioObjects(); buildScreens(); buildOrb(); makeDust(); buildLounges(); buildAgents(); buildStars(); buildNightSky(); buildLamps(); buildNews(); buildMapBoard(); buildFloorLogo(); buildClouds(); buildPrecip();
+  buildHeroLayers(tableOf('oulanka')); buildScenarioObjects(); buildScreens(); buildOrb(); makeDust(); buildLounges(); buildAgents(); buildStars(); buildNightSky(); buildLamps(); buildNews(); buildMapBoard(); buildFloorLogo(); buildClouds(); buildPrecip(); applyHUD();
   await progress(.88, 'Preparing interface');
   buildUI(); aiInit(); wbInput(); setupInput(); panoInput(); setupVR(); setupAgentUI();
   state.night = ls.get('hub.night') === '1'; applySeason('summer', true); applyLayers(); setDay(playback.day);

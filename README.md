@@ -16,6 +16,8 @@ The **Oulankajoki** supersite at Oulanka Research Station, Kuusamo, is the large
 
 ## Features
 
+- **Hologram HUD design:** a navy and black hall with cyan light: animated floor grid, holographic tables with running rim lights, light frames on the video wall, news and map, a blueprint map of the supersites, and HUD-style panels and charts.
+
 - **Real Oulanka map:** terrain from the national 2 m elevation model, a 0.5 m aerial photo in summer, drawn snow and land-cover maps, buildings and bridges from the national terrain database, and a 5 cm drone photo of the Puukkosuo fen. Flood and river-ice scenarios follow the real valley.
 
 - **Sensor stations:** stations from the Oulanka snow and reindeer-grazing experiment, with their sensors, measured variables, measurement heights and data-quality information.
