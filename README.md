@@ -43,6 +43,8 @@ The **Oulankajoki** supersite at Oulanka Research Station, Kuusamo, is the large
 
 ![360° view of the Oulankajoki rapids](docs/preview-360.jpg)
 
+![The Immersive DIWA Supersites flipbook, open at the Oulankajoki pages](docs/preview-flipbook.jpg)
+
 ## How to explore
 
 | Action | Control |
