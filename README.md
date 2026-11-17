@@ -12,9 +12,11 @@ The DIWA Spatial Hub brings environmental monitoring sites across Finland togeth
 
 Tana River (TA) · Pallas Research Station (PA) · Sodankylä Research Station (SO) · **Oulankajoki River (OU)** · Kemijoki River (KE) · Vantaanjoki River (VA) · Kokkola Groundwater Area (KO) · Archipelago Sea (AR) · Oulu Region (OR)
 
-The **Oulankajoki** supersite at Oulanka Research Station, Kuusamo, is the large centre table and the first fully interactive one.
+The **Oulankajoki** supersite at Oulanka Research Station, Kuusamo, is the large centre table and the first fully interactive one. It is a **real map**: a 3.7 km wide circle centred on the station, with the true terrain, the river and lakes, road 8693 and its bridge, the Kiutaköngäs rapids and footbridges, trails, the station and visitor centre buildings, and the Puukkosuo fen.
 
 ## Features
+
+- **Real Oulanka map:** terrain from the national 2 m elevation model, a 0.5 m aerial photo in summer, drawn snow and land-cover maps, buildings and bridges from the national terrain database, and a 5 cm drone photo of the Puukkosuo fen. Flood and river-ice scenarios follow the real valley.
 
 - **Sensor stations:** stations from the Oulanka snow and reindeer-grazing experiment, with their sensors, measured variables, measurement heights and data-quality information.
 - **Time series and playback:** weather and hydrology charts linked to a timeline that can be played through the year.
@@ -58,7 +60,7 @@ Chrome or Edge on a laptop or desktop gives the best experience.
 
 ## About the data
 
-This is a research demonstrator. The sensor metadata is taken from the DIWA metadata template for the Oulanka experiment. The terrain, station positions, time series and scenarios are demonstration data, and they are labelled that way in the interface. They will be replaced step by step with measured data, national elevation models and official spatial datasets.
+This is a research demonstrator. The sensor metadata is taken from the DIWA metadata template for the Oulanka experiment. The Oulankajoki table uses real national map data; sensor positions on it are approximate. The other tables, the time series and the scenarios are demonstration data, and they are labelled that way in the interface. They will be replaced step by step with measured data, national elevation models and official spatial datasets.
 
 ## Author
 
@@ -71,6 +73,8 @@ Digital Waters (DIWA) Flagship
 ## Credits
 
 - **360° photography:** Siamak Bazzaz, Oulanka, September 2026.
+- **Map data:** National Land Survey of Finland, Elevation model 2 m, Orthophoto and Terrain database (CC BY 4.0), downloaded November 2026.
+- **Puukkosuo drone survey:** orthomosaic and elevation model, 5 cm, July 2024.
 - **Built with:** [three.js](https://threejs.org), [Trystero](https://github.com/dmotz/trystero) for peer-to-peer sessions, Cloudflare Workers AI for the assistant, and the Web Audio, WebRTC, Web Speech and WebXR browser APIs.
 - **Music:** composed live in the browser for this project.
 
