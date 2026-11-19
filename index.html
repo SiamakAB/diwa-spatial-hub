@@ -663,6 +663,12 @@ body.hud #hint{color:rgba(160,215,255,.6)}
 .wb-tool.sh svg{width:18px;height:18px}
 .lbl small{display:none}
 
+/* sensor globes: category dot in the tag, category filter chips */
+.globe-tag i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:1px;box-shadow:0 0 6px currentColor}
+.cat-chip{cursor:pointer;border:1px solid rgba(140,200,255,.25);background:rgba(20,60,110,.35);color:#eaf4ff;font:inherit;font-size:12px;display:inline-flex;align-items:center;gap:6px}
+.cat-chip i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.cat-chip.off{opacity:.38}
+
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 </head>
@@ -1022,7 +1028,7 @@ const SITES = [
     text: 'Boreal forest and fen landscape of central Lapland, with a long tradition of Arctic research. Table terrain is illustrative.' },
   { id: 'oulanka', name: 'Oulankajoki River', icon: 'waves', type: 'river', pos: [0, -5], r: 5.6, seed: 41, hero: true,
     sub: 'Supersite · Oulanka, Kuusamo',
-    text: 'The Oulankajoki flows through Oulanka National Park in Kuusamo, northeastern Finland, past the University of Oulu’s Oulanka Research Station. This table is a real map of the 3.7 km around the station, from the National Land Survey 2 m elevation model and terrain database: the river and Kiutaköngäs rapids, road 8693 and its bridge, the station and visitor centre, trails, and the Puukkosuo fen. It carries the full set of hub layers: sensor stations from the DIWA metadata template, weather and hydrology panels, seasons, 360° views and a live camera.' },
+    text: 'The Oulankajoki flows through Oulanka National Park in Kuusamo, northeastern Finland, past the University of Oulu’s Oulanka Research Station. This table is a real map of the 3.7 km around the station, from the National Land Survey 2 m elevation model and terrain database: the river and Kiutaköngäs rapids, road 8693 and its bridge, the station and visitor centre, trails, and the Puukkosuo fen. It carries the full set of hub layers: public sensor stations at their surveyed positions, drone photos of the Puukkosuo fen through the seasons, weather and hydrology panels, 360° views and a live camera.' },
   { id: 'kemijoki', name: 'Kemijoki River', icon: 'waves', type: 'river', pos: [16.6, -10.4], r: 3.25, seed: 53,
     sub: 'River site · Lapland',
     text: 'Finland’s longest river, flowing from eastern Lapland to the Gulf of Bothnia at Kemi and heavily used for hydropower. Table terrain is illustrative.' },
@@ -1043,36 +1049,23 @@ const SITE = Object.fromEntries(SITES.map(s => [s.id, s]));
 const HERO = SITE.oulanka;
 
 /* =====================================================================
-   Sensor stations — from oulanka-metadata-template (DIWA)
-   Positions on the table are illustrative: the template has no coordinates yet.
+   Sensor stations — DIWA critical-zone sensor template, public sensors only
+   Filled from oulanka/sensors.json (built by tools/build_sensors.py). Sensors marked private or
+   confidential are never written to that file, so they never appear in the hub.
    ===================================================================== */
-const GLOBES = [
-  { id: 'tower-pine-inside', name: 'Pine heath tower · inside fence', short: 'Pine tower · inside', at: [-0.55, 0.5],
-    site: 'Pine heath', treat: 'Inside fence · ungrazed', plots: 'Plots 1–18', since: '2018', heights: '2 m and 18 m',
-    sensors: ['Campbell CS215 · temperature & humidity', 'Kipp & Zonen CNR 4 · net radiometer', 'Campbell SR50A · snow depth', 'Skye SKR 180 · NDVI', 'Apogee SQ-215 · PAR', 'Vaisala GMP345 · CO₂', 'Campbell CR1000X · logger'],
-    measures: ['Air temperature', 'Relative humidity', 'Shortwave in / out', 'Longwave in / out', 'Snow depth', 'CO₂'],
-    flags: 0, changes: 3, snowF: 1.0, vars: ['airT', 'snow', 'sw', 'rh', 'co2'] },
-  { id: 'tower-pine-outside', name: 'Pine heath tower · outside fence', short: 'Pine tower · outside', at: [-0.12, 0.7],
-    site: 'Pine heath', treat: 'Outside fence · reindeer grazed', plots: 'Plots 19–36', since: '2018', heights: '2 m and 18 m',
-    sensors: ['Campbell CS215 · temperature & humidity', 'Kipp & Zonen CNR 4 · net radiometer', 'Campbell SR50A · snow depth', 'Skye SKR 180 · NDVI', 'Apogee SQ-215 · PAR', 'Campbell CR1000X · logger'],
-    measures: ['Air temperature', 'Relative humidity', 'Shortwave in / out', 'Longwave in / out', 'Snow depth'],
-    flags: 20, changes: 0, snowF: 0.9, vars: ['airT', 'snow', 'sw', 'rh'] },
-  { id: 'tower-fen-inside', name: 'Puukkosuo fen tower · inside fence', short: 'Fen tower · inside', at: [0.46, -0.38],
-    site: 'Puukkosuo fen', treat: 'Inside fence · ungrazed', plots: 'Plots 55–72', since: '2018', heights: '2 m',
-    sensors: ['Campbell CS215 · temperature & humidity', 'Kipp & Zonen CNR 4 · net radiometer', 'Campbell SR50A · snow depth', 'Skye SKR 180 · NDVI', 'Campbell CS100 · barometer', 'Campbell CR1000X · logger'],
-    measures: ['Air temperature', 'Relative humidity', 'Shortwave in / out', 'Longwave in / out', 'Snow depth', 'Air pressure'],
-    flags: 36, changes: 0, snowF: 1.12, vars: ['airT', 'snow', 'sw', 'rh', 'pres'] },
-  { id: 'tower-fen-outside', name: 'Puukkosuo fen tower · outside fence', short: 'Fen tower · outside', at: [0.7, -0.5],
-    site: 'Puukkosuo fen', treat: 'Outside fence · reindeer grazed', plots: 'Plots 37–54', since: '2018', heights: '2 m',
-    sensors: ['Campbell CS215 · temperature & humidity', 'Kipp & Zonen CNR 4 · net radiometer', 'Campbell SR50A · snow depth', 'Skye SKR 180 · NDVI', 'Campbell CS100 · barometer', 'Campbell CR1000X · logger'],
-    measures: ['Air temperature', 'Relative humidity', 'Shortwave in / out', 'Longwave in / out', 'Snow depth', 'Air pressure'],
-    flags: 38, changes: 0, snowF: 1.05, vars: ['airT', 'snow', 'sw', 'rh', 'pres'] },
-  { id: 'snow-block', name: 'Snow manipulation block', short: 'Snow block', at: [-0.38, 0.72],
-    site: 'Pine heath', treat: 'Control · snow reduced (S−) · snow added (S+)', plots: 'Three treatment stations', since: '2022', heights: 'Soil −5 to −100 cm · snowpack 0 to 160 cm',
-    sensors: ['Campbell SoilVUE10 · soil profile (TDR)', 'Campbell 107 · thermistor chains', 'Campbell CR1000X · logger'],
-    measures: ['Soil temperature profile', 'Volumetric water content', 'Dielectric permittivity', 'Soil electrical conductivity', 'Snowpack temperature'],
-    flags: 1, changes: 0, snowF: 1.0, vars: ['soil10', 'profile', 'snowpack', 'vwc'] },
-];
+const GLOBES = [];
+const SENSOR_CATS = {
+  soil: { label: 'Soil', color: 0x34d399, css: '#34d399' },
+  surface: { label: 'Surface water', color: 0x38bdf8, css: '#38bdf8' },
+  groundwater: { label: 'Groundwater', color: 0xa78bfa, css: '#a78bfa' },
+  atmosphere: { label: 'Atmosphere and weather', color: 0xfacc15, css: '#facc15' },
+  vegetation: { label: 'Vegetation', color: 0x86efac, css: '#86efac' },
+  remote: { label: 'Cameras and remote sensing', color: 0xf1f5f9, css: '#f1f5f9' },
+  other: { label: 'Other', color: 0x94a3b8, css: '#94a3b8' },
+};
+const sensorFilter = new Set(Object.keys(SENSOR_CATS));
+let FEN = null;                           // Petra's 2024 drone surveys of Puukkosuo (oulanka/fen-surveys.json)
+const FEN_BY_SEASON = { winter: 'mar', spring: 'may', summer: 'jul', autumn: 'sep' };
 
 /* =====================================================================
    Small utilities
@@ -1660,11 +1653,6 @@ let OUL = null;
 const OUL_VE = 1.2;                       // vertical exaggeration of the terrain
 const SU = { flood: .64, view: .42, jam: .56, ice: .24 };   // anchors along the river for the scenarios
 let JAM_RISE = .028;
-const RIVER_GLOBE = at => ({ id: 'river-station', name: 'Riverside monitoring point', short: 'River station', at,
-  site: 'Oulankajoki · below the station yard', treat: 'River bank · wooden stairs down from the station yard', plots: 'One river station', since: '—', heights: 'Probes in the river',
-  sensors: ['Water level sensor', 'Water temperature probe', 'Turbidity sensor', 'Data logger cabinet', 'Mast camera'],
-  measures: ['Water level', 'Discharge', 'Water temperature', 'Turbidity'],
-  flags: 0, changes: 0, snowF: 1, vars: ['wl', 'q', 'wt', 'turb'], water: true });
 async function loadOulanka() {
   if (/[?&]proc\b/.test(location.search)) return;
   try {
@@ -1677,11 +1665,16 @@ async function loadOulanka() {
     meta.H = new Float32Array(n); meta.L = new Float32Array(n);
     for (let i = 0; i < n; i++) { meta.H[i] = meta.base + u16[i] / meta.enc; meta.L[i] = meta.base + u16[n + i] / meta.enc; }
     meta.trees = new Float32Array(trb); meta.tex = { summer, winter, landcover };
-    if (meta.fen) meta.tex.fen = await tex('fen-drone.webp').catch(() => null);
+    if (meta.fen) {
+      FEN = await fetch(base + 'fen-surveys.json').then(ok).then(r => r.json()).catch(() => null);
+      meta.tex.fenSeason = {};
+      if (FEN) await Promise.all(FEN.surveys.map(async S => { meta.tex.fenSeason[S.key] = await tex(`fen-${S.key}.webp`).catch(() => null); }));
+      meta.tex.fen = meta.tex.fenSeason.jul || await tex('fen-drone.webp').catch(() => null);
+    }
+    const sens = await fetch(base + 'sensors.json').then(ok).then(r => r.json()).catch(() => null);
+    if (sens) sens.stations.filter(S => S.inTable).forEach(S => GLOBES.push({ ...S, real: true, short: S.name.replace(/ \d{4,}$/, '') }));
     OUL = meta;
-    // sensors and 360° points move to their places on the real map (approximate until exact coordinates are supplied)
-    GLOBES.forEach(G => { if (meta.sensors[G.id]) G.at = meta.sensors[G.id]; });
-    if (meta.sensors['river-station'] && !GLOBES.find(g => g.id === 'river-station')) GLOBES.push(RIVER_GLOBE(meta.sensors['river-station']));
+    // 360° points move to their places on the real map
     CONFIG.PANORAMAS.forEach(P => { if (meta.pano[P.id]) { P.at = meta.pano[P.id]; delete P.river; } });
     Object.assign(SU, meta.scenU || {});
   } catch (e) { console.warn('Oulanka map data not found · using the illustrative table', e); OUL = null; }
@@ -1840,7 +1833,7 @@ function buildRealTerrain(T) {
     for (let j = 0; j < NZ; j++) for (let i = 0; i < NX; i++) { const a = j * (NX + 1) + i, b = a + 1, c = a + NX + 1, d = c + 1; fi.push(a, c, b, b, c, d); }
     const fgeo = new THREE.BufferGeometry(); fgeo.setAttribute('position', new THREE.Float32BufferAttribute(fp, 3)); fgeo.setAttribute('uv', new THREE.Float32BufferAttribute(fu, 2)); fgeo.setIndex(fi); fgeo.computeVertexNormals();
     const fm = glowPatch(new THREE.MeshStandardMaterial({ map: O.tex.fen, transparent: true, roughness: .95, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }));
-    const inset = new THREE.Mesh(fgeo, fm); inset.position.y = Y0; inset.receiveShadow = true; inset.renderOrder = 1; g.add(inset); T.fenMat = fm;
+    const inset = new THREE.Mesh(fgeo, fm); inset.position.y = Y0; inset.receiveShadow = true; inset.renderOrder = 1; g.add(inset); T.fenMat = fm; T.fenInset = inset;
   }
   // place names (shown when the table is in focus)
   heroLayers.places = new THREE.Group(); g.add(heroLayers.places);
@@ -1850,11 +1843,16 @@ function buildRealTerrain(T) {
   });
 }
 
+let fenKey = null;                // a drone survey picked by hand; null = follow the season
 function realSeason(T, season, landcover, instant) {
   const U = T.terrU, from = [U.uSnow.value, U.uLandK.value, U.uTint.value.r, U.uTint.value.g, U.uTint.value.b], tint = OUL_TINT[season];
   const to = [OUL_SNOW[season], landcover ? 1 : 0, ...tint];
   const roofs = T.roofMats.map(m => [m, m.color.clone(), new THREE.Color(m.userData.base).lerp(new THREE.Color(0xf1f4f7), OUL_SNOW[season] * .9)]);
-  const f0 = T.fenMat ? T.fenMat.opacity : 0, f1 = (1 - to[0]) * (1 - to[1]);
+  const fs = OUL.tex.fenSeason || {}, fk = fenKey || FEN_BY_SEASON[season], ft = fs[fk];
+  if (T.fenMat && ft && T.fenMat.map !== ft) { T.fenMat.map = ft; T.fenMat.needsUpdate = true; }
+  T.fenKey = ft ? fk : 'jul';
+  const fc = document.getElementById('fenCard'); if (fc && FEN) fc.outerHTML = fenCardHTML();
+  const f0 = T.fenMat ? T.fenMat.opacity : 0, f1 = ft ? (1 - to[1]) : (1 - to[0]) * (1 - to[1]);
   const run = e => { if (T.fenMat) { T.fenMat.opacity = lerp(f0, f1, e); T.fenMat.visible = T.fenMat.opacity > .01; } U.uSnow.value = lerp(from[0], to[0], e); U.uLandK.value = lerp(from[1], to[1], e); U.uTint.value.setRGB(lerp(from[2], to[2], e), lerp(from[3], to[3], e), lerp(from[4], to[4], e)); roofs.forEach(([m, a, b]) => m.color.lerpColors(a, b, e)); };
   if (instant) run(1); else tween(900, run, easeInOut);
   treeColors(T, season, landcover);
@@ -2132,27 +2130,26 @@ function buildHeroLayers(T) {
     hx(54, 5, 1); hx(40, 2, .55); c.fillStyle = '#fff'; c.beginPath(); c.arc(w / 2, w / 2, 13, 0, 7); c.fill();
     [0, 1, 2, 3].forEach(k => { const a = k * Math.PI / 2; c.fillRect(w / 2 + Math.cos(a) * 58 - 2, w / 2 + Math.sin(a) * 58 - 2, 4, 4); });
   });
-  const SH = T.real ? .3 : .42, SS = T.real ? .085 : .12;
+  // sensor stations: small glowing globes on a thin stem, coloured by what they measure
+  const SS = .048;
   GLOBES.forEach((G, i) => {
+    const C = SENSOR_CATS[G.cat] || SENSOR_CATS.other, col = new THREE.Color(C.color);
+    const SH = .1 + (i % 3) * .022;                          // staggered heights so close neighbours do not overlap
     const grp = new THREE.Group(); const base = T.local(G.at[0], G.at[1], 0); if (T.real) base.y = T.surfY(G.at[0], G.at[1]); grp.position.copy(base);
-    const mark = new THREE.Sprite(new THREE.SpriteMaterial({ map: hexTex, color: new THREE.Color(.5, 1.4, 2.0), transparent: true, depthWrite: false, toneMapped: false })); mark.scale.setScalar(SS); mark.position.y = SH;
-    const coreMat = mark.material;
-    const s = new THREE.Mesh(new THREE.SphereGeometry(SS * .7, 12, 8), new THREE.MeshBasicMaterial({ visible: false })); s.position.y = SH; s.userData.globe = G.id; pickables.push(s);
-    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0x6fd0ff, transparent: true, opacity: .4, depthWrite: false, blending: THREE.AdditiveBlending })); halo.scale.setScalar(SS * 1.6); halo.position.y = SH;
-    const stem = new THREE.Mesh(new THREE.CylinderGeometry(.0018, .0018, SH, 4), new THREE.MeshBasicMaterial({ color: new THREE.Color(.4, 1.1, 1.8), toneMapped: false, transparent: true, opacity: .75 })); stem.position.y = SH / 2;
-    const ring = new THREE.Mesh(new THREE.RingGeometry(SS * .32, SS * .36, 48), new THREE.MeshBasicMaterial({ color: new THREE.Color(.5, 1.3, 2), toneMapped: false, transparent: true, side: THREE.DoubleSide, depthWrite: false }));
-    ring.rotation.x = -Math.PI / 2; ring.position.y = .006;
-    if (G.id !== 'snow-block' && !G.water) {
-      const pm = new THREE.InstancedMesh(new THREE.CylinderGeometry(.004, .004, .006, 6), new THREE.MeshBasicMaterial({ color: new THREE.Color(.6, 1.3, 1.9), toneMapped: false }), 18); const o = new THREE.Object3D(); const r = mulberry32(i + 5);
-      for (let k = 0; k < 18; k++) { const a = r() * 6.283, d = (T.real ? .035 + r() * .05 : .1 + r() * .16), x = G.at[0] + Math.cos(a) * d / T.Rt, z = G.at[1] + Math.sin(a) * d / T.Rt; o.position.copy(T.local(x, z, .004)).sub(base); if (T.real) o.position.y = T.surfY(x, z) + .004 - base.y; o.updateMatrix(); pm.setMatrixAt(k, o.matrix); }
-      grp.add(pm);
-    }
-    const tagEl = document.createElement('div'); tagEl.innerHTML = `<div class="globe-tag">${G.short}</div>`;
-    const tag = new CSS2DObject(tagEl); tag.position.y = SH + SS * .9;
-    grp.add(mark, s, halo, stem, ring, tag);
+    const coreMat = new THREE.MeshBasicMaterial({ color: col.clone().multiplyScalar(1.6), toneMapped: false });
+    const core = new THREE.Mesh(new THREE.SphereGeometry(SS * .42, 16, 12), coreMat); core.position.y = SH;
+    const s = new THREE.Mesh(new THREE.SphereGeometry(SS * 1.1, 8, 6), new THREE.MeshBasicMaterial({ visible: false })); s.position.y = SH; s.userData.globe = G.id; pickables.push(s);
+    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: col.clone().multiplyScalar(.7), transparent: true, opacity: .5, depthWrite: false, blending: THREE.AdditiveBlending })); halo.scale.setScalar(SS * 2.4); halo.position.y = SH;
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(.0012, .0012, SH, 4), new THREE.MeshBasicMaterial({ color: col.clone().multiplyScalar(1.2), toneMapped: false, transparent: true, opacity: .7 })); stem.position.y = SH / 2;
+    const ring = new THREE.Mesh(new THREE.RingGeometry(SS * .3, SS * .36, 32), new THREE.MeshBasicMaterial({ color: col.clone().multiplyScalar(1.4), toneMapped: false, transparent: true, side: THREE.DoubleSide, depthWrite: false }));
+    ring.rotation.x = -Math.PI / 2; ring.position.y = .004;
+    const tagEl = document.createElement('div'); tagEl.innerHTML = `<div class="globe-tag"><i style="background:${C.css}"></i>${G.short}</div>`;
+    const tag = new CSS2DObject(tagEl); tag.position.y = SH + SS * .8;
+    grp.add(core, s, halo, stem, ring, tag);
     heroLayers.sensors.add(grp);
-    globeObjs.push({ G, grp, coreMat, halo, ring, shell: s, tag: tagEl.firstElementChild, phase: i * 1.3 });
+    globeObjs.push({ G, grp, coreMat, halo, ring, shell: s, tag: tagEl.firstElementChild, phase: i * 1.3, col });
   });
+  applySensorFilter();
   // 360 pins
   const pinTex = canvasTex(160, 160, (g, w) => {
     g.strokeStyle = '#ffffff'; g.lineWidth = 6; g.beginPath(); g.arc(w / 2, w / 2, w / 2 - 10, 0, 7); g.stroke();
@@ -2855,7 +2852,7 @@ async function agentTour(A) {
   const nm = visitorName() ? ', ' + visitorName() : '';
   const steps = [
     { go: 'home', act: () => goHome(), say: `Welcome to the tour${nm}! I’m ${A.name}. Follow me through the DIWA Spatial Hub.` },
-    { go: 'oulanka', act: () => focusSite('oulanka'), say: 'This is the Oulankajoki River in Oulanka National Park, our centre table and the first fully interactive supersite. The glowing globes are sensor stations from the DIWA metadata template.' },
+    { go: 'oulanka', act: () => focusSite('oulanka'), say: 'This is the Oulankajoki River in Oulanka National Park, our centre table and the first fully interactive supersite. The small glowing globes are public sensor stations, coloured by what they measure.' },
     { go: 'map', act: () => focusMap(), say: 'This map shows all nine DIWA supersites across Finland, from the Tana River in the far north to the Archipelago Sea in the southwest.' },
     { go: 'kemijoki', act: () => focusSite('kemijoki'), say: 'The Kemijoki is Finland’s longest river. Every table follows the seasons: watch it turn to winter for a moment.',
       during: async () => { const s0 = state.season; await wait(2200); if (tour.stop) return; applySeason(s0 === 'winter' ? 'summer' : 'winter'); await wait(4200); applySeason(s0); } },
@@ -3782,11 +3779,12 @@ function renderSiteTab(site) {
       <div class="card"><p>${site.text}</p></div>
       ${site.hero ? `
       <div class="stats">
-        <div class="stat"><div class="k">Sensor stations</div><div class="v">5</div></div>
-        <div class="stat"><div class="k">Experiment plots</div><div class="v">72</div></div>
-        <div class="stat"><div class="k">Logging since</div><div class="v">2018</div></div>
-        <div class="stat"><div class="k">Flagged periods</div><div class="v">95</div></div>
+        <div class="stat"><div class="k">Public sensor stations</div><div class="v">${GLOBES.length}</div></div>
+        <div class="stat"><div class="k">Public sensors</div><div class="v">${GLOBES.reduce((a, G) => a + G.sensors.length, 0)}</div></div>
+        <div class="stat"><div class="k">Drone surveys</div><div class="v">${FEN ? FEN.surveys.length : 0}</div></div>
+        <div class="stat"><div class="k">360° views</div><div class="v">${CONFIG.PANORAMAS.length}</div></div>
       </div>
+      ${FEN ? fenCardHTML() : ''}
       <div class="card"><h3>Explore</h3>
         <div class="btn-row" style="margin-top:0">
           <button class="btn" data-act="story">${svg('story')}Snowmelt story</button>
@@ -3794,15 +3792,19 @@ function renderSiteTab(site) {
           <button class="btn secondary" data-act="scen">${svg('scen')}Scenarios</button>
           <button class="btn secondary" data-act="live">${svg('live')}Video wall</button>
         </div>
-        <div class="small-note">Sensor metadata comes from the DIWA metadata template for the Oulanka snow and reindeer grazing experiment (Campbell CR1000X loggers). The terrain, river, roads and buildings are real (National Land Survey of Finland, CC BY 4.0). Station positions are approximate and time series are illustrative until coordinates and data exports are added.</div>
+        <div class="small-note">Sensor stations and their metadata come from the DIWA critical-zone sensor template; only sensors marked Open data or Public data are shown, at their surveyed positions. The terrain, river, roads and buildings are real (National Land Survey of Finland, CC BY 4.0). Station positions are approximate and time series are illustrative until coordinates and data exports are added.</div>
       </div>` : `
       <div class="card"><h3>Status</h3><dl class="kv"><dt>Table</dt><dd>Placeholder terrain</dd><dt>Layers</dt><dd>Not yet connected</dd><dt>Next step</dt><dd>Add site data with the Oulankajoki template</dd></dl></div>`}
+      <div class="card"><h3>Catchment <span class="note">source to sea</span></h3><p>See ${site.name} at catchment scale with its public sensor network.</p><div class="btn-row"><a class="btn secondary" href="catchments/?site=${site.id}" style="text-decoration:none">${svg('map')}Open the catchment map</a></div></div>
       <div class="card"><h3>Ask about this site</h3><p>Open the assistant with a question about ${site.name}.</p><div class="btn-row"><button class="btn ghost" data-act="ask">${svg('ai')}Ask the Hub</button></div></div>
     </div>`;
   } else if (tab === 'sensors') {
-    b.innerHTML = `<div class="fade-in"><div class="card" style="padding:6px 10px">${GLOBES.map(G => `<div class="list-row" data-g="${G.id}"><div class="dot"></div><div><b>${G.name}</b><span>${G.treat} · since ${G.since}</span></div><div class="chev"></div></div>`).join('')}</div>
-      <div class="small-note">Globe colour follows air temperature at the timeline date: blue is below 0 °C, orange above. Positions are approximate until exact coordinates are added.</div></div>`;
+    const used = Object.keys(SENSOR_CATS).filter(k => GLOBES.some(G => G.cat === k));
+    b.innerHTML = `<div class="fade-in"><div class="card"><h3>Sensor types <span class="note">tap to show or hide</span></h3><div class="chips">${used.map(k => `<button class="chip cat-chip ${sensorFilter.has(k) ? '' : 'off'}" data-cat="${k}"><i style="background:${SENSOR_CATS[k].css}"></i>${SENSOR_CATS[k].label} · ${GLOBES.filter(G => G.cat === k).length}</button>`).join('')}</div></div>
+      <div class="card" style="padding:6px 10px">${GLOBES.filter(G => sensorFilter.has(G.cat)).map(G => `<div class="list-row" data-g="${G.id}"><div class="dot" style="width:11px;height:11px;flex:none;margin:0 4px;background:${SENSOR_CATS[G.cat].css};box-shadow:0 0 8px ${SENSOR_CATS[G.cat].css}"></div><div><b>${G.name}</b><span>${G.place ? G.place + ' · ' : ''}${G.sensors.length} sensor${G.sensors.length > 1 ? 's' : ''}</span></div><div class="chev"></div></div>`).join('')}</div>
+      <div class="small-note">Only sensors marked Open data or Public data in the DIWA sensor template are shown, at their surveyed positions. Private and confidential sensors are not included.</div></div>`;
     b.querySelectorAll('.list-row').forEach(r => r.addEventListener('click', () => openGlobe(r.dataset.g)));
+    b.querySelectorAll('.cat-chip').forEach(c => c.addEventListener('click', () => { const k = c.dataset.cat; sensorFilter.has(k) ? sensorFilter.delete(k) : sensorFilter.add(k); applySensorFilter(); renderSiteTab(site); }));
   } else if (tab === 'weather') {
     b.innerHTML = `<div class="fade-in"><div class="stats" id="wStats"></div>
       <div class="card"><h3>Air temperature <span class="note">°C · daily</span></h3><div id="cT"></div></div>
@@ -3857,6 +3859,22 @@ const VARS = {
   turb: { label: 'Turbidity', h: 'Turbidity', unit: 'FNU', s: () => [{ name: 'Turbidity', color: C1, data: D.TURB }] },
   vwc: { label: 'Soil moisture', h: 'Volumetric water content · −10 cm', unit: 'm³/m³', dec: 2, s: () => [{ name: 'Volumetric water content', color: C1, data: D.vwc }] },
 };
+function applySensorFilter() { globeObjs.forEach(o => { o.grp.visible = sensorFilter.has(o.G.cat); if (o.grp.visible) pickables.includes(o.shell) || pickables.push(o.shell); else { const k = pickables.indexOf(o.shell); if (k >= 0) pickables.splice(k, 1); } }); }
+function fenCardHTML() {
+  const T = tableOf('oulanka'), cur = T?.fenKey || FEN_BY_SEASON[state.season];
+  const S = FEN.surveys.find(x => x.key === cur) || FEN.surveys[0];
+  return `<div class="card" id="fenCard"><h3>Puukkosuo fen from the air <span class="note">drone surveys 2024</span></h3>
+    <div class="var-pills">${FEN.surveys.map(x => `<button data-fen="${x.key}" class="${x.key === S.key ? 'active' : ''}">${x.season}</button>`).join('')}</div>
+    <dl class="kv"><dt>Survey</dt><dd>${S.label} · ${S.product}</dd><dt>Flight</dt><dd>${S.images} images from ${S.alt_m} m</dd><dt>Ground resolution</dt><dd>${S.gsd_cm} cm per pixel</dd><dt>Area</dt><dd>${S.area_km2} km²</dd><dt>Accuracy</dt><dd>${S.gcp_err_cm} cm at ${S.gcp} control point${S.gcp > 1 ? 's' : ''}</dd><dt>Ground model</dt><dd>DTM ${FEN.dtm.date}, ${FEN.dtm.res_cm} cm · approximate</dd></dl>
+    <div class="small-note">${FEN.by}. ${FEN.camera}, processed in ${FEN.software}. The season buttons above the hall also switch these photos.</div></div>`;
+}
+document.addEventListener('click', e => { const b = e.target.closest('[data-fen]'); if (b) setFenSurvey(b.dataset.fen); });
+function setFenSurvey(key) {
+  const T = tableOf('oulanka'); if (!T || !T.real) return;
+  const S = FEN.surveys.find(x => x.key === key); const season = Object.keys(FEN_BY_SEASON).find(k => FEN_BY_SEASON[k] === key);
+  fenKey = null; if (season && season !== state.season) { stopPlay(); applySeason(season); segSet($('#seasonSeg'), season); } else realSeason(T, state.season, state.layers.landcover, false);
+  toast(`Puukkosuo · ${S.season.toLowerCase()} survey, ${S.label}`, 2200);
+}
 function sensorStats(G, d) {
   const stat = (k, v, u) => `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u}</small></div></div>`;
   if (G.water) return stat('Water level', D.WL[d].toFixed(2), 'm') + stat('Water temp.', D.WT[d].toFixed(1), '°C');
@@ -3864,8 +3882,8 @@ function sensorStats(G, d) {
   return stat('Air temperature', D.airT[d].toFixed(1), '°C') + stat('Snow depth', (D.snow[d] * G.snowF).toFixed(0), 'cm');
 }
 function openGlobe(id, fly = true) {
-  const G = GLOBES.find(g => g.id === id), o = globeObjs.find(g => g.G.id === id);
-  sensorCard.G = G; sensorCard.v = G.vars[0];
+  const G = GLOBES.find(g => g.id === id), o = globeObjs.find(g => g.G.id === id); if (!G || !o) return;
+  sensorCard.G = G; sensorCard.v = G.vars ? G.vars[0] : null;
   if (fly) {
     const T = tableOf('oulanka'); const wp = new THREE.Vector3(); o.grp.getWorldPosition(wp); wp.y += .42;
     const dir = new THREE.Vector3(-T.group.position.x * .3, 0, 24 - T.group.position.z).normalize();
@@ -3875,6 +3893,7 @@ function openGlobe(id, fly = true) {
 }
 function renderSensorCard() {
   const G = sensorCard.G, v = VARS[sensorCard.v];
+  if (G.real) { renderStationCard(G); return; }
   [...charts].forEach(c => { if (c.el.id === 'scChart') charts.delete(c); });
   $('#scInner').innerHTML = `
     <div class="sc-head"><div class="sc-orb"></div><div><h3>${G.name}</h3><p>${G.treat}</p></div><button class="x" id="scClose" style="margin-left:auto">${svg('x')}</button></div>
@@ -3889,6 +3908,20 @@ function renderSensorCard() {
   chart($('#scChart'), { series: v.s(G), unit: v.unit, decimals: v.dec ?? 1, zeroBase: !!v.zero });
   $('#scClose').addEventListener('click', closeSensorCard);
   $('#scInner').querySelectorAll('.var-pills button').forEach(bt => bt.addEventListener('click', () => { sensorCard.v = bt.dataset.v; renderSensorCard(); }));
+  globeObjs.forEach(o => o.tag.classList.toggle('show', o.G.id === G.id));
+}
+function renderStationCard(G) {
+  const C = SENSOR_CATS[G.cat] || SENSOR_CATS.other, esc = t => String(t).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+  const since = G.sensors.map(x => x.start).filter(Boolean).sort()[0];
+  $('#scInner').innerHTML = `
+    <div class="sc-head"><div class="sc-orb" style="background:radial-gradient(circle at 35% 30%,#fff,${C.css} 45%,transparent 72%)"></div><div><h3>${esc(G.name)}</h3><p>${esc(G.place || G.site)} · ${C.label}</p></div><button class="x" id="scClose" style="margin-left:auto">${svg('x')}</button></div>
+    <div class="stats"><div class="stat"><div class="k">Sensors</div><div class="v">${G.sensors.length}</div></div><div class="stat"><div class="k">Measuring since</div><div class="v">${since ? since.slice(0, 4) : '—'}</div></div></div>
+    ${G.sensors.map(x => `<div class="card"><h3>${esc([x.producer, x.model].filter(Boolean).join(' ') || 'Sensor')} ${x.label ? `<span class="note">${esc(x.label)}</span>` : ''}</h3>
+      <dl class="kv">${x.type ? `<dt>Observes</dt><dd>${esc(x.type)}</dd>` : ''}${x.params ? `<dt>Parameters</dt><dd>${esc(x.params)}${x.units ? ` <span class="note">(${esc(x.units)})</span>` : ''}</dd>` : ''}${x.res ? `<dt>Interval</dt><dd>${esc(x.res)}</dd>` : ''}${x.start ? `<dt>Since</dt><dd>${esc(x.start)}${x.end ? ' to ' + esc(x.end) : ''}</dd>` : ''}${x.fmt ? `<dt>Format</dt><dd>${esc(x.fmt)}</dd>` : ''}<dt>Data level</dt><dd>${esc(x.level)}</dd></dl>
+      ${x.note ? `<div class="small-note">${esc(x.note)}</div>` : ''}</div>`).join('')}
+    <div class="card"><h3>Location <span class="note">ETRS-TM35FIN</span></h3><dl class="kv"><dt>Easting</dt><dd>${G.E}</dd><dt>Northing</dt><dd>${G.N}</dd>${G.z ? `<dt>Elevation</dt><dd>${G.z} m (N2000)</dd>` : ''}</dl>
+      <div class="small-note">From the DIWA critical-zone sensor template. Time series will be connected from the DIWA datalake.</div></div>`;
+  $('#scClose').addEventListener('click', closeSensorCard);
   globeObjs.forEach(o => o.tag.classList.toggle('show', o.G.id === G.id));
 }
 function closeSensorCard() { $('#sensorCard').classList.remove('show'); sensorCard.G = null; globeObjs.forEach(o => o.tag.classList.remove('show')); [...charts].forEach(c => { if (c.el.id === 'scChart') charts.delete(c); }); }
@@ -3944,7 +3977,7 @@ function storyStep(i) {
   const p0 = playback.day; tween(1500, e => setDay(lerp(p0, S.day, e)), easeInOut);
   const c = T.group.position;
   if (S.view === 'over') flyTo(new THREE.Vector3(c.x + 2.2, 11, c.z + 11), new THREE.Vector3(c.x, 1.2, c.z), 1900);
-  if (S.view === 'snow') { const wp = new THREE.Vector3(); globeObjs.find(o => o.G.id === 'snow-block').grp.getWorldPosition(wp); flyTo(wp.clone().add(new THREE.Vector3(.9, 1.5, 2.2)), wp.clone().add(new THREE.Vector3(0, .3, 0)), 1900); }
+  if (S.view === 'snow' && globeObjs.length) { const wp = new THREE.Vector3(); (globeObjs.find(o => o.G.place === 'Puukkosuo fen') || globeObjs[0]).grp.getWorldPosition(wp); flyTo(wp.clone().add(new THREE.Vector3(.9, 1.5, 2.2)), wp.clone().add(new THREE.Vector3(0, .3, 0)), 1900); }
   if (S.view === 'river') flyTo(new THREE.Vector3(c.x + 4.6, 3.2, c.z + 4.6), new THREE.Vector3(c.x - .7, 1.15, c.z - .35), 1900);
 }
 function endStory(silent) {
@@ -4123,7 +4156,8 @@ function hubContext() {
   L.push(`SUPERSITE TABLES (${SITES.length} miniature 3D landscape tables, each labelled with a two-letter code). The big centre table is the hero site; the others form a ring around it:`);
   SITES.forEach((s, i) => L.push(`${i + 1}. ${code(s)} · ${s.name} (${s.sub})${s.hero ? ' — CENTRE TABLE, the only one with full data layers' : ''}. ${s.text}`));
   L.push(OUL ? 'The Oulankajoki table is a real map: a 3.7 km wide circle centred on Oulanka Research Station, built from the National Land Survey 2 m elevation model and terrain database (river, lakes, road 8693 and its bridge, trails, the station buildings, the visitor centre, Kiutaköngäs rapids, the Puukkosuo fen and the national park boundary). Terrain height is exaggerated 1.2×. Sensor positions on it are approximate. The other tables are still illustrative.' : 'The table terrains, trees and sensor positions are illustrative, not real elevation data; real DSM / elevation data will come in a later version.');
-  L.push(`OULANKAJOKI SENSOR STATIONS (floating glowing globes on the centre table, from the DIWA Oulanka metadata template): ${GLOBES.map(G => `${G.name} (since ${G.since}; measures ${G.measures.join(', ')})`).join('; ')}.`);
+  L.push(`OULANKAJOKI SENSOR STATIONS (small glowing globes on the centre table, coloured by type: green soil, blue surface water, violet groundwater, yellow atmosphere, white remote sensing; only Open or Public sensors from the DIWA critical-zone sensor template): ${GLOBES.map(G => `${G.name}${G.place ? ' at ' + G.place : ''} (${G.sensors.map(x => [x.producer, x.model].filter(Boolean).join(' ') + (x.params ? ': ' + x.params : '')).join('; ')})`).join(' | ')}.`);
+  if (FEN) L.push(`PUUKKOSUO FEN DRONE SURVEYS (${FEN.by}, ${FEN.camera}): ${FEN.surveys.map(S => `${S.season} ${S.label}, ${S.images} images from ${S.alt_m} m, ${S.gsd_cm} cm/pixel, accuracy ${S.gcp_err_cm} cm`).join('; ')}. The fen photo on the table follows the season buttons.`);
   L.push('Clicking a sensor globe opens a card with a time-series chart. A timeline at the bottom plays one year of illustrative weather and hydrology (discharge, water level, water temperature, air temperature, snow depth), and the table changes with the seasons (winter snow, spring melt, summer, autumn colours).');
   L.push(`SCENARIOS on the Oulankajoki table: flooding (${FLOOD.map(f => f.name).join(', ')}) and river ice (${ICE.map(f => f.name).join(', ')}). There is also a story mode about the spring snowmelt flood.`);
   L.push(`360° PHOTOS: ${CONFIG.PANORAMAS.length} real 360° photos from Oulanka are pinned on the centre table (${CONFIG.PANORAMAS.map(p => p.title).join(', ')}). Clicking one opens it full screen.`);
@@ -4766,8 +4800,7 @@ function loop() {
   globeObjs.forEach(o => {
     const p = .5 + .5 * Math.sin(t * 2 + o.phase);
     o.halo.material.opacity = .35 + .3 * p; o.ring.scale.setScalar(1 + ((t * .6 + o.phase) % 1) * 1.8); o.ring.material.opacity = 1 - ((t * .6 + o.phase) % 1);
-    const k = clamp((airT + 12) / 24, 0, 1); tmpC.copy(k < .5 ? cold : mid).lerp(k < .5 ? mid : warm, k < .5 ? k * 2 : (k - .5) * 2);
-    o.coreMat.color.copy(tmpC); o.halo.material.color.copy(tmpC).multiplyScalar(.5);
+    o.halo.material.opacity = (.3 + .25 * p) * (sensorCard.G?.id === o.G.id ? 2 : 1);
   });
   tables.forEach(T => {
     const target = (hovered === T.site.id || focus.id === T.site.id) ? 1 : 0; T.hover = lerp(T.hover, target, .12);
@@ -5208,7 +5241,7 @@ async function boot() {
   renderer.setAnimationLoop(loop);
   renderer.compile(scene, camera);
   await progress(1, 'Ready');
-  window.__hub = { bookNow: () => bookClock = 0, agentBook, agentAttend, BOARDS, wbApply, KN, focusKnowledge, knLoadFiles, kAsk, knSearch, sitAt, SEATS, hubContext, sendAI, IDLE, AGENTS, tables, AGX, agentCommand, openAgentMenu, AG_ACTIONS, greetVisitor, THREE, scene, camera, controls, focusSite, goHome, focusAI, focusLive, openPano, closePano, openGlobe, startStory, storyStep, applySeason, setDay, state, renderer,
+  window.__hub = { bookNow: () => bookClock = 0, agentBook, agentAttend, BOARDS, wbApply, KN, focusKnowledge, knLoadFiles, kAsk, knSearch, sitAt, SEATS, hubContext, sendAI, IDLE, AGENTS, tables, AGX, agentCommand, openAgentMenu, AG_ACTIONS, greetVisitor, THREE, scene, camera, controls, focusSite, goHome, focusAI, focusLive, openPano, closePano, openGlobe, startStory, focusSite, GLOBES, tableOf, setFenSurvey, storyStep, applySeason, setDay, state, renderer,
     summonOrb, dismissOrb, D, cloudSets, precipSets, setOrbState, updateOrb, deliver, caption, applyFlood, applyIce, setIceDay, clearScenario, music, ORB, scen, enter, simulatePeer, sitAt, focusLounge, toggleNight, mp, getAurora: () => aurora, focusLive, focusScreen, focusMap, focusNews, focusWhiteboard, openMapCard, wbApply, SCREENS, WB, BOARDS };
   $('#loader').classList.add('ready');
   const nm = $('#ldName'); nm.value = mp.name; setTimeout(() => { if (!entered) nm.focus(); }, 400);
@@ -5243,7 +5276,7 @@ function enter(sound, auto = false) {
   $('#loader').classList.add('hide'); setTimeout(() => $('#loader').classList.add('gone'), 1000);
   camera.lookAt(HOME_TGT);
   AGX.quiet = !sound; AGX.greeted.clear(); AGX.introduced.clear();
-  flyTo(HOME_POS, HOME_TGT, 3600, () => { setTimeout(() => $('#hint').style.opacity = 0, 6000); screensArmed = true; perf.armed = !/[?&]hq\b/.test(location.search); setTimeout(greetVisitor, 1200); });
+  flyTo(HOME_POS, HOME_TGT, 3600, () => { const ps = new URLSearchParams(location.search).get('site'); if (ps && SITE[ps]) setTimeout(() => focusSite(ps), 300); setTimeout(() => $('#hint').style.opacity = 0, 6000); screensArmed = true; perf.armed = !/[?&]hq\b/.test(location.search); setTimeout(greetVisitor, 1200); });
 }
 boot();
 

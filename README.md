@@ -23,8 +23,9 @@ The **Oulankajoki** supersite at Oulanka Research Station, Kuusamo, is the large
 - **Hologram HUD design:** a navy and black hall with cyan light: animated floor grid, holographic tables with running rim lights, light frames on the video wall, news and map, a blueprint map of the supersites, and HUD-style panels and charts.
 
 - **Real Oulanka map:** terrain from the national 2 m elevation model, a 0.5 m aerial photo in summer, drawn snow and land-cover maps, buildings and bridges from the national terrain database, and a 5 cm drone photo of the Puukkosuo fen. Flood and river-ice scenarios follow the real valley.
+- **Puukkosuo through the seasons:** four 2024 drone surveys of the fen (winter, snowmelt, summer, autumn) follow the season buttons, with flight details and accuracy from the processing reports.
 
-- **Sensor stations:** stations from the Oulanka snow and reindeer-grazing experiment, with their sensors, measured variables, measurement heights and data-quality information.
+- **Sensor stations:** the public DIWA sensor network at its surveyed positions, from the DIWA critical-zone sensor template. Small glowing globes are coloured by what they measure (green soil, blue surface water, violet groundwater, yellow atmosphere, white cameras and remote sensing); click one for its sensors, parameters, interval and start date. Only sensors marked Open data or Public data are included.
 - **Time series and playback:** weather and hydrology charts linked to a timeline that can be played through the year.
 - **Seasons:** winter, spring, summer and autumn, shown on the landscapes and the surroundings.
 - **Scenarios:** spring flood scenarios of different return periods, and river-ice scenarios that include ice growth, breakup and ice jams.
@@ -38,6 +39,7 @@ The **Oulankajoki** supersite at Oulanka Research Station, Kuusamo, is the large
 - **Living sky:** optional clouds drift over the tables, with rain or snow falling at a wind-blown angle, all following the weather of the selected day.
 - **Day and night:** switch between daylight and a night mode with northern lights and twinkling stars over the forest and warm lamps inside, while the tables stay clearly lit.
 - **Showcase mode:** when nobody touches the controls for 10 seconds, the view returns to the overview and circles slowly around the hall.
+- **Catchment map** (`/catchments/`): every DIWA supersite at catchment scale, source to sea, with the public sensor network grouped by type. Select a supersite to zoom in, then open its 3D table in the hub. Works on computers and phones.
 - **AR booklet** (`/flipbook/`): *Immersive DIWA Supersites*, a 16-page booklet in the blueprint style. Read it online as a flipbook with page-curl animation, thumbnails, zoom, full screen and links that open each table in 3D, or print `flipbook/immersive-diwa-supersites-print-A4.pdf` (two A5 pages per A4 sheet with a white margin and cut marks). Point a phone at any table in a scan frame, on paper or on screen, and the AR viewer at `/ar/` raises it in 3D. The Oulankajoki page shows the real-data Oulanka model, shared with the AR Table.
 - **VR edition:** a dedicated version for Meta Quest 3 and other WebXR headsets ([open in the headset](https://siamakab.github.io/diwa-spatial-hub/vr.html)), with laser pointers, thumbstick walking, snap turning and rising for a view from above, teleporting, raised viewpoints over each table, a menu on your hand, 3D info cards and 360° photos you can step inside.
 
@@ -82,7 +84,9 @@ Digital Waters (DIWA) Flagship
 
 - **360° photography:** Siamak Bazzaz, Oulanka, September 2026.
 - **Map data:** National Land Survey of Finland, Elevation model 2 m, Orthophoto and Terrain database (CC BY 4.0), downloaded November 2026.
-- **Puukkosuo drone survey:** orthomosaic and elevation model, 5 cm, July 2024.
+- **Puukkosuo drone surveys:** Petra Korhonen, orthomosaics of 20 March, 14 May, 24 July and 25 September 2024, and a ground model of 31 May 2024.
+- **Sensor metadata:** DIWA critical-zone sensor template (public sensors only). **Supersite boundaries:** DIWA.
+- **Catchment map:** Leaflet and Leaflet.markercluster; background map © OpenStreetMap contributors, © CARTO.
 - **Built with:** [three.js](https://threejs.org), [Trystero](https://github.com/dmotz/trystero) for peer-to-peer sessions, Cloudflare Workers AI for the assistant, and the Web Audio, WebRTC, Web Speech and WebXR browser APIs.
 - **Music:** composed live in the browser for this project.
 

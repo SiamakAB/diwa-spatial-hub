@@ -1,0 +1,64 @@
+{
+ "by": "Petra Korhonen, drone surveys of Puukkosuo fen",
+ "camera": "DJI Mavic 3 Multispectral (M3M)",
+ "software": "Agisoft Metashape",
+ "dtm": {
+  "date": "2024-05-31",
+  "res_cm": 10,
+  "note": "Ground model filtered from the SfM surface model; less accurate than LiDAR."
+ },
+ "surveys": [
+  {
+   "key": "mar",
+   "date": "2024-03-20",
+   "season": "Winter",
+   "label": "20 Mar 2024",
+   "images": 351,
+   "alt_m": 67,
+   "gsd_cm": 1.62,
+   "area_km2": 0.119,
+   "gcp": 1,
+   "gcp_err_cm": 0.73,
+   "product": "Orthomosaic 5 cm"
+  },
+  {
+   "key": "may",
+   "date": "2024-05-14",
+   "season": "Snowmelt",
+   "label": "14 May 2024",
+   "images": 430,
+   "alt_m": 62.6,
+   "gsd_cm": 1.53,
+   "area_km2": 0.0911,
+   "gcp": 3,
+   "gcp_err_cm": 4.01,
+   "product": "Orthomosaic 5 cm"
+  },
+  {
+   "key": "jul",
+   "date": "2024-07-24",
+   "season": "Summer",
+   "label": "24 Jul 2024",
+   "images": 423,
+   "alt_m": 62.7,
+   "gsd_cm": 1.52,
+   "area_km2": 0.0863,
+   "gcp": 3,
+   "gcp_err_cm": 3.63,
+   "product": "Orthomosaic 5 cm"
+  },
+  {
+   "key": "sep",
+   "date": "2024-09-25",
+   "season": "Autumn",
+   "label": "25 Sep 2024",
+   "images": 420,
+   "alt_m": 59.0,
+   "gsd_cm": 1.52,
+   "area_km2": 0.0832,
+   "gcp": 3,
+   "gcp_err_cm": 2.55,
+   "product": "Orthomosaic 10 cm"
+  }
+ ]
+}

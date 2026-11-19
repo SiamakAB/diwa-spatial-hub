@@ -11,10 +11,12 @@ export let OUL, M;                                      // data, model parts
 export async function loadData() {
   const ok = r => { if (!r.ok) throw new Error(r.url + ' ' + r.status); return r; };
   const tl = new THREE.TextureLoader(), tex = f => tl.loadAsync(DATA + f).then(t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; });
-  const [meta, tb, trb, summer, winter, fen] = await Promise.all([fetch(DATA + 'oulanka.json').then(ok).then(r => r.json()), fetch(DATA + 'terrain.bin').then(ok).then(r => r.arrayBuffer()), fetch(DATA + 'trees.bin').then(ok).then(r => r.arrayBuffer()), tex('map-summer.jpg'), tex('map-winter.jpg'), tex('fen-drone.webp').catch(() => null)]);
+  const [meta, tb, trb, summer, winter, fenJul, fenMar, sens] = await Promise.all([fetch(DATA + 'oulanka.json').then(ok).then(r => r.json()), fetch(DATA + 'terrain.bin').then(ok).then(r => r.arrayBuffer()), fetch(DATA + 'trees.bin').then(ok).then(r => r.arrayBuffer()), tex('map-summer.jpg'), tex('map-winter.jpg'),
+    tex('fen-jul.webp').catch(() => tex('fen-drone.webp')).catch(() => null), tex('fen-mar.webp').catch(() => null), fetch(DATA + 'sensors.json').then(ok).then(r => r.json()).catch(() => null)]);
+  const fen = fenJul; meta.stations = sens ? sens.stations.filter(s => s.inTable) : [];
   const n = meta.grid * meta.grid, u = new Uint16Array(tb); meta.H = new Float32Array(n); meta.L = new Float32Array(n);
   for (let i = 0; i < n; i++) { meta.H[i] = meta.base + u[i] / meta.enc; meta.L[i] = meta.base + u[n + i] / meta.enc; }
-  meta.trees = new Float32Array(trb); meta.tex = { summer, winter, fen }; OUL = meta;
+  meta.trees = new Float32Array(trb); meta.tex = { summer, winter, fen, fenWinter: fenMar }; OUL = meta;
 }
 const HOLO_VS = `varying vec2 vUv; varying vec2 vP; void main(){ vUv = uv; vP = position.xz; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }`;
 const WALL_FS = `uniform float uTime; uniform float uK; varying vec2 vUv; void main(){ float y = vUv.y, f = fract(y * 6. - uTime * .35); float scan = smoothstep(0., .06, f) * smoothstep(.12, .06, f);
@@ -132,6 +134,13 @@ export function buildModel(opt = {}) {
   Object.entries(O.pano).forEach(([id, [x, z]]) => { if (!PANOS[id]) return; const y = sAt(x, z);
     const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: pt, color: new THREE.Color(.6, 1.2, 1.9), transparent: true, depthWrite: false, toneMapped: false })); s.scale.setScalar(.015); s.position.set(x * RT, y + .025, z * RT); s.userData.pano = id;
     const st = new THREE.Mesh(new THREE.CylinderGeometry(.0005, .0005, .025, 4), new THREE.MeshBasicMaterial({ color: 0x7fdcff })); st.position.set(x * RT, y + .0125, z * RT); if (opt.pins !== false) { spin.add(s, st); pins.push(s); } });
+  // public sensor stations (DIWA sensor template): small glowing dots coloured by what they measure
+  const SC = { soil: 0x34d399, surface: 0x38bdf8, groundwater: 0xa78bfa, atmosphere: 0xfacc15, vegetation: 0x86efac, remote: 0xf1f5f9, other: 0x94a3b8 };
+  const sensors = new THREE.Group(); if (opt.sensors !== false) spin.add(sensors);
+  (O.stations || []).forEach((st, i) => { const [x, z] = st.at, y = sAt(x, z), c = new THREE.Color(SC[st.cat] || SC.other), h = .012 + (i % 3) * .003;
+    const dot = new THREE.Mesh(new THREE.SphereGeometry(.0028, 10, 8), new THREE.MeshBasicMaterial({ color: c.clone().multiplyScalar(1.6), toneMapped: false })); dot.position.set(x * RT, y + h, z * RT);
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(.0003, .0003, h, 4), new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: .7 })); stem.position.set(x * RT, y + h / 2, z * RT);
+    sensors.add(dot, stem); });
   // hologram glass around the landscape
   let top = -1e9; for (let i = 0; i < O.H.length; i++) top = Math.max(top, O.H[i]); const topY = ym(top) + .01;
   const wall = new THREE.Mesh(new THREE.CylinderGeometry(RT + .003, RT + .003, topY - BODY, 160, 1, true), holo(WALL_FS)); wall.position.y = BODY + (topY - BODY) / 2; root.add(wall);
@@ -142,7 +151,7 @@ export function buildModel(opt = {}) {
   O.buildings.filter(b => b.d < 400).forEach(b => { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowT, color: 0xffc070, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); s.scale.setScalar(.025); s.position.set(b.c[0] * RT, hAt(...b.c) + .008, b.c[1] * RT); lamps.add(s); });
   // lights live with the model so it looks the same in every mode
   const hemi = new THREE.HemisphereLight(0xdfeeff, 0x2a3442, 1.25), sun = new THREE.DirectionalLight(0xfff1dc, 1.9); sun.position.set(.6, 1.2, .5); root.add(hemi, sun);
-  M = { root, spin, dial, opt, U, water, wm, foam, IM, crownM, roofs, fenM, labels, pins, lamps, hemi, sun, VS, waterY: 0, appear: 0 };
+  M = { root, spin, dial, opt, U, water, wm, foam, IM, crownM, roofs, fenM, labels, pins, sensors, lamps, hemi, sun, VS, waterY: 0, appear: 0 };
   return root;
 }
 // toggles
@@ -154,6 +163,8 @@ export function applyState(instant) {
   M.crownM[0].color.setHex(win ? 0x52625a : 0x1f3a26); M.crownM[1].color.setHex(win ? 0x6d7d72 : 0x3d5a2c);
   M.IM[2][0].visible = !win;                                        // birches lose their leaves
   M.roofs.forEach(r => r.color.setHex(win ? 0xeef3f7 : r.userData.base));
+  const ft = win && OUL.tex.fenWinter ? OUL.tex.fenWinter : OUL.tex.fen;                 // Puukkosuo drone photo of the matching season
+  if (M.fenM && ft && M.fenM.map !== ft) { M.fenM.map = ft; M.fenM.needsUpdate = true; }
   const ice = S.ice || win;
   M.wm.color.setHex(S.ice ? 0xdfeaf2 : win ? 0xcfdde8 : S.flood ? 0x5a4a32 : 0x1d4660); M.wm.roughness = ice ? .35 : .08; M.wm.opacity = ice ? .96 : .84;
   M.hemi.intensity = S.night ? .3 : 1.25; M.sun.intensity = S.night ? .12 : 1.9; M.sun.color.setHex(S.night ? 0x7fa0ff : 0xfff1dc); M.lamps.visible = S.night;

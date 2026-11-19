@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>DIWA Catchments · DIWA Spatial Hub</title>
+<meta name="description" content="DIWA supersites at catchment scale: supersite boundaries and the public sensor network, with a way into each 3D site table.">
+<link rel="icon" href="../assets/diwa-logo-white.png">
+<link rel="stylesheet" href="leaflet.css">
+<link rel="stylesheet" href="MarkerCluster.css">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#061632;color:#eaf4ff;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+#map{position:fixed;inset:0;background:
+ repeating-linear-gradient(0deg,rgba(130,190,255,.06) 0 1px,transparent 1px 96px),repeating-linear-gradient(90deg,rgba(130,190,255,.06) 0 1px,transparent 1px 96px),
+ repeating-linear-gradient(0deg,rgba(130,190,255,.025) 0 1px,transparent 1px 24px),repeating-linear-gradient(90deg,rgba(130,190,255,.025) 0 1px,transparent 1px 24px),
+ linear-gradient(160deg,#0a2448,#061632 60%,#040e22)}
+.leaflet-container{background:transparent;font:inherit}
+.leaflet-tile-pane{filter:saturate(.7) brightness(.95) hue-rotate(-8deg)}
+.glass{background:linear-gradient(160deg,rgba(30,80,150,.55),rgba(6,24,54,.82));border:1px solid rgba(120,200,255,.28);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 14px 44px rgba(0,8,25,.5)}
+#panel{position:fixed;left:16px;top:16px;bottom:16px;width:360px;border-radius:24px;z-index:500;display:flex;flex-direction:column;overflow:hidden}
+.ph{padding:18px 20px 12px;border-bottom:1px solid rgba(120,200,255,.16)}
+.brand{display:flex;align-items:center;gap:10px}
+.brand img{height:26px}
+.brand b{display:block;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7fd8ff}
+.brand span{font-size:11px;color:rgba(200,225,255,.65)}
+.ph p{margin:12px 0 0;font-size:12.5px;line-height:1.55;color:rgba(225,238,255,.82)}
+.pb{flex:1;overflow:auto;padding:12px 14px 16px;scrollbar-width:thin}
+.lbl{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(190,220,255,.6);margin:6px 6px 8px}
+.cat{display:flex;flex-wrap:wrap;gap:6px;margin:0 2px 12px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:99px;font-size:11.5px;cursor:pointer;border:1px solid rgba(120,200,255,.25);background:rgba(20,60,110,.35);transition:.2s}
+.chip i{width:9px;height:9px;border-radius:50%;box-shadow:0 0 8px currentColor}
+.chip.off{opacity:.35}
+.site{display:block;width:100%;text-align:left;border:1px solid rgba(120,200,255,.16);background:rgba(255,255,255,.035);border-radius:16px;padding:11px 13px;margin:0 0 7px;cursor:pointer;transition:.2s}
+.site:hover{background:rgba(95,212,255,.08);border-color:rgba(120,200,255,.35)}
+.site.on{background:rgba(95,212,255,.13);border-color:rgba(127,216,255,.7);box-shadow:0 0 0 1px rgba(127,216,255,.3)}
+.site b{font-size:13.5px;color:#fff}
+.site small{display:block;font-size:11px;color:rgba(200,225,255,.65);margin-top:2px}
+.site .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.site .n{font-size:11px;font-weight:700;color:#7fd8ff;white-space:nowrap}
+.det{margin:4px 0 0;padding-top:10px;border-top:1px solid rgba(120,200,255,.18);display:none}
+.site.on .det{display:block}
+.det .bars{display:flex;height:6px;border-radius:6px;overflow:hidden;margin:8px 0 6px;background:rgba(255,255,255,.06)}
+.det .leg{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:10.5px;color:rgba(220,235,255,.8)}
+.det .leg i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px}
+.btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:12px;font-size:11.5px;font-weight:700;text-decoration:none;color:#06162e;background:#7fd8ff;border:0;cursor:pointer}
+.btn.sec{background:rgba(95,212,255,.14);color:#eaf4ff;border:1px solid rgba(127,216,255,.4)}
+.tag{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:99px;margin-left:6px;vertical-align:2px}
+.tag.real{background:#ffd65a;color:#06162e}.tag.ill{background:rgba(255,255,255,.1);color:rgba(220,235,255,.75)}
+.pf{padding:10px 18px 14px;font-size:10.5px;line-height:1.5;color:rgba(200,225,255,.55);border-top:1px solid rgba(120,200,255,.14)}
+.pf a{color:#7fd8ff}
+#top{position:fixed;right:16px;top:16px;z-index:500;display:flex;gap:8px}
+#top a{padding:10px 14px;border-radius:16px;font-size:12px;font-weight:600;color:#eaf4ff;text-decoration:none}
+/* map elements */
+.ctag{background:rgba(5,19,43,.82);border:1px solid rgba(127,216,255,.5);color:#fff;border-radius:10px;padding:4px 9px;font-size:11.5px;font-weight:700;box-shadow:0 0 14px rgba(95,212,255,.25);white-space:nowrap}
+.ctag small{display:block;font-weight:500;font-size:10px;color:rgba(200,225,255,.7)}
+.leaflet-tooltip.ctag:before{display:none}
+.clu{display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:800;font-size:12px;color:#fff;background:rgba(6,22,50,.85);border:2px solid;box-shadow:0 0 14px currentColor}
+.leaflet-popup-content-wrapper{background:linear-gradient(160deg,rgba(30,80,150,.92),rgba(6,24,54,.96));color:#eaf4ff;border:1px solid rgba(120,200,255,.35);border-radius:16px;box-shadow:0 14px 40px rgba(0,8,25,.6)}
+.leaflet-popup-tip{background:rgba(6,24,54,.96)}
+.leaflet-popup-content{margin:12px 14px;font-size:12px;line-height:1.5;max-height:320px;overflow:auto;width:280px!important}
+.leaflet-container a.leaflet-popup-close-button{color:#cfe6ff}
+.pop h4{margin:0;font-size:13.5px;color:#fff}.pop .sub{font-size:11px;color:rgba(200,225,255,.7);margin-bottom:8px}
+.pop .s{border-top:1px solid rgba(120,200,255,.18);padding:7px 0}
+.pop .s b{color:#fff}.pop .s div{color:rgba(225,238,255,.85)}.pop .s .m{font-size:10.5px;color:rgba(200,225,255,.6)}
+.leaflet-control-attribution{background:rgba(6,22,50,.7)!important;color:rgba(200,225,255,.6)!important;font-size:10px}
+.leaflet-control-attribution a{color:#7fd8ff!important}
+.leaflet-control-zoom a{background:rgba(6,24,54,.85)!important;color:#eaf4ff!important;border-color:rgba(120,200,255,.3)!important}
+.leaflet-bar{border-radius:12px!important;overflow:hidden;border:1px solid rgba(120,200,255,.3)!important}
+@media (max-width:760px){
+ #panel{left:8px;right:8px;top:auto;bottom:8px;width:auto;height:46vh;border-radius:22px}
+ #panel.min{height:118px}
+ .ph p{display:none}
+ #top{top:10px;right:10px}
+ .leaflet-top.leaflet-right{top:52px}
+}
+#grab{display:none}
+@media (max-width:760px){#grab{display:block;position:absolute;top:6px;left:50%;width:44px;height:5px;margin-left:-22px;border-radius:5px;background:rgba(200,225,255,.35);border:0;padding:0}}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<aside id="panel" class="glass">
+ <button id="grab" aria-label="Expand or collapse"></button>
+ <div class="ph">
+  <div class="brand"><img src="../assets/diwa-logo-white.png" alt="Digital Waters"><div><b>DIWA Catchments</b><span>Source to sea · supersites and sensors</span></div></div>
+  <p>Each DIWA supersite at catchment scale, with the public sensor network. Select a supersite to zoom in, then open its 3D table in the Spatial Hub.</p>
+ </div>
+ <div class="pb">
+  <div class="lbl">Sensor types</div>
+  <div class="cat" id="cats"></div>
+  <div class="lbl">Supersites</div>
+  <div id="sites"></div>
+ </div>
+ <div class="pf">Boundaries: DIWA supersite boundaries. Sensors: DIWA critical-zone sensor template; only sensors marked Open data or Public data are shown. Background map © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors, © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>.</div>
+</aside>
+<div id="top"><a class="glass" href="../">Enter the hub ↗</a></div>
+<script src="leaflet.js"></script>
+<script src="leaflet.markercluster.js"></script>
+<script>
+const CATS = {
+  soil: ['Soil', '#34d399'], surface: ['Surface water', '#38bdf8'], groundwater: ['Groundwater', '#a78bfa'],
+  atmosphere: ['Atmosphere and weather', '#facc15'], vegetation: ['Vegetation', '#86efac'], remote: ['Cameras and remote sensing', '#f1f5f9'], other: ['Other', '#94a3b8']
+};
+const ORDER = ['oulanka', 'tana', 'kemijoki', 'osp', 'kokkola', 'vantaanjoki', 'archipelago'];
+const REAL = { oulanka: true };                       // site tables built from real data so far
+const OUL_TABLE = { lat: 66.37004, lon: 29.31197, r: 1850 }; // centre of the 3.7 km Oulanka table
+const on = new Set(Object.keys(CATS));
+const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const $ = s => document.querySelector(s);
+
+const map = L.map('map', { zoomControl: false, attributionControl: true, minZoom: 4, maxZoom: 17, zoomSnap: .25, worldCopyJump: false });
+L.control.zoom({ position: 'bottomright' }).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19, attribution: '© OpenStreetMap contributors © CARTO' }).addTo(map);
+map.fitBounds([[59.6, 19.8], [70.2, 31.8]], innerWidth > 760 ? { paddingTopLeft: [380, 10] } : { paddingBottomRight: [0, innerHeight * .45] });
+
+const clusters = L.markerClusterGroup({
+  showCoverageOnHover: false, spiderfyOnMaxZoom: true, maxClusterRadius: 46,
+  iconCreateFunction: c => {
+    const ms = c.getAllChildMarkers(), cnt = {}; ms.forEach(m => cnt[m.options.cat] = (cnt[m.options.cat] || 0) + 1);
+    const top = Object.entries(cnt).sort((a, b) => b[1] - a[1])[0][0], n = c.getChildCount(), s = n < 10 ? 30 : n < 50 ? 36 : 44;
+    return L.divIcon({ html: `<div class="clu" style="width:${s}px;height:${s}px;color:${CATS[top][1]};border-color:${CATS[top][1]}"><span style="color:#fff">${n}</span></div>`, className: '', iconSize: [s, s] });
+  }
+});
+map.addLayer(clusters);
+
+let DATA, GEO, markers = [], layers = {}, sel = null;
+Promise.all([fetch('../data/catchments.geojson').then(r => r.json()), fetch('../data/sensors-all.json').then(r => r.json())]).then(([geo, sens]) => {
+  GEO = geo; DATA = sens.supersites;
+  // catchments
+  geo.features.forEach(f => {
+    const id = f.properties.id;
+    const lay = L.geoJSON(f, { style: { color: '#7fd8ff', weight: 1.6, fillColor: '#3aa0ff', fillOpacity: .08, opacity: .85 } }).addTo(map);
+    lay.on('mouseover', () => { if (sel !== id) lay.setStyle({ fillOpacity: .16, weight: 2.2 }); });
+    lay.on('mouseout', () => { if (sel !== id) lay.setStyle({ fillOpacity: .08, weight: 1.6 }); });
+    lay.on('click', () => select(id));
+    lay.bindTooltip(`${esc(f.properties.name)}<small>${esc(f.properties.kind)}</small>`, { className: 'ctag', direction: 'center', permanent: true, opacity: 1 });
+    layers[id] = lay;
+  });
+  // Oulanka 3D table footprint: the "dive in" place
+  const tc = L.circle([OUL_TABLE.lat, OUL_TABLE.lon], { radius: OUL_TABLE.r, color: '#ffd65a', weight: 2, dashArray: '6 6', fillColor: '#ffd65a', fillOpacity: .06 }).addTo(map);
+  tc.bindTooltip('Oulanka 3D table · 3.7 km<small>Click to open it in the hub</small>', { className: 'ctag', direction: 'top', offset: [0, -6] });
+  tc.on('click', () => window.open('../?site=oulanka', '_self'));
+  // sensor stations
+  Object.entries(DATA).forEach(([sid, list]) => list.forEach(st => {
+    const c = CATS[st.cat] || CATS.other;
+    const m = L.circleMarker([st.lat, st.lon], { radius: 6, color: '#06162e', weight: 1.5, fillColor: c[1], fillOpacity: .95, cat: st.cat, sid });
+    m.bindPopup(() => popup(st, sid), { maxWidth: 300 });
+    markers.push(m);
+  }));
+  buildCats(); buildSites(); refresh();
+  let q = new URLSearchParams(location.search).get('site'); q = { pallas: 'kemijoki', sodankyla: 'kemijoki' }[q] || q; if (q && layers[q]) select(q);
+});
+
+function popup(st, sid) {
+  const c = CATS[st.cat] || CATS.other;
+  return `<div class="pop"><h4>${esc(st.name)}</h4><div class="sub"><span style="color:${c[1]}">●</span> ${esc(c[0])} · ${esc(st.place || st.site)}</div>
+    ${st.sensors.map(x => `<div class="s"><b>${esc([x.producer, x.model].filter(Boolean).join(' ') || 'Sensor')}</b>${x.label ? ` <span class="m">${esc(x.label)}</span>` : ''}
+      ${x.params ? `<div>${esc(x.params)}${x.units ? ` <span class="m">(${esc(x.units)})</span>` : ''}</div>` : x.type ? `<div>${esc(x.type)}</div>` : ''}
+      <div class="m">${[x.res && 'Every ' + x.res.replace(/^every /i, ''), x.start && 'since ' + x.start, x.level].filter(Boolean).map(esc).join(' · ')}</div></div>`).join('')}
+    <div class="m" style="margin-top:4px;font-size:10.5px;color:rgba(200,225,255,.55)">E ${st.E} · N ${st.N} (ETRS-TM35FIN)</div></div>`;
+}
+function buildCats() {
+  const used = Object.keys(CATS).filter(k => Object.values(DATA).some(l => l.some(s => s.cat === k)));
+  $('#cats').innerHTML = used.map(k => `<button class="chip" data-k="${k}"><i style="background:${CATS[k][1]};color:${CATS[k][1]}"></i>${CATS[k][0]}</button>`).join('');
+  $('#cats').querySelectorAll('.chip').forEach(b => b.onclick = () => { const k = b.dataset.k; on.has(k) ? on.delete(k) : on.add(k); b.classList.toggle('off', !on.has(k)); refresh(); buildSites(); });
+}
+function buildSites() {
+  $('#sites').innerHTML = ORDER.filter(id => GEO.features.some(f => f.properties.id === id)).map(id => {
+    const P = GEO.features.find(f => f.properties.id === id).properties, list = (DATA[id] || []).filter(s => on.has(s.cat));
+    const ns = list.reduce((a, s) => a + s.sensors.length, 0), cnt = {}; list.forEach(s => cnt[s.cat] = (cnt[s.cat] || 0) + s.sensors.length);
+    const bars = Object.entries(cnt).map(([k, v]) => `<span style="width:${v / ns * 100}%;background:${CATS[k][1]}"></span>`).join('');
+    return `<div class="site ${sel === id ? 'on' : ''}" data-id="${id}" role="button" tabindex="0">
+      <div class="row"><div><b>${esc(P.name)}</b>${REAL[id] ? '<span class="tag real">Real-data table</span>' : ''}<small>${esc(P.kind)} · ${P.area_km2.toLocaleString('en')} km²</small></div><div class="n">${list.length} stations</div></div>
+      <div class="det">
+        <div style="font-size:11.5px;color:rgba(225,238,255,.85)">${ns} public sensors at ${list.length} stations</div>
+        ${ns ? `<div class="bars">${bars}</div><div class="leg">${Object.entries(cnt).map(([k, v]) => `<span><i style="background:${CATS[k][1]}"></i>${CATS[k][0]} ${v}</span>`).join('')}</div>` : ''}
+        <div class="btns"><a class="btn" href="../?site=${P.table}">Open the 3D table</a>${id === 'oulanka' ? '<a class="btn sec" href="../ar-table/">AR Table</a>' : ''}<button class="btn sec" data-fit="${id}">Zoom to catchment</button></div>
+        ${REAL[id] ? '' : '<div style="font-size:10.5px;color:rgba(200,225,255,.55);margin-top:8px">The 3D table of this supersite is still illustrative.</div>'}
+      </div></div>`;
+  }).join('');
+  $('#sites').querySelectorAll('.site').forEach(e => e.onclick = ev => { if (ev.target.closest('a')) return; if (ev.target.dataset.fit) { fit(ev.target.dataset.fit); return; } select(e.dataset.id); });
+}
+function refresh() { clusters.clearLayers(); clusters.addLayers(markers.filter(m => on.has(m.options.cat))); }
+function fit(id) { const b = layers[id].getBounds(); map.flyToBounds(b, { paddingTopLeft: innerWidth > 760 ? [400, 30] : [20, 20], paddingBottomRight: innerWidth > 760 ? [30, 30] : [20, innerHeight * .48], duration: 1.1 }); }
+function select(id) {
+  if (sel && layers[sel]) layers[sel].setStyle({ fillOpacity: .08, weight: 1.6, color: '#7fd8ff' });
+  sel = id; layers[id].setStyle({ fillOpacity: .14, weight: 2.6, color: '#ffd65a' }); layers[id].bringToBack();
+  fit(id); buildSites(); $('#panel').classList.remove('min');
+  const e = document.querySelector(`.site[data-id="${id}"]`); e && e.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  history.replaceState(null, '', '?site=' + id);
+}
+$('#grab').onclick = () => $('#panel').classList.toggle('min');
+</script>
+</body>
+</html>
