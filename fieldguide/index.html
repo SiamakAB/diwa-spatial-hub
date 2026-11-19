@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#061632">
+<title>Oulanka Virtual Field Guide · DIWA Spatial Hub</title>
+<meta name="description" content="Walk the Oulankajoki supersite in 360°: field views, public sensor stations and short topics, on a map. Works on phones and computers.">
+<link rel="icon" href="../catchments/logo.png">
+<link rel="stylesheet" href="../catchments/leaflet.css">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#040e22;color:#eaf4ff;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;-webkit-font-smoothing:antialiased;touch-action:none}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:#7fd8ff}
+.glass{background:linear-gradient(160deg,rgba(30,80,150,.55),rgba(6,24,54,.82));border:1px solid rgba(120,200,255,.28);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 14px 44px rgba(0,8,25,.5)}
+#app{position:fixed;inset:0;display:flex}
+#panoWrap{position:relative;flex:1;min-width:0;overflow:hidden;cursor:grab}
+#panoWrap.drag{cursor:grabbing}
+#pano{position:absolute;inset:0;width:100%;height:100%;display:block}
+#fade{position:absolute;inset:0;background:#061632;opacity:0;pointer-events:none;transition:opacity .45s}
+#hs{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#mapWrap{position:relative;width:40%;transition:width .45s cubic-bezier(.2,.8,.2,1);border-left:1px solid rgba(120,200,255,.3);background:#061632}
+#mapWrap.s0{width:0;border:0}#mapWrap.s2{width:60%}
+#map{position:absolute;inset:0}
+.leaflet-container{background:#08203f;font:inherit}
+.leaflet-tile-pane{filter:invert(1) hue-rotate(188deg) brightness(.92) contrast(.9) saturate(.6)}
+.leaflet-control-attribution{background:rgba(6,22,50,.75)!important;color:rgba(200,225,255,.6)!important;font-size:10px}
+.leaflet-control-attribution a{color:#7fd8ff!important}
+.leaflet-control-zoom a{background:rgba(6,24,54,.85)!important;color:#eaf4ff!important;border-color:rgba(120,200,255,.3)!important}
+.leaflet-bar{border-radius:12px!important;overflow:hidden;border:1px solid rgba(120,200,255,.3)!important}
+/* hotspots */
+.hot{position:absolute;left:0;top:0;transform:translate(-50%,-50%);pointer-events:auto;cursor:pointer;will-change:transform}
+.nav{display:flex;flex-direction:column;align-items:center;gap:6px}
+.nav .ring{width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(127,216,255,.35),rgba(6,22,46,.55) 62%);border:2px solid rgba(160,230,255,.9);box-shadow:0 0 22px rgba(95,212,255,.6),inset 0 0 14px rgba(95,212,255,.4);transition:transform .25s}
+.nav .ring svg{filter:drop-shadow(0 0 6px rgba(127,216,255,.9))}
+.nav:hover .ring{transform:scale(1.12)}
+.nav .lab{padding:4px 10px;border-radius:99px;font-size:11.5px;font-weight:600;background:rgba(5,19,43,.82);border:1px solid rgba(127,216,255,.45);white-space:nowrap}
+.nav .lab b{color:#7fd8ff;margin-left:4px}
+.sen{display:flex;align-items:center;gap:8px}
+.sen .orb{width:20px;height:20px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 4px rgba(255,255,255,.12),0 0 18px var(--c);background:radial-gradient(circle at 35% 30%,#fff,var(--c) 55%);animation:pulse 2.4s infinite}
+.sen .lab{padding:4px 9px;border-radius:10px;font-size:11px;font-weight:600;background:rgba(5,19,43,.82);border:1px solid var(--c);white-space:nowrap;opacity:0;transform:translateX(-4px);transition:.2s}
+.sen:hover .lab,.sen.show .lab{opacity:1;transform:none}
+.top{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 19px Georgia,serif;font-style:italic;color:#06162e;background:#fff;box-shadow:0 0 0 6px rgba(255,255,255,.22),0 0 24px rgba(255,255,255,.55);animation:pulse2 2.6s infinite}
+.top:hover{transform:translate(-50%,-50%) scale(1.1)}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 4px rgba(255,255,255,.12),0 0 12px var(--c)}50%{box-shadow:0 0 0 9px rgba(255,255,255,.04),0 0 26px var(--c)}}
+@keyframes pulse2{0%,100%{box-shadow:0 0 0 6px rgba(255,255,255,.22),0 0 18px rgba(255,255,255,.4)}50%{box-shadow:0 0 0 12px rgba(255,255,255,.06),0 0 30px rgba(255,255,255,.7)}}
+/* chrome */
+#info{position:absolute;left:16px;top:16px;max-width:330px;border-radius:20px;padding:14px 16px;z-index:5}
+#info .kick{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#7fd8ff;display:flex;align-items:center;gap:8px}
+#info .kick img{height:16px}
+#info h1{margin:6px 0 2px;font-size:19px;line-height:1.2;letter-spacing:-.01em}
+#info p{margin:0;font-size:12px;color:rgba(220,235,255,.75)}
+#info dl{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin:10px 0 0;font-size:12px}
+#info dt{color:rgba(190,220,255,.6)}#info dd{margin:0}
+#info .warn{margin-top:8px;font-size:10.5px;color:#ffd65a}
+#compass{position:absolute;left:50%;bottom:116px;transform:translateX(-50%);width:300px;height:34px;border-radius:99px;overflow:hidden;z-index:5;pointer-events:none}
+#compass .tape{position:absolute;top:0;height:100%;display:flex;align-items:center;white-space:nowrap;font-size:11px;font-weight:700;letter-spacing:.08em;color:rgba(220,235,255,.75)}
+#compass .tape span{display:inline-block;width:30px;text-align:center}
+#compass .tape span.c{color:#ffd65a;font-size:13px}
+#compass:after{content:"";position:absolute;left:50%;top:3px;bottom:3px;width:2px;margin-left:-1px;background:#7fd8ff;box-shadow:0 0 8px #7fd8ff}
+#tools{position:absolute;left:16px;bottom:118px;display:flex;flex-direction:column;gap:6px;padding:6px;border-radius:18px;z-index:5}
+#tools button{width:42px;height:42px;border:0;border-radius:13px;background:transparent;display:flex;align-items:center;justify-content:center;color:#cfe6ff;transition:.2s}
+#tools button:hover,#tools button.on{background:rgba(95,212,255,.18);color:#fff}
+#strip{position:absolute;left:76px;right:16px;bottom:16px;height:86px;border-radius:18px;padding:8px;display:flex;gap:8px;overflow-x:auto;z-index:5;scrollbar-width:none}
+#strip::-webkit-scrollbar{display:none}
+#strip button{flex:none;width:150px;height:70px;border-radius:12px;border:1px solid rgba(120,200,255,.25);background-size:cover;background-position:center;position:relative;padding:0;overflow:hidden;transition:.25s}
+#strip button span{position:absolute;left:0;right:0;bottom:0;padding:14px 8px 5px;font-size:10.5px;font-weight:600;text-align:left;background:linear-gradient(transparent,rgba(3,12,30,.92))}
+#strip button.cur{border:2px solid #ffd65a;box-shadow:0 0 16px rgba(255,214,90,.5)}
+#strip button:hover{transform:translateY(-3px)}
+#card{position:absolute;right:16px;top:16px;bottom:118px;width:380px;max-width:calc(100% - 32px);border-radius:22px;z-index:8;display:flex;flex-direction:column;overflow:hidden;transform:translateX(calc(100% + 30px));transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+#card.show{transform:none}
+#card .ch{padding:16px 18px 10px;display:flex;gap:12px;align-items:flex-start}
+#card .ch .dot{flex:none;width:34px;height:34px;border-radius:50%;margin-top:2px}
+#card h2{margin:0;font-size:17px;line-height:1.25}
+#card .sub{font-size:12px;color:rgba(200,225,255,.7);margin-top:3px}
+#card .x{margin-left:auto;flex:none;width:32px;height:32px;border-radius:10px;border:1px solid rgba(120,200,255,.3);background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center}
+#card .cb{flex:1;overflow:auto;padding:0 18px 18px;scrollbar-width:thin}
+#card img{width:100%;border-radius:14px;margin:4px 0 10px;border:1px solid rgba(120,200,255,.25);display:block}
+#card p{font-size:13.5px;line-height:1.6;color:rgba(230,240,255,.9);margin:0 0 10px}
+#card .draft{font-size:10.5px;color:#ffd65a;border:1px dashed rgba(255,214,90,.5);border-radius:10px;padding:6px 9px;margin-bottom:10px}
+#card .sc{border:1px solid rgba(120,200,255,.18);background:rgba(255,255,255,.04);border-radius:14px;padding:10px 12px;margin-bottom:8px;font-size:12px}
+#card .sc b{font-size:12.5px;color:#fff}
+#card .sc .m{color:rgba(200,225,255,.6);font-size:11px}
+#card .go{display:inline-flex;align-items:center;gap:6px;margin-top:6px;padding:8px 12px;border-radius:12px;border:0;background:#7fd8ff;color:#06162e;font-weight:700;font-size:12px}
+#tables{position:fixed;inset:24px;border-radius:24px;z-index:20;display:none;flex-direction:column;overflow:hidden}
+#tables.show{display:flex}
+#tables .th{display:flex;align-items:center;gap:6px;padding:14px 16px;border-bottom:1px solid rgba(120,200,255,.2)}
+#tables .th button.tab{border:0;background:transparent;padding:8px 14px;border-radius:12px;font-weight:700;font-size:13px;color:rgba(220,235,255,.7)}
+#tables .th button.tab.on{background:rgba(95,212,255,.2);color:#fff}
+#tables input{margin-left:auto;width:220px;padding:9px 12px;border-radius:12px;border:1px solid rgba(120,200,255,.3);background:rgba(3,14,34,.6);color:#fff;font:inherit;font-size:13px}
+#tables .tb{flex:1;overflow:auto;padding:6px 16px 16px}
+#tables table{width:100%;border-collapse:collapse;font-size:13px}
+#tables th{text-align:left;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(190,220,255,.6);padding:10px 8px;position:sticky;top:0;background:rgba(8,28,60,.96)}
+#tables td{padding:9px 8px;border-top:1px solid rgba(120,200,255,.12);vertical-align:top}
+#tables tr.row{cursor:pointer}#tables tr.row:hover td{background:rgba(95,212,255,.08)}
+#tables td a{font-weight:700;text-decoration:none}
+.catdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+#splash{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:radial-gradient(1000px 600px at 60% 30%,rgba(56,150,255,.25),transparent 60%),linear-gradient(160deg,rgba(10,36,72,.86),rgba(4,14,34,.94));transition:opacity .6s}
+#splash .bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(3px) saturate(.8);opacity:.35;z-index:-1}
+#splash .in{max-width:620px;text-align:center;padding:24px}
+#splash .kick{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#7fd8ff}
+#splash h1{font-size:46px;line-height:1.05;margin:14px 0 12px;letter-spacing:-.02em}
+#splash h1 span{color:#7fd8ff}
+#splash p{font-size:15px;line-height:1.6;color:rgba(225,238,255,.82);margin:0 auto 20px;max-width:520px}
+#splash .chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:26px}
+#splash .chips span{padding:7px 13px;border-radius:99px;font-size:12px;font-weight:600;background:rgba(95,212,255,.12);border:1px solid rgba(127,216,255,.35)}
+#splash .start{padding:15px 30px;border-radius:16px;border:0;font-size:15px;font-weight:800;color:#06162e;background:linear-gradient(135deg,#ffd65a,#ffb347);box-shadow:0 0 30px rgba(255,214,90,.45)}
+#splash .small{margin-top:16px;font-size:11.5px;color:rgba(200,225,255,.55)}
+#load{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#7fd8ff;z-index:4;pointer-events:none;opacity:0;transition:.3s}
+#load.on{opacity:1}
+#edit{position:absolute;left:50%;bottom:118px;transform:translateX(-50%);border-radius:16px;padding:10px 12px;z-index:9;display:none;gap:8px;align-items:center;font-size:12px}
+#edit.on{display:flex}
+#edit button{border:0;border-radius:10px;padding:8px 12px;font-weight:700;background:#7fd8ff;color:#06162e}
+#edit button.sec{background:rgba(95,212,255,.15);color:#fff;border:1px solid rgba(127,216,255,.4)}
+#mapBtn{position:absolute;right:14px;bottom:118px;z-index:6;display:none;width:46px;height:46px;border-radius:14px;border:0;align-items:center;justify-content:center;color:#eaf4ff}
+@media (max-width:820px){
+ #mapWrap{position:absolute;right:10px;bottom:176px;width:46vw!important;height:34vh;border-radius:18px;overflow:hidden;border:1px solid rgba(120,200,255,.4);z-index:7;transition:opacity .3s}
+ #mapWrap.s0{opacity:0;pointer-events:none}
+ #mapWrap.s2{width:calc(100% - 20px)!important;height:52vh}
+ #info{left:10px;top:10px;right:10px;max-width:none;padding:11px 13px}
+ #info dl{display:none}
+ #info.more dl{display:grid}
+ #compass{bottom:100px;width:220px}
+ #tools{left:auto;right:10px;bottom:auto;top:110px;flex-direction:column}
+ #strip{left:10px;right:10px;bottom:10px;height:78px}
+ #strip button{width:120px;height:62px}
+ #card{left:10px;right:10px;top:auto;bottom:10px;width:auto;height:62vh;transform:translateY(calc(100% + 30px))}
+ #tables{inset:8px}
+ #tables input{width:100%;margin:8px 0 0}
+ #tables .th{flex-wrap:wrap}
+ #splash h1{font-size:34px}
+ .nav .ring{width:52px;height:52px}
+}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+</head>
+<body>
+<div id="app">
+ <div id="panoWrap">
+  <canvas id="pano"></canvas>
+  <div id="hs"></div>
+  <div id="fade"></div>
+  <div id="load">Loading view…</div>
+  <div id="info" class="glass"></div>
+  <div id="compass" class="glass"><div class="tape" id="tape"></div></div>
+  <div id="tools" class="glass">
+   <button id="bList" title="Points, sensors and topics"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg></button>
+   <button id="bMap" title="Map size"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3.5 6.5 9 4l6 2.5L20.5 4v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg></button>
+   <button id="bNorth" title="Face north"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m12 5 3 8h-6z" fill="currentColor"/></svg></button>
+   <button id="bFull" title="Full screen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 9V5.5A1.5 1.5 0 0 1 5.5 4H9M15 4h3.5A1.5 1.5 0 0 1 20 5.5V9M20 15v3.5a1.5 1.5 0 0 1-1.5 1.5H15M9 20H5.5A1.5 1.5 0 0 1 4 18.5V15"/></svg></button>
+   <a id="bHub" href="../catchments/?site=oulanka" title="Catchment map" style="width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:#cfe6ff"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4.5c3-1.6 6.2.4 8.6-.6 2.2-.9 4.4.6 4.6 3.2.2 2.6-1.6 3.6-1.2 6 .4 2.6-1.4 5.4-4.6 5.9-3.4.5-5-1.6-7.6-1.4C3.4 17.8 2.6 14.6 3.6 12c.9-2.4-.6-3.6.1-5.4.4-1 1.2-1.6 2.3-2.1z"/><path d="M12 7.5c.4 2.2-1.6 3.2-1.2 5.2.3 1.6 1.8 2.3 2.2 3.8"/></svg></a>
+  </div>
+  <div id="strip" class="glass"></div>
+  <div id="edit" class="glass"><span id="editTxt">Edit mode</span><button id="eNorth">Set north here</button><button class="sec" id="eSave">Download points.json</button></div>
+  <aside id="card" class="glass"></aside>
+ </div>
+ <div id="mapWrap" class="s1"><div id="map"></div></div>
+</div>
+<div id="tables" class="glass">
+ <div class="th"><button class="tab on" data-t="points">Points</button><button class="tab" data-t="sensors">Sensors</button><button class="tab" data-t="topics">To notice</button><input id="q" placeholder="Search…"><button id="tClose" class="tab" style="margin-left:6px">✕</button></div>
+ <div class="tb" id="tbody"></div>
+</div>
+<div id="splash"><div class="bg" id="splashBg"></div><div class="in">
+ <div class="kick">DIWA Spatial Hub · Oulankajoki supersite</div>
+ <h1>Oulanka <span>Virtual Field Guide</span></h1>
+ <p>Walk the Oulankajoki valley in 360°: from the research station along the river to the Kiutaköngäs rapids and the Puukkosuo fen. Glowing points show the sensors measuring the site, and white “i” points tell you what to notice.</p>
+ <div class="chips" id="chips"></div>
+ <button class="start" id="start">Start the guide</button>
+ <div class="small">Drag to look around · arrows to walk · works on phones and computers</div>
+</div></div>
+<script src="../catchments/leaflet.js"></script>
+<script type="module">
+import * as THREE from 'three';
+const $ = s => document.querySelector(s);
+const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const CATS = { soil: ['Soil', '#34d399'], surface: ['Surface water', '#38bdf8'], groundwater: ['Groundwater', '#a78bfa'], atmosphere: ['Atmosphere and weather', '#facc15'], vegetation: ['Vegetation', '#86efac'], remote: ['Cameras and remote sensing', '#f1f5f9'], other: ['Other', '#94a3b8'] };
+const EDIT = /[?&]edit\b/.test(location.search);
+const G = await fetch('guide.json').then(r => r.json());
+try { const o = await fetch('points.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : null); if (o) o.points.forEach(p => { const q = G.points.find(x => x.id === p.id); if (q) Object.assign(q, p); }); } catch (e) {}
+const P = G.points, byId = Object.fromEntries(P.map(p => [p.id, p]));
+const dist = (a, b) => Math.hypot(b.E - a.E, b.N - a.N), bearing = (a, b) => Math.atan2(b.E - a.E, b.N - a.N) * 180 / Math.PI;
+// order points as a walk: start at the station yard, then nearest neighbour
+const order = (() => { const left = [...P], out = [left.splice(Math.max(0, left.findIndex(p => p.id === 'p15')), 1)[0]]; while (left.length) { const l = out.at(-1); left.sort((a, b) => dist(l, a) - dist(l, b)); out.push(left.shift()); } return out; })();
+
+// ---------------------------------------------------------------- 360 view
+const canvas = $('#pano'), renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(2, devicePixelRatio)); renderer.outputColorSpace = THREE.SRGBColorSpace;
+const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(75, 1, .1, 1100);
+const geo = new THREE.SphereGeometry(500, 96, 64); geo.scale(-1, 1, 1);
+const mat = new THREE.MeshBasicMaterial({ color: 0xffffff }); scene.add(new THREE.Mesh(geo, mat));
+const loader = new THREE.TextureLoader(), cache = {};
+let cur = null, yaw = 0, pitch = 0, vy = 0, vp = 0, fov = 75, dragging = false;
+const dirOf = (yawDeg, pitchDeg, r = 100) => { const y = yawDeg * Math.PI / 180, p = pitchDeg * Math.PI / 180; return new THREE.Vector3(Math.sin(y) * Math.cos(p) * r, Math.sin(p) * r, -Math.cos(y) * Math.cos(p) * r); };
+function resize() { const w = $('#panoWrap').clientWidth, h = $('#panoWrap').clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); MAP && MAP.invalidateSize(); }
+addEventListener('resize', resize);
+const tex = id => cache[id] || (cache[id] = new Promise(res => loader.load(byId[id].file, t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); res(t); })));
+async function go(id, look) {
+  const p = byId[id]; if (!p || (cur && cur.id === id)) return;
+  $('#load').classList.add('on'); $('#fade').style.opacity = cur ? 1 : 0;
+  const t = await tex(id); await new Promise(r => setTimeout(r, cur ? 350 : 0));
+  const from = cur; cur = p; mat.map = t; mat.needsUpdate = true;
+  if (look !== undefined) yaw = look; else if (from) yaw = p.north + bearing(from, p);   // keep walking direction
+  else yaw = p.north;
+  pitch = 0; $('#fade').style.opacity = 0; $('#load').classList.remove('on');
+  buildHotspots(); renderInfo(); markStrip(); mapFocus(); history.replaceState(null, '', '#' + id + (EDIT ? '' : ''));
+  const k = order.indexOf(p); [order[k + 1], order[k - 1]].forEach(n => n && tex(n.id));   // preload neighbours
+}
+// drag, inertia, zoom
+let lx = 0, ly = 0, pinch = 0;
+const pw = $('#panoWrap');
+pw.addEventListener('pointerdown', e => { if (e.target.closest('.hot,#info,#tools,#strip,#card,#edit')) return; dragging = true; pw.classList.add('drag'); lx = e.clientX; ly = e.clientY; pw.setPointerCapture(e.pointerId); });
+pw.addEventListener('pointermove', e => { if (!dragging) return; const k = fov / pw.clientHeight; vy = -(e.clientX - lx) * k; vp = (e.clientY - ly) * k; yaw += vy; pitch = Math.max(-85, Math.min(85, pitch + vp)); lx = e.clientX; ly = e.clientY; });
+pw.addEventListener('pointerup', () => { dragging = false; pw.classList.remove('drag'); });
+pw.addEventListener('wheel', e => { fov = Math.max(35, Math.min(100, fov + e.deltaY * .04)); e.preventDefault(); }, { passive: false });
+pw.addEventListener('touchmove', e => { if (e.touches.length === 2) { const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); if (pinch) fov = Math.max(35, Math.min(100, fov * pinch / d)); pinch = d; } }, { passive: true });
+pw.addEventListener('touchend', () => pinch = 0);
+addEventListener('keydown', e => { if (e.key === 'ArrowLeft') yaw -= 10; if (e.key === 'ArrowRight') yaw += 10; if (e.key === 'Escape') { closeCard(); $('#tables').classList.remove('show'); } });
+
+// ---------------------------------------------------------------- hotspots (placed by real bearing from the point)
+let hots = [];
+function buildHotspots() {
+  const hs = $('#hs'); hs.innerHTML = ''; hots = []; const p = cur, eye = (p.elev ?? 160) + 1.6;
+  const add = (el, yawDeg, pitchDeg, fn) => { el.classList.add('hot'); hs.appendChild(el); el.addEventListener('click', e => { e.stopPropagation(); fn(); }); hots.push({ el, v: dirOf(yawDeg, pitchDeg) }); };
+  // walk to the nearest points
+  P.filter(q => q !== p).map(q => ({ q, d: dist(p, q) })).filter(o => o.d < 1600).sort((a, b) => a.d - b.d).slice(0, 4).forEach(({ q, d }, i) => {
+    const el = document.createElement('div'); el.className = 'nav';
+    el.innerHTML = `<div class="ring"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#eaffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg></div><div class="lab">${esc(q.title)}<b>${d < 1000 ? Math.round(d) + ' m' : (d / 1000).toFixed(1) + ' km'}</b></div>`;
+    add(el, p.north + bearing(p, q), -16 - Math.min(10, 600 / Math.max(d, 60)), () => go(q.id));
+  });
+  // sensor stations within 700 m
+  G.stations.map(s => ({ s, d: dist(p, s) })).filter(o => o.d < 700).sort((a, b) => a.d - b.d).slice(0, 9).forEach(({ s, d }) => {
+    const c = (CATS[s.cat] || CATS.other)[1], el = document.createElement('div'); el.className = 'sen'; el.style.setProperty('--c', c);
+    el.innerHTML = `<div class="orb"></div><div class="lab">${esc(s.name)} · ${Math.round(d)} m</div>`;
+    const z = parseFloat(s.z) || p.elev || 160; add(el, p.north + bearing(p, s), Math.max(-10, Math.min(8, Math.atan2(z + 2 - eye, Math.max(d, 15)) * 180 / Math.PI)), () => showStation(s, d));
+  });
+  // topics within 1.3 km
+  G.topics.map(t => ({ t, d: dist(p, t) })).filter(o => o.d < 1300).sort((a, b) => a.d - b.d).slice(0, 4).forEach(({ t, d }) => {
+    const el = document.createElement('div'); el.className = 'top'; el.title = t.title; el.textContent = 'i';
+    add(el, p.north + bearing(p, t), 6 + Math.min(10, 300 / Math.max(d, 30)), () => showTopic(t));
+  });
+}
+const tmp = new THREE.Vector3();
+function placeHotspots() {
+  const w = pw.clientWidth, h = pw.clientHeight;
+  hots.forEach(o => { tmp.copy(o.v).project(camera); const vis = tmp.z < 1 && Math.abs(tmp.x) < 1.2 && Math.abs(tmp.y) < 1.2;
+    o.el.style.display = vis ? '' : 'none'; if (vis) o.el.style.transform = `translate(${(tmp.x * .5 + .5) * w}px,${(-tmp.y * .5 + .5) * h}px) translate(-50%,-50%)`; });
+}
+// compass tape
+const tape = $('#tape'), DIRS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+tape.innerHTML = Array.from({ length: 72 }, (_, i) => { const deg = (i * 15) % 360, k = deg % 45 === 0 ? DIRS[deg / 45] : '·'; return `<span class="${deg === 0 ? 'c' : ''}">${k}</span>`; }).join('');
+function headingDeg() { return (((yaw - (cur?.north || 0)) % 360) + 360) % 360; }
+
+// ---------------------------------------------------------------- info card, strip, cards
+function renderInfo() {
+  const p = cur;
+  $('#info').innerHTML = `<div class="kick"><img src="../catchments/logo.png" alt="">Oulanka · Virtual Field Guide</div>
+    <h1>${esc(p.title)}</h1><p>${esc(p.sub)}</p>
+    <dl><dt>Photo</dt><dd>${p.season} · ${p.date === '2026-09' ? 'September 2026' : esc(p.date)}</dd>${p.elev ? `<dt>Elevation</dt><dd>${Math.round(p.elev)} m a.s.l.</dd>` : ''}
+    <dt>Position</dt><dd>${p.lat.toFixed(5)} N, ${p.lon.toFixed(5)} E · <a href="https://www.google.com/maps?q=${p.lat},${p.lon}" target="_blank" rel="noopener">Google Maps</a></dd>
+    <dt>Point</dt><dd>${order.indexOf(p) + 1} of ${P.length}</dd></dl>
+    ${p.approx ? '<div class="warn">Position and north direction are approximate.</div>' : ''}`;
+}
+$('#info').addEventListener('click', () => $('#info').classList.toggle('more'));
+const strip = $('#strip');
+strip.innerHTML = order.map((p, i) => `<button data-id="${p.id}" style="background-image:url('${p.file.replace('panoramas/', 'panoramas/thumbs/')}')"><span>${i + 1} · ${esc(p.title)}</span></button>`).join('');
+strip.querySelectorAll('button').forEach(b => b.onclick = () => go(b.dataset.id));
+function markStrip() { strip.querySelectorAll('button').forEach(b => b.classList.toggle('cur', b.dataset.id === cur.id)); strip.querySelector('.cur')?.scrollIntoView({ inline: 'center', behavior: 'smooth', block: 'nearest' }); }
+const card = $('#card');
+function openCard(html) { card.innerHTML = html; card.classList.add('show'); card.querySelector('.x').onclick = closeCard; }
+function closeCard() { card.classList.remove('show'); }
+function showTopic(t) {
+  openCard(`<div class="ch"><div class="dot" style="background:#fff;display:flex;align-items:center;justify-content:center;color:#06162e;font:italic 700 18px Georgia,serif">i</div><div><h2>${esc(t.title)}</h2><div class="sub">${esc(t.sub)}</div></div><button class="x">✕</button></div>
+    <div class="cb">${t.img ? `<img src="${t.img}" alt="">` : ''}<p>${esc(t.text)}</p>${t.draft ? '<div class="draft">Draft text, to be reviewed by the Oulankajoki research team.</div>' : ''}
+    <button class="go" data-look="${t.id}">Look towards it</button></div>`);
+  card.querySelector('[data-look]').onclick = () => turnTo(t);
+}
+function showStation(s, d) {
+  const c = (CATS[s.cat] || CATS.other);
+  openCard(`<div class="ch"><div class="dot" style="background:radial-gradient(circle at 35% 30%,#fff,${c[1]} 55%);box-shadow:0 0 16px ${c[1]}"></div><div><h2>${esc(s.name)}</h2><div class="sub">${esc(c[0])}${s.place ? ' · ' + esc(s.place) : ''}${d ? ` · ${Math.round(d)} m from here` : ''}</div></div><button class="x">✕</button></div>
+    <div class="cb">${s.sensors.map(x => `<div class="sc"><b>${esc([x.producer, x.model].filter(Boolean).join(' ') || 'Sensor')}</b> ${x.label ? `<span class="m">${esc(x.label)}</span>` : ''}
+      ${x.type ? `<div>${esc(x.type)}</div>` : ''}${x.params ? `<div>${esc(x.params)}${x.units ? ` <span class="m">(${esc(x.units)})</span>` : ''}</div>` : ''}
+      <div class="m">${[x.res && 'Interval ' + x.res, x.start && 'since ' + x.start, x.level].filter(Boolean).map(esc).join(' · ')}</div>${x.note ? `<div class="m">${esc(x.note)}</div>` : ''}</div>`).join('')}
+      <div class="m" style="font-size:11px;color:rgba(200,225,255,.55)">From the DIWA critical-zone sensor template. Only Open and Public sensors are shown.</div>
+      <button class="go" data-look="1">Look towards it</button></div>`);
+  card.querySelector('[data-look]').onclick = () => turnTo(s);
+}
+function turnTo(t) { const target = cur.north + bearing(cur, t); let d = ((target - yaw) % 360 + 540) % 360 - 180; const y0 = yaw, t0 = performance.now(); (function st(now) { const k = Math.min(1, (now - t0) / 900), e = 1 - Math.pow(1 - k, 3); yaw = y0 + d * e; pitch *= .9; if (k < 1) requestAnimationFrame(st); })(t0); }
+
+// ---------------------------------------------------------------- map
+let MAP = null, cone = null, ptLayer = {};
+function initMap() {
+  MAP = L.map('map', { zoomControl: false, attributionControl: true }).setView([66.374, 29.318], 14);
+  L.control.zoom({ position: 'bottomright' }).addTo(MAP);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(MAP);
+  fetch('../data/catchments.geojson').then(r => r.json()).then(gj => { const f = gj.features.find(x => x.properties.id === 'oulanka'); if (f) L.geoJSON(f, { style: { color: '#7fd8ff', weight: 1.5, fill: false, dashArray: '5 5' }, interactive: false }).addTo(MAP); }).catch(() => {});
+  G.stations.forEach(s => L.circleMarker([s.lat, s.lon], { radius: 6, color: '#06162e', weight: 1.5, fillColor: (CATS[s.cat] || CATS.other)[1], fillOpacity: 1 }).bindTooltip(s.name).on('click', () => showStation(s, cur ? dist(cur, s) : 0)).addTo(MAP));
+  G.topics.forEach(t => L.marker([t.lat, t.lon], { icon: L.divIcon({ className: '', html: '<div style="width:22px;height:22px;border-radius:50%;background:#fff;color:#06162e;font:italic 700 13px Georgia,serif;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(255,255,255,.7)">i</div>', iconSize: [22, 22] }) }).bindTooltip(t.title).on('click', () => showTopic(t)).addTo(MAP));
+  P.forEach(p => { const m = L.marker([p.lat, p.lon], { draggable: EDIT, icon: ptIcon(false, order.indexOf(p) + 1) }).bindTooltip(p.title).on('click', () => go(p.id)).addTo(MAP);
+    if (EDIT) m.on('dragend', () => { const ll = m.getLatLng(); p.lat = +ll.lat.toFixed(6); p.lon = +ll.lng.toFixed(6); const [E, N] = toETRS(p.lat, p.lon); p.E = E; p.N = N; p.approx = false; buildHotspots(); renderInfo(); });
+    ptLayer[p.id] = m; });
+  cone = L.polygon([[0, 0]], { color: '#ffd65a', weight: 1.5, fillColor: '#ffd65a', fillOpacity: .28, interactive: false }).addTo(MAP);
+}
+const ptIcon = (on, n) => L.divIcon({ className: '', iconSize: [on ? 34 : 24, on ? 34 : 24], html: `<div style="width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:${on ? 12 : 10}px;font-weight:800;color:${on ? '#06162e' : '#fff'};background:${on ? '#ffd65a' : 'rgba(6,22,46,.85)'};border:2px solid ${on ? '#fff' : '#7fd8ff'};box-shadow:0 0 ${on ? 18 : 10}px ${on ? 'rgba(255,214,90,.8)' : 'rgba(95,212,255,.7)'}">${n}</div>` });
+let lastOn = null;
+function mapFocus() { if (!MAP) return; if (lastOn) ptLayer[lastOn].setIcon(ptIcon(false, order.findIndex(p => p.id === lastOn) + 1)).setZIndexOffset(0); ptLayer[cur.id].setIcon(ptIcon(true, order.indexOf(cur) + 1)).setZIndexOffset(1000); lastOn = cur.id; MAP.flyTo([cur.lat, cur.lon], Math.max(MAP.getZoom(), 15), { duration: .8 }); }
+// view cone in metres around the point, converted to lat/lon
+function updateCone() {
+  if (!MAP || !cur) return; const h = headingDeg(), half = camera.getEffectiveFOV() * camera.aspect / 2, r = 160, pts = [[cur.lat, cur.lon]];
+  for (let a = -half; a <= half; a += half / 6) { const b = (h + a) * Math.PI / 180; pts.push([cur.lat + r * Math.cos(b) / 111320, cur.lon + r * Math.sin(b) / (111320 * Math.cos(cur.lat * Math.PI / 180))]); }
+  cone.setLatLngs(pts);
+}
+// lat/lon -> ETRS-TM35FIN (for edit mode; small-area approximation around the table centre)
+function toETRS(lat, lon) { const c = G.table, lat0 = 66.37004, lon0 = 29.31197; const E = c.E + (lon - lon0) * 111320 * Math.cos(lat * Math.PI / 180) * 1.0, N = c.N + (lat - lat0) * 111320; return [+E.toFixed(1), +N.toFixed(1)]; }
+
+// ---------------------------------------------------------------- tables
+let tab = 'points';
+function renderTable() {
+  const q = $('#q').value.trim().toLowerCase(), m = s => !q || s.toLowerCase().includes(q); let h = '';
+  if (tab === 'points') h = `<table><tr><th>#</th><th>Point</th><th>Description</th><th>Elevation</th></tr>${order.filter(p => m(p.title + p.sub)).map(p => `<tr class="row" data-p="${p.id}"><td>${order.indexOf(p) + 1}</td><td><a>${esc(p.title)}</a></td><td>${esc(p.sub)}</td><td>${p.elev ? Math.round(p.elev) + ' m' : ''}</td></tr>`).join('')}</table>`;
+  if (tab === 'sensors') h = `<table><tr><th>Station</th><th>Type</th><th>Sensors</th><th>Place</th></tr>${G.stations.filter(s => m(s.name + s.cat + s.sensors.map(x => x.producer + x.model + x.params).join(' '))).map(s => `<tr class="row" data-s="${s.id}"><td><a>${esc(s.name)}</a></td><td><span class="catdot" style="background:${(CATS[s.cat] || CATS.other)[1]}"></span>${(CATS[s.cat] || CATS.other)[0]}</td><td>${s.sensors.map(x => esc([x.producer, x.model].filter(Boolean).join(' '))).join(', ')}</td><td>${esc(s.place || '')}</td></tr>`).join('')}</table>`;
+  if (tab === 'topics') h = `<table><tr><th>Title</th><th>Subtitle</th></tr>${G.topics.filter(t => m(t.title + t.sub + t.text)).map(t => `<tr class="row" data-t="${t.id}"><td><a>${esc(t.title)}</a></td><td>${esc(t.sub)}</td></tr>`).join('')}</table>`;
+  $('#tbody').innerHTML = h;
+  $('#tbody').querySelectorAll('tr.row').forEach(r => r.onclick = () => { $('#tables').classList.remove('show');
+    if (r.dataset.p) go(r.dataset.p);
+    const near = o => [...P].sort((a, b) => dist(a, o) - dist(b, o))[0];
+    if (r.dataset.s) { const s = G.stations.find(x => x.id === r.dataset.s), n = near(s); go(n.id).then(() => { turnTo(s); showStation(s, dist(n, s)); }); if (n === cur) { turnTo(s); showStation(s, dist(cur, s)); } }
+    if (r.dataset.t) { const t = G.topics.find(x => x.id === r.dataset.t), n = near(t); go(n.id).then(() => { turnTo(t); showTopic(t); }); if (n === cur) { turnTo(t); showTopic(t); } } });
+}
+document.querySelectorAll('#tables .tab[data-t]').forEach(b => b.onclick = () => { tab = b.dataset.t; document.querySelectorAll('#tables .tab[data-t]').forEach(x => x.classList.toggle('on', x === b)); renderTable(); });
+$('#q').oninput = renderTable; $('#tClose').onclick = () => $('#tables').classList.remove('show');
+$('#bList').onclick = () => { $('#tables').classList.add('show'); renderTable(); };
+let mapState = innerWidth < 820 ? 0 : 1;
+const setMap = s => { mapState = s; $('#mapWrap').className = 's' + s; setTimeout(resize, 470); };
+$('#bMap').onclick = () => setMap((mapState + 1) % 3);
+$('#bNorth').onclick = () => turnTo({ E: cur.E, N: cur.N + 100 });
+$('#bFull').onclick = () => { const d = document; if (!d.fullscreenElement) d.documentElement.requestFullscreen?.(); else d.exitFullscreen?.(); };
+
+// ---------------------------------------------------------------- edit mode: set north and positions, download the result
+if (EDIT) {
+  $('#edit').classList.add('on');
+  $('#eNorth').onclick = () => { cur.north = Math.round(((yaw % 360) + 360) % 360); cur.approx = false; buildHotspots(); renderInfo(); $('#editTxt').textContent = `North set for ${cur.title}`; };
+  $('#eSave').onclick = () => { const out = { points: P.map(p => ({ id: p.id, lat: p.lat, lon: p.lon, E: p.E, N: p.N, north: p.north, approx: p.approx })) };
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 1)], { type: 'application/json' })); a.download = 'points.json'; a.click(); };
+}
+
+// ---------------------------------------------------------------- start
+$('#chips').innerHTML = `<span>${P.length} 360° points</span><span>${G.stations.length} sensor stations</span><span>${G.topics.length} things to notice</span>`;
+$('#splashBg').style.backgroundImage = `url('${byId.p03?.file || P[0].file}')`;
+setMap(mapState); initMap(); resize();
+const startId = (location.hash.slice(1) && byId[location.hash.slice(1)]) ? location.hash.slice(1) : order[0].id;
+tex(startId);
+$('#start').onclick = () => { $('#splash').style.opacity = 0; setTimeout(() => $('#splash').remove(), 650); go(startId); };
+if (location.hash.length > 1 || EDIT) $('#start').click();
+let last = performance.now(), coneT = 0;
+renderer.setAnimationLoop(now => {
+  const dt = (now - last) / 1000; last = now;
+  if (!dragging) { yaw += vy; pitch = Math.max(-85, Math.min(85, pitch + vp)); vy *= .9; vp *= .9; if (!cur) yaw += dt * 3; }
+  camera.fov += (fov - camera.fov) * .2; camera.updateProjectionMatrix();
+  camera.lookAt(dirOf(yaw, pitch));
+  renderer.render(scene, camera); placeHotspots();
+  const h = headingDeg(); tape.style.left = `${150 - (h / 15) * 30 - 15 - 360 / 15 * 30}px`;
+  if ((coneT += dt) > .08) { coneT = 0; updateCone(); }
+});
+window.__fg = { go, G, get cur() { return cur; }, turnTo, showTopic, showStation, setMap };
+</script>
+</body>
+</html>
