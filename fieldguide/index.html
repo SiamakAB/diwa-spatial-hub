@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#061632">
 <title>Oulanka Virtual Field Guide · DIWA Spatial Hub</title>
-<meta name="description" content="Walk the Oulankajoki supersite in 360°: field views, public sensor stations, on a map. Works on phones and computers.">
+<meta name="description" content="Walk the Oulankajoki supersite in 360°: field views on a map. Works on phones and computers.">
 <link rel="icon" href="../catchments/logo.png">
 <link rel="stylesheet" href="../catchments/leaflet.css">
 <style>
@@ -37,10 +37,6 @@ a{color:#7fd8ff}
 .nav:hover .ring{transform:scale(1.12)}
 .nav .lab{padding:4px 10px;border-radius:99px;font-size:11.5px;font-weight:600;background:rgba(5,19,43,.82);border:1px solid rgba(127,216,255,.45);white-space:nowrap}
 .nav .lab b{color:#7fd8ff;margin-left:4px}
-.sen{display:flex;align-items:center;gap:8px}
-.sen .orb{width:20px;height:20px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 4px rgba(255,255,255,.12),0 0 18px var(--c);background:radial-gradient(circle at 35% 30%,#fff,var(--c) 55%);animation:pulse 2.4s infinite}
-.sen .lab{padding:4px 9px;border-radius:10px;font-size:11px;font-weight:600;background:rgba(5,19,43,.82);border:1px solid var(--c);white-space:nowrap;opacity:0;transform:translateX(-4px);transition:.2s}
-.sen:hover .lab,.sen.show .lab{opacity:1;transform:none}
 .top:hover{transform:translate(-50%,-50%) scale(1.1)}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 4px rgba(255,255,255,.12),0 0 12px var(--c)}50%{box-shadow:0 0 0 9px rgba(255,255,255,.04),0 0 26px var(--c)}}
 @keyframes pulse2{0%,100%{box-shadow:0 0 0 6px rgba(255,255,255,.22),0 0 18px rgba(255,255,255,.4)}50%{box-shadow:0 0 0 12px rgba(255,255,255,.06),0 0 30px rgba(255,255,255,.7)}}
@@ -144,7 +140,7 @@ a{color:#7fd8ff}
   <div id="info" class="glass"></div>
   <div id="compass" class="glass"><div class="tape" id="tape"></div></div>
   <div id="tools" class="glass">
-   <button id="bList" title="Points and sensors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg></button>
+   <button id="bList" title="All points"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg></button>
    <button id="bMap" title="Map size"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3.5 6.5 9 4l6 2.5L20.5 4v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg></button>
    <button id="bNorth" title="Face north"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m12 5 3 8h-6z" fill="currentColor"/></svg></button>
    <button id="bFull" title="Full screen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 9V5.5A1.5 1.5 0 0 1 5.5 4H9M15 4h3.5A1.5 1.5 0 0 1 20 5.5V9M20 15v3.5a1.5 1.5 0 0 1-1.5 1.5H15M9 20H5.5A1.5 1.5 0 0 1 4 18.5V15"/></svg></button>
@@ -157,14 +153,14 @@ a{color:#7fd8ff}
  <div id="mapWrap" class="s1"><div id="map"></div></div>
 </div>
 <div id="tables" class="glass">
- <div class="th"><button class="tab on" data-t="points">Points</button><button class="tab" data-t="sensors">Sensors</button><input id="q" placeholder="Search…"><button id="tClose" class="tab" style="margin-left:6px">✕</button></div>
+ <div class="th"><button class="tab on" data-t="points">Points</button><input id="q" placeholder="Search…"><button id="tClose" class="tab" style="margin-left:6px">✕</button></div>
  <div class="tb" id="tbody"></div>
 </div>
 <div id="splash"><div class="in">
  <img class="logo" src="logo.png" alt="Digital Waters">
  <div class="kick">DIWA Spatial Hub · Oulankajoki supersite</div>
  <h1>Oulanka <span>Virtual Field Guide</span></h1>
- <div class="card"><p>Walk the Oulankajoki valley in 360°: from the research station along the river to the Kiutaköngäs rapids and the Puukkosuo fen. Glowing points show the public sensor stations measuring the site, and the map shows where you are and which way you are looking.</p></div>
+ <div class="card"><p>Walk the Oulankajoki valley in 360°: from the research station along the river to the Kiutaköngäs rapids and the Puukkosuo fen. Arrows take you from one view to the next, and the map shows where you are and which way you are looking.</p></div>
  <div class="chips" id="chips"></div>
  <button class="start" id="start">Start the guide</button>
  <div class="small">Drag to look around · arrows to walk · works on phones and computers</div>
@@ -228,12 +224,6 @@ function buildHotspots() {
     el.innerHTML = `<div class="ring"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#eaffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg></div><div class="lab">${esc(q.title)}<b>${d < 1000 ? Math.round(d) + ' m' : (d / 1000).toFixed(1) + ' km'}</b></div>`;
     add(el, p.north + bearing(p, q), -16 - Math.min(10, 600 / Math.max(d, 60)), () => go(q.id));
   });
-  // sensor stations within 700 m
-  G.stations.map(s => ({ s, d: dist(p, s) })).filter(o => o.d < 700).sort((a, b) => a.d - b.d).slice(0, 9).forEach(({ s, d }) => {
-    const c = (CATS[s.cat] || CATS.other)[1], el = document.createElement('div'); el.className = 'sen'; el.style.setProperty('--c', c);
-    el.innerHTML = `<div class="orb"></div><div class="lab">${esc(s.name)} · ${Math.round(d)} m</div>`;
-    const z = parseFloat(s.z) || p.elev || 160; add(el, p.north + bearing(p, s), Math.max(-10, Math.min(8, Math.atan2(z + 2 - eye, Math.max(d, 15)) * 180 / Math.PI)), () => showStation(s, d));
-  });
 }
 const tmp = new THREE.Vector3();
 function placeHotspots() {
@@ -264,16 +254,6 @@ function markStrip() { strip.querySelectorAll('button').forEach(b => b.classList
 const card = $('#card');
 function openCard(html) { card.innerHTML = html; card.classList.add('show'); card.querySelector('.x').onclick = closeCard; }
 function closeCard() { card.classList.remove('show'); }
-function showStation(s, d) {
-  const c = (CATS[s.cat] || CATS.other);
-  openCard(`<div class="ch"><div class="dot" style="background:radial-gradient(circle at 35% 30%,#fff,${c[1]} 55%);box-shadow:0 0 16px ${c[1]}"></div><div><h2>${esc(s.name)}</h2><div class="sub">${esc(c[0])}${s.place ? ' · ' + esc(s.place) : ''}${d ? ` · ${Math.round(d)} m from here` : ''}</div></div><button class="x">✕</button></div>
-    <div class="cb">${s.sensors.map(x => `<div class="sc"><b>${esc([x.producer, x.model].filter(Boolean).join(' ') || 'Sensor')}</b> ${x.label ? `<span class="m">${esc(x.label)}</span>` : ''}
-      ${x.type ? `<div>${esc(x.type)}</div>` : ''}${x.params ? `<div>${esc(x.params)}${x.units ? ` <span class="m">(${esc(x.units)})</span>` : ''}</div>` : ''}
-      <div class="m">${[x.res && 'Interval ' + x.res, x.start && 'since ' + x.start, x.level].filter(Boolean).map(esc).join(' · ')}</div>${x.note ? `<div class="m">${esc(x.note)}</div>` : ''}</div>`).join('')}
-      <div class="m" style="font-size:11px;color:rgba(200,225,255,.55)">From the DIWA critical-zone sensor template. Only Open and Public sensors are shown.</div>
-      <button class="go" data-look="1">Look towards it</button></div>`);
-  card.querySelector('[data-look]').onclick = () => turnTo(s);
-}
 function turnTo(t) { const target = cur.north + bearing(cur, t); let d = ((target - yaw) % 360 + 540) % 360 - 180; const y0 = yaw, t0 = performance.now(); (function st(now) { const k = Math.min(1, (now - t0) / 900), e = 1 - Math.pow(1 - k, 3); yaw = y0 + d * e; pitch *= .9; if (k < 1) requestAnimationFrame(st); })(t0); }
 
 // ---------------------------------------------------------------- map
@@ -283,7 +263,6 @@ function initMap() {
   L.control.zoom({ position: 'bottomright' }).addTo(MAP);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(MAP);
   fetch('../data/catchments.geojson').then(r => r.json()).then(gj => { const f = gj.features.find(x => x.properties.id === 'oulanka'); if (f) L.geoJSON(f, { style: { color: '#7fd8ff', weight: 1.5, fill: false, dashArray: '5 5' }, interactive: false }).addTo(MAP); }).catch(() => {});
-  G.stations.forEach(s => L.circleMarker([s.lat, s.lon], { radius: 6, color: '#06162e', weight: 1.5, fillColor: (CATS[s.cat] || CATS.other)[1], fillOpacity: 1 }).bindTooltip(s.name).on('click', () => showStation(s, cur ? dist(cur, s) : 0)).addTo(MAP));
   P.forEach(p => { const m = L.marker([p.lat, p.lon], { draggable: EDIT, icon: ptIcon(false, order.indexOf(p) + 1) }).bindTooltip(p.title).on('click', () => go(p.id)).addTo(MAP);
     if (EDIT) m.on('dragend', () => { const ll = m.getLatLng(); p.lat = +ll.lat.toFixed(6); p.lon = +ll.lng.toFixed(6); const [E, N] = toETRS(p.lat, p.lon); p.E = E; p.N = N; p.approx = false; buildHotspots(); renderInfo(); });
     ptLayer[p.id] = m; });
@@ -306,12 +285,10 @@ let tab = 'points';
 function renderTable() {
   const q = $('#q').value.trim().toLowerCase(), m = s => !q || s.toLowerCase().includes(q); let h = '';
   if (tab === 'points') h = `<table><tr><th>#</th><th>Point</th><th>Description</th><th>Elevation</th></tr>${order.filter(p => m(p.title + p.sub)).map(p => `<tr class="row" data-p="${p.id}"><td>${order.indexOf(p) + 1}</td><td><a>${esc(p.title)}</a></td><td>${esc(p.sub)}</td><td>${p.elev ? Math.round(p.elev) + ' m' : ''}</td></tr>`).join('')}</table>`;
-  if (tab === 'sensors') h = `<table><tr><th>Station</th><th>Type</th><th>Sensors</th><th>Place</th></tr>${G.stations.filter(s => m(s.name + s.cat + s.sensors.map(x => x.producer + x.model + x.params).join(' '))).map(s => `<tr class="row" data-s="${s.id}"><td><a>${esc(s.name)}</a></td><td><span class="catdot" style="background:${(CATS[s.cat] || CATS.other)[1]}"></span>${(CATS[s.cat] || CATS.other)[0]}</td><td>${s.sensors.map(x => esc([x.producer, x.model].filter(Boolean).join(' '))).join(', ')}</td><td>${esc(s.place || '')}</td></tr>`).join('')}</table>`;
   $('#tbody').innerHTML = h;
   $('#tbody').querySelectorAll('tr.row').forEach(r => r.onclick = () => { $('#tables').classList.remove('show');
     if (r.dataset.p) go(r.dataset.p);
     const near = o => [...P].sort((a, b) => dist(a, o) - dist(b, o))[0];
-    if (r.dataset.s) { const s = G.stations.find(x => x.id === r.dataset.s), n = near(s); go(n.id).then(() => { turnTo(s); showStation(s, dist(n, s)); }); if (n === cur) { turnTo(s); showStation(s, dist(cur, s)); } }
   });
 }
 document.querySelectorAll('#tables .tab[data-t]').forEach(b => b.onclick = () => { tab = b.dataset.t; document.querySelectorAll('#tables .tab[data-t]').forEach(x => x.classList.toggle('on', x === b)); renderTable(); });
@@ -332,7 +309,7 @@ if (EDIT) {
 }
 
 // ---------------------------------------------------------------- start
-$('#chips').innerHTML = `<span>${P.length} 360° points</span><span>${G.stations.length} public sensor stations</span>`;
+$('#chips').innerHTML = `<span>${P.length} 360° points</span><span>Autumn 2026</span>`;
 setMap(mapState); initMap(); resize();
 const startId = (location.hash.slice(1) && byId[location.hash.slice(1)]) ? location.hash.slice(1) : order[0].id;
 tex(startId);
@@ -348,7 +325,7 @@ renderer.setAnimationLoop(now => {
   const h = headingDeg(); tape.style.left = `${150 - (h / 15) * 30 - 15 - 360 / 15 * 30}px`;
   if ((coneT += dt) > .08) { coneT = 0; updateCone(); }
 });
-window.__fg = { go, G, get cur() { return cur; }, turnTo, showStation, setMap };
+window.__fg = { go, G, get cur() { return cur; }, turnTo, setMap };
 </script>
 </body>
 </html>
