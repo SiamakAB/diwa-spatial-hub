@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>DIWA Catchments · DIWA Spatial Hub</title>
 <meta name="description" content="DIWA supersites at catchment scale: supersite boundaries and the public sensor network, with a way into each 3D site table.">
-<link rel="icon" href="../assets/diwa-logo-white.png">
+<link rel="icon" href="logo.png">
 <link rel="stylesheet" href="leaflet.css">
 <link rel="stylesheet" href="MarkerCluster.css">
 <style>
@@ -17,7 +17,7 @@ button{font:inherit;color:inherit}
  repeating-linear-gradient(0deg,rgba(130,190,255,.025) 0 1px,transparent 1px 24px),repeating-linear-gradient(90deg,rgba(130,190,255,.025) 0 1px,transparent 1px 24px),
  linear-gradient(160deg,#0a2448,#061632 60%,#040e22)}
 .leaflet-container{background:transparent;font:inherit}
-.leaflet-tile-pane{filter:saturate(.7) brightness(.95) hue-rotate(-8deg)}
+.leaflet-tile-pane{filter:invert(1) hue-rotate(188deg) brightness(.92) contrast(.9) saturate(.6)}   /* OpenStreetMap restyled to the blueprint palette */
 .glass{background:linear-gradient(160deg,rgba(30,80,150,.55),rgba(6,24,54,.82));border:1px solid rgba(120,200,255,.28);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 14px 44px rgba(0,8,25,.5)}
 #panel{position:fixed;left:16px;top:16px;bottom:16px;width:360px;border-radius:24px;z-index:500;display:flex;flex-direction:column;overflow:hidden}
 .ph{padding:18px 20px 12px;border-bottom:1px solid rgba(120,200,255,.16)}
@@ -85,7 +85,7 @@ button{font:inherit;color:inherit}
 <aside id="panel" class="glass">
  <button id="grab" aria-label="Expand or collapse"></button>
  <div class="ph">
-  <div class="brand"><img src="../assets/diwa-logo-white.png" alt="Digital Waters"><div><b>DIWA Catchments</b><span>Source to sea · supersites and sensors</span></div></div>
+  <div class="brand"><img src="logo.png" alt="Digital Waters"><div><b>DIWA Catchments</b><span>Source to sea · supersites and sensors</span></div></div>
   <p>Each DIWA supersite at catchment scale, with the public sensor network. Select a supersite to zoom in, then open its 3D table in the Spatial Hub.</p>
  </div>
  <div class="pb">
@@ -94,7 +94,7 @@ button{font:inherit;color:inherit}
   <div class="lbl">Supersites</div>
   <div id="sites"></div>
  </div>
- <div class="pf">Boundaries: DIWA supersite boundaries. Sensors: DIWA critical-zone sensor template; only sensors marked Open data or Public data are shown. Background map © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors, © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>.</div>
+ <div class="pf">Boundaries: DIWA supersite boundaries. Sensors: DIWA critical-zone sensor template; only sensors marked Open data or Public data are shown. Background map © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors.</div>
 </aside>
 <div id="top"><a class="glass" href="../">Enter the hub ↗</a></div>
 <script src="leaflet.js"></script>
@@ -113,7 +113,8 @@ const $ = s => document.querySelector(s);
 
 const map = L.map('map', { zoomControl: false, attributionControl: true, minZoom: 4, maxZoom: 17, zoomSnap: .25, worldCopyJump: false });
 L.control.zoom({ position: 'bottomright' }).addTo(map);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19, attribution: '© OpenStreetMap contributors © CARTO' }).addTo(map);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(map);
+let mask = null;                                         // darkens everything outside the selected catchment
 map.fitBounds([[59.6, 19.8], [70.2, 31.8]], innerWidth > 760 ? { paddingTopLeft: [380, 10] } : { paddingBottomRight: [0, innerHeight * .45] });
 
 const clusters = L.markerClusterGroup({
@@ -132,9 +133,9 @@ Promise.all([fetch('../data/catchments.geojson').then(r => r.json()), fetch('../
   // catchments
   geo.features.forEach(f => {
     const id = f.properties.id;
-    const lay = L.geoJSON(f, { style: { color: '#7fd8ff', weight: 1.6, fillColor: '#3aa0ff', fillOpacity: .08, opacity: .85 } }).addTo(map);
-    lay.on('mouseover', () => { if (sel !== id) lay.setStyle({ fillOpacity: .16, weight: 2.2 }); });
-    lay.on('mouseout', () => { if (sel !== id) lay.setStyle({ fillOpacity: .08, weight: 1.6 }); });
+    const lay = L.geoJSON(f, { style: { color: '#7fd8ff', weight: 1.6, fillColor: '#3aa0ff', fillOpacity: .04, opacity: .9 } }).addTo(map);
+    lay.on('mouseover', () => { if (sel !== id) lay.setStyle({ fillOpacity: .12, weight: 2.2 }); });
+    lay.on('mouseout', () => { if (sel !== id) lay.setStyle({ fillOpacity: .04, weight: 1.6 }); });
     lay.on('click', () => select(id));
     lay.bindTooltip(`${esc(f.properties.name)}<small>${esc(f.properties.kind)}</small>`, { className: 'ctag', direction: 'center', permanent: true, opacity: 1 });
     layers[id] = lay;
@@ -186,8 +187,12 @@ function buildSites() {
 function refresh() { clusters.clearLayers(); clusters.addLayers(markers.filter(m => on.has(m.options.cat))); }
 function fit(id) { const b = layers[id].getBounds(); map.flyToBounds(b, { paddingTopLeft: innerWidth > 760 ? [400, 30] : [20, 20], paddingBottomRight: innerWidth > 760 ? [30, 30] : [20, innerHeight * .48], duration: 1.1 }); }
 function select(id) {
-  if (sel && layers[sel]) layers[sel].setStyle({ fillOpacity: .08, weight: 1.6, color: '#7fd8ff' });
-  sel = id; layers[id].setStyle({ fillOpacity: .14, weight: 2.6, color: '#ffd65a' }); layers[id].bringToBack();
+  if (sel && layers[sel]) layers[sel].setStyle({ fillOpacity: .04, weight: 1.6, color: '#7fd8ff' });
+  sel = id; layers[id].setStyle({ fillOpacity: 0, weight: 2.6, color: '#ffd65a' }); layers[id].bringToBack();
+  if (mask) map.removeLayer(mask);
+  const f = GEO.features.find(x => x.properties.id === id), polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
+  const holes = polys.map(p => p[0].map(([lo, la]) => [la, lo]));
+  mask = L.polygon([[[-89, -179], [89, -179], [89, 179], [-89, 179]], ...holes], { stroke: false, fillColor: '#030c1f', fillOpacity: .62, interactive: false }).addTo(map);
   fit(id); buildSites(); $('#panel').classList.remove('min');
   const e = document.querySelector(`.site[data-id="${id}"]`); e && e.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   history.replaceState(null, '', '?site=' + id);
