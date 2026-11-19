@@ -90,6 +90,6 @@ topics = [
   *at_label('Haaralamminkangas')[:2], crop('p12', .5, 'pine.jpg')),
 ]
 json.dump({'site': 'Oulankajoki', 'title': 'Oulanka Virtual Field Guide', 'credit': '360° photos: Siamak Bazzaz, September 2026 · Fen photos: Petra Korhonen, 2024 drone surveys · Sensors: DIWA critical-zone sensor template (public sensors only) · Map: © OpenStreetMap contributors',
-           'table': {'E': CE, 'N': CN, 'R': R}, 'points': pts, 'stations': stations}, open(os.path.join(OUT, 'guide.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
-print(len(pts), 'points', len(stations), 'stations')  # topics removed from the guide (v1.18)
+           'table': {'E': CE, 'N': CN, 'R': R}, 'points': pts}, open(os.path.join(OUT, 'guide.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
+print(len(pts), 'points')  # sensors removed from the guide (v1.19)  # topics removed from the guide (v1.18)
 print([(p['id'], p['elev']) for p in pts])
