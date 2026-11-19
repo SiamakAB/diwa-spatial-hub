@@ -39,6 +39,7 @@ The **Oulankajoki** supersite at Oulanka Research Station, Kuusamo, is the large
 - **Living sky:** optional clouds drift over the tables, with rain or snow falling at a wind-blown angle, all following the weather of the selected day.
 - **Day and night:** switch between daylight and a night mode with northern lights and twinkling stars over the forest and warm lamps inside, while the tables stay clearly lit.
 - **Showcase mode:** when nobody touches the controls for 10 seconds, the view returns to the overview and circles slowly around the hall.
+- **DIWA Catchments board:** in the hall, beside the supersite map and in the same style, a map of the supersite boundaries and the public sensor network; click a pulsing point for a catchment's sensors, then open the catchment map or visit its 3D table.
 - **Catchment map** (`/catchments/`): every DIWA supersite at catchment scale, source to sea, with the public sensor network grouped by type. Select a supersite to zoom in, then open its 3D table in the hub. Works on computers and phones.
 - **AR booklet** (`/flipbook/`): *Immersive DIWA Supersites*, a 16-page booklet in the blueprint style. Read it online as a flipbook with page-curl animation, thumbnails, zoom, full screen and links that open each table in 3D, or print `flipbook/immersive-diwa-supersites-print-A4.pdf` (two A5 pages per A4 sheet with a white margin and cut marks). Point a phone at any table in a scan frame, on paper or on screen, and the AR viewer at `/ar/` raises it in 3D. The Oulankajoki page shows the real-data Oulanka model, shared with the AR Table.
 - **VR edition:** a dedicated version for Meta Quest 3 and other WebXR headsets ([open in the headset](https://siamakab.github.io/diwa-spatial-hub/vr.html)), with laser pointers, thumbstick walking, snap turning and rising for a view from above, teleporting, raised viewpoints over each table, a menu on your hand, 3D info cards and 360° photos you can step inside.
@@ -86,7 +87,7 @@ Digital Waters (DIWA) Flagship
 - **Map data:** National Land Survey of Finland, Elevation model 2 m, Orthophoto and Terrain database (CC BY 4.0), downloaded November 2026.
 - **Puukkosuo drone surveys:** Petra Korhonen, orthomosaics of 20 March, 14 May, 24 July and 25 September 2024, and a ground model of 31 May 2024.
 - **Sensor metadata:** DIWA critical-zone sensor template (public sensors only). **Supersite boundaries:** DIWA.
-- **Catchment map:** Leaflet and Leaflet.markercluster; background map © OpenStreetMap contributors, © CARTO.
+- **Catchment map:** Leaflet and Leaflet.markercluster; background map © OpenStreetMap contributors. Country outlines on the hall board: Natural Earth (public domain) via world-atlas.
 - **Built with:** [three.js](https://threejs.org), [Trystero](https://github.com/dmotz/trystero) for peer-to-peer sessions, Cloudflare Workers AI for the assistant, and the Web Audio, WebRTC, Web Speech and WebXR browser APIs.
 - **Music:** composed live in the browser for this project.
 
