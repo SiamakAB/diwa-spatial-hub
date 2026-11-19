@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#061632">
 <title>Oulanka Virtual Field Guide · DIWA Spatial Hub</title>
-<meta name="description" content="Walk the Oulankajoki supersite in 360°: field views, public sensor stations and short topics, on a map. Works on phones and computers.">
+<meta name="description" content="Walk the Oulankajoki supersite in 360°: field views, public sensor stations, on a map. Works on phones and computers.">
 <link rel="icon" href="../catchments/logo.png">
 <link rel="stylesheet" href="../catchments/leaflet.css">
 <style>
@@ -41,7 +41,6 @@ a{color:#7fd8ff}
 .sen .orb{width:20px;height:20px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 4px rgba(255,255,255,.12),0 0 18px var(--c);background:radial-gradient(circle at 35% 30%,#fff,var(--c) 55%);animation:pulse 2.4s infinite}
 .sen .lab{padding:4px 9px;border-radius:10px;font-size:11px;font-weight:600;background:rgba(5,19,43,.82);border:1px solid var(--c);white-space:nowrap;opacity:0;transform:translateX(-4px);transition:.2s}
 .sen:hover .lab,.sen.show .lab{opacity:1;transform:none}
-.top{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 19px Georgia,serif;font-style:italic;color:#06162e;background:#fff;box-shadow:0 0 0 6px rgba(255,255,255,.22),0 0 24px rgba(255,255,255,.55);animation:pulse2 2.6s infinite}
 .top:hover{transform:translate(-50%,-50%) scale(1.1)}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 4px rgba(255,255,255,.12),0 0 12px var(--c)}50%{box-shadow:0 0 0 9px rgba(255,255,255,.04),0 0 26px var(--c)}}
 @keyframes pulse2{0%,100%{box-shadow:0 0 0 6px rgba(255,255,255,.22),0 0 18px rgba(255,255,255,.4)}50%{box-shadow:0 0 0 12px rgba(255,255,255,.06),0 0 30px rgba(255,255,255,.7)}}
@@ -78,7 +77,6 @@ a{color:#7fd8ff}
 #card .cb{flex:1;overflow:auto;padding:0 18px 18px;scrollbar-width:thin}
 #card img{width:100%;border-radius:14px;margin:4px 0 10px;border:1px solid rgba(120,200,255,.25);display:block}
 #card p{font-size:13.5px;line-height:1.6;color:rgba(230,240,255,.9);margin:0 0 10px}
-#card .draft{font-size:10.5px;color:#ffd65a;border:1px dashed rgba(255,214,90,.5);border-radius:10px;padding:6px 9px;margin-bottom:10px}
 #card .sc{border:1px solid rgba(120,200,255,.18);background:rgba(255,255,255,.04);border-radius:14px;padding:10px 12px;margin-bottom:8px;font-size:12px}
 #card .sc b{font-size:12.5px;color:#fff}
 #card .sc .m{color:rgba(200,225,255,.6);font-size:11px}
@@ -96,17 +94,18 @@ a{color:#7fd8ff}
 #tables tr.row{cursor:pointer}#tables tr.row:hover td{background:rgba(95,212,255,.08)}
 #tables td a{font-weight:700;text-decoration:none}
 .catdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
-#splash{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:radial-gradient(1000px 600px at 60% 30%,rgba(56,150,255,.25),transparent 60%),linear-gradient(160deg,rgba(10,36,72,.86),rgba(4,14,34,.94));transition:opacity .6s}
-#splash .bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(3px) saturate(.8);opacity:.35;z-index:-1}
-#splash .in{max-width:620px;text-align:center;padding:24px}
-#splash .kick{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#7fd8ff}
-#splash h1{font-size:46px;line-height:1.05;margin:14px 0 12px;letter-spacing:-.02em}
-#splash h1 span{color:#7fd8ff}
-#splash p{font-size:15px;line-height:1.6;color:rgba(225,238,255,.82);margin:0 auto 20px;max-width:520px}
-#splash .chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:26px}
-#splash .chips span{padding:7px 13px;border-radius:99px;font-size:12px;font-weight:600;background:rgba(95,212,255,.12);border:1px solid rgba(127,216,255,.35)}
-#splash .start{padding:15px 30px;border-radius:16px;border:0;font-size:15px;font-weight:800;color:#06162e;background:linear-gradient(135deg,#ffd65a,#ffb347);box-shadow:0 0 30px rgba(255,214,90,.45)}
-#splash .small{margin-top:16px;font-size:11.5px;color:rgba(200,225,255,.55)}
+#splash{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;overflow-y:auto;padding:28px 16px;background:radial-gradient(1200px 700px at 50% 40%,#ffffff 0%,#eef3f8 55%,#dfe8f1 100%);color:#1d1d1f;transition:opacity .6s}
+#splash .in{max-width:620px;text-align:center;padding:12px;display:flex;flex-direction:column;align-items:center;gap:18px;margin:auto 0}
+#splash .logo{height:64px;width:auto}
+#splash .kick{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#1770b8}
+#splash h1{font-size:40px;line-height:1.05;margin:-6px 0 0;letter-spacing:-.02em;font-weight:700;color:#0c2a4c}
+#splash h1 span{color:#1770b8}
+#splash .card{width:min(600px,calc(100vw - 32px));box-sizing:border-box;padding:18px 22px;border-radius:20px;text-align:left;background:rgba(255,255,255,.62);backdrop-filter:blur(22px) saturate(1.6);-webkit-backdrop-filter:blur(22px) saturate(1.6);box-shadow:inset 0 0 0 .5px rgba(255,255,255,.9),0 0 0 .5px rgba(12,42,76,.1),0 18px 44px rgba(12,42,76,.12)}
+#splash p{font-size:14px;line-height:1.6;color:#3a3a3c;margin:0}
+#splash .chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+#splash .chips span{padding:7px 13px;border-radius:99px;font-size:12px;font-weight:650;color:#1770b8;background:rgba(76,169,255,.12);border:1px solid rgba(23,112,184,.18)}
+#splash .start{padding:14px 30px;border-radius:16px;border:0;font-size:15px;font-weight:700;color:#fff;background:linear-gradient(135deg,#2b8fe0,#1770b8);box-shadow:0 10px 26px rgba(23,112,184,.3);cursor:pointer}
+#splash .small{font-size:11.5px;color:#86868b}
 #load{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#7fd8ff;z-index:4;pointer-events:none;opacity:0;transition:.3s}
 #load.on{opacity:1}
 #edit{position:absolute;left:50%;bottom:118px;transform:translateX(-50%);border-radius:16px;padding:10px 12px;z-index:9;display:none;gap:8px;align-items:center;font-size:12px}
@@ -145,7 +144,7 @@ a{color:#7fd8ff}
   <div id="info" class="glass"></div>
   <div id="compass" class="glass"><div class="tape" id="tape"></div></div>
   <div id="tools" class="glass">
-   <button id="bList" title="Points, sensors and topics"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg></button>
+   <button id="bList" title="Points and sensors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg></button>
    <button id="bMap" title="Map size"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3.5 6.5 9 4l6 2.5L20.5 4v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg></button>
    <button id="bNorth" title="Face north"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m12 5 3 8h-6z" fill="currentColor"/></svg></button>
    <button id="bFull" title="Full screen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 9V5.5A1.5 1.5 0 0 1 5.5 4H9M15 4h3.5A1.5 1.5 0 0 1 20 5.5V9M20 15v3.5a1.5 1.5 0 0 1-1.5 1.5H15M9 20H5.5A1.5 1.5 0 0 1 4 18.5V15"/></svg></button>
@@ -158,13 +157,14 @@ a{color:#7fd8ff}
  <div id="mapWrap" class="s1"><div id="map"></div></div>
 </div>
 <div id="tables" class="glass">
- <div class="th"><button class="tab on" data-t="points">Points</button><button class="tab" data-t="sensors">Sensors</button><button class="tab" data-t="topics">To notice</button><input id="q" placeholder="Search…"><button id="tClose" class="tab" style="margin-left:6px">✕</button></div>
+ <div class="th"><button class="tab on" data-t="points">Points</button><button class="tab" data-t="sensors">Sensors</button><input id="q" placeholder="Search…"><button id="tClose" class="tab" style="margin-left:6px">✕</button></div>
  <div class="tb" id="tbody"></div>
 </div>
-<div id="splash"><div class="bg" id="splashBg"></div><div class="in">
+<div id="splash"><div class="in">
+ <img class="logo" src="logo.png" alt="Digital Waters">
  <div class="kick">DIWA Spatial Hub · Oulankajoki supersite</div>
  <h1>Oulanka <span>Virtual Field Guide</span></h1>
- <p>Walk the Oulankajoki valley in 360°: from the research station along the river to the Kiutaköngäs rapids and the Puukkosuo fen. Glowing points show the sensors measuring the site, and white “i” points tell you what to notice.</p>
+ <div class="card"><p>Walk the Oulankajoki valley in 360°: from the research station along the river to the Kiutaköngäs rapids and the Puukkosuo fen. Glowing points show the public sensor stations measuring the site, and the map shows where you are and which way you are looking.</p></div>
  <div class="chips" id="chips"></div>
  <button class="start" id="start">Start the guide</button>
  <div class="small">Drag to look around · arrows to walk · works on phones and computers</div>
@@ -234,11 +234,6 @@ function buildHotspots() {
     el.innerHTML = `<div class="orb"></div><div class="lab">${esc(s.name)} · ${Math.round(d)} m</div>`;
     const z = parseFloat(s.z) || p.elev || 160; add(el, p.north + bearing(p, s), Math.max(-10, Math.min(8, Math.atan2(z + 2 - eye, Math.max(d, 15)) * 180 / Math.PI)), () => showStation(s, d));
   });
-  // topics within 1.3 km
-  G.topics.map(t => ({ t, d: dist(p, t) })).filter(o => o.d < 1300).sort((a, b) => a.d - b.d).slice(0, 4).forEach(({ t, d }) => {
-    const el = document.createElement('div'); el.className = 'top'; el.title = t.title; el.textContent = 'i';
-    add(el, p.north + bearing(p, t), 6 + Math.min(10, 300 / Math.max(d, 30)), () => showTopic(t));
-  });
 }
 const tmp = new THREE.Vector3();
 function placeHotspots() {
@@ -269,12 +264,6 @@ function markStrip() { strip.querySelectorAll('button').forEach(b => b.classList
 const card = $('#card');
 function openCard(html) { card.innerHTML = html; card.classList.add('show'); card.querySelector('.x').onclick = closeCard; }
 function closeCard() { card.classList.remove('show'); }
-function showTopic(t) {
-  openCard(`<div class="ch"><div class="dot" style="background:#fff;display:flex;align-items:center;justify-content:center;color:#06162e;font:italic 700 18px Georgia,serif">i</div><div><h2>${esc(t.title)}</h2><div class="sub">${esc(t.sub)}</div></div><button class="x">✕</button></div>
-    <div class="cb">${t.img ? `<img src="${t.img}" alt="">` : ''}<p>${esc(t.text)}</p>${t.draft ? '<div class="draft">Draft text, to be reviewed by the Oulankajoki research team.</div>' : ''}
-    <button class="go" data-look="${t.id}">Look towards it</button></div>`);
-  card.querySelector('[data-look]').onclick = () => turnTo(t);
-}
 function showStation(s, d) {
   const c = (CATS[s.cat] || CATS.other);
   openCard(`<div class="ch"><div class="dot" style="background:radial-gradient(circle at 35% 30%,#fff,${c[1]} 55%);box-shadow:0 0 16px ${c[1]}"></div><div><h2>${esc(s.name)}</h2><div class="sub">${esc(c[0])}${s.place ? ' · ' + esc(s.place) : ''}${d ? ` · ${Math.round(d)} m from here` : ''}</div></div><button class="x">✕</button></div>
@@ -295,7 +284,6 @@ function initMap() {
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(MAP);
   fetch('../data/catchments.geojson').then(r => r.json()).then(gj => { const f = gj.features.find(x => x.properties.id === 'oulanka'); if (f) L.geoJSON(f, { style: { color: '#7fd8ff', weight: 1.5, fill: false, dashArray: '5 5' }, interactive: false }).addTo(MAP); }).catch(() => {});
   G.stations.forEach(s => L.circleMarker([s.lat, s.lon], { radius: 6, color: '#06162e', weight: 1.5, fillColor: (CATS[s.cat] || CATS.other)[1], fillOpacity: 1 }).bindTooltip(s.name).on('click', () => showStation(s, cur ? dist(cur, s) : 0)).addTo(MAP));
-  G.topics.forEach(t => L.marker([t.lat, t.lon], { icon: L.divIcon({ className: '', html: '<div style="width:22px;height:22px;border-radius:50%;background:#fff;color:#06162e;font:italic 700 13px Georgia,serif;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(255,255,255,.7)">i</div>', iconSize: [22, 22] }) }).bindTooltip(t.title).on('click', () => showTopic(t)).addTo(MAP));
   P.forEach(p => { const m = L.marker([p.lat, p.lon], { draggable: EDIT, icon: ptIcon(false, order.indexOf(p) + 1) }).bindTooltip(p.title).on('click', () => go(p.id)).addTo(MAP);
     if (EDIT) m.on('dragend', () => { const ll = m.getLatLng(); p.lat = +ll.lat.toFixed(6); p.lon = +ll.lng.toFixed(6); const [E, N] = toETRS(p.lat, p.lon); p.E = E; p.N = N; p.approx = false; buildHotspots(); renderInfo(); });
     ptLayer[p.id] = m; });
@@ -319,13 +307,12 @@ function renderTable() {
   const q = $('#q').value.trim().toLowerCase(), m = s => !q || s.toLowerCase().includes(q); let h = '';
   if (tab === 'points') h = `<table><tr><th>#</th><th>Point</th><th>Description</th><th>Elevation</th></tr>${order.filter(p => m(p.title + p.sub)).map(p => `<tr class="row" data-p="${p.id}"><td>${order.indexOf(p) + 1}</td><td><a>${esc(p.title)}</a></td><td>${esc(p.sub)}</td><td>${p.elev ? Math.round(p.elev) + ' m' : ''}</td></tr>`).join('')}</table>`;
   if (tab === 'sensors') h = `<table><tr><th>Station</th><th>Type</th><th>Sensors</th><th>Place</th></tr>${G.stations.filter(s => m(s.name + s.cat + s.sensors.map(x => x.producer + x.model + x.params).join(' '))).map(s => `<tr class="row" data-s="${s.id}"><td><a>${esc(s.name)}</a></td><td><span class="catdot" style="background:${(CATS[s.cat] || CATS.other)[1]}"></span>${(CATS[s.cat] || CATS.other)[0]}</td><td>${s.sensors.map(x => esc([x.producer, x.model].filter(Boolean).join(' '))).join(', ')}</td><td>${esc(s.place || '')}</td></tr>`).join('')}</table>`;
-  if (tab === 'topics') h = `<table><tr><th>Title</th><th>Subtitle</th></tr>${G.topics.filter(t => m(t.title + t.sub + t.text)).map(t => `<tr class="row" data-t="${t.id}"><td><a>${esc(t.title)}</a></td><td>${esc(t.sub)}</td></tr>`).join('')}</table>`;
   $('#tbody').innerHTML = h;
   $('#tbody').querySelectorAll('tr.row').forEach(r => r.onclick = () => { $('#tables').classList.remove('show');
     if (r.dataset.p) go(r.dataset.p);
     const near = o => [...P].sort((a, b) => dist(a, o) - dist(b, o))[0];
     if (r.dataset.s) { const s = G.stations.find(x => x.id === r.dataset.s), n = near(s); go(n.id).then(() => { turnTo(s); showStation(s, dist(n, s)); }); if (n === cur) { turnTo(s); showStation(s, dist(cur, s)); } }
-    if (r.dataset.t) { const t = G.topics.find(x => x.id === r.dataset.t), n = near(t); go(n.id).then(() => { turnTo(t); showTopic(t); }); if (n === cur) { turnTo(t); showTopic(t); } } });
+  });
 }
 document.querySelectorAll('#tables .tab[data-t]').forEach(b => b.onclick = () => { tab = b.dataset.t; document.querySelectorAll('#tables .tab[data-t]').forEach(x => x.classList.toggle('on', x === b)); renderTable(); });
 $('#q').oninput = renderTable; $('#tClose').onclick = () => $('#tables').classList.remove('show');
@@ -345,8 +332,7 @@ if (EDIT) {
 }
 
 // ---------------------------------------------------------------- start
-$('#chips').innerHTML = `<span>${P.length} 360° points</span><span>${G.stations.length} sensor stations</span><span>${G.topics.length} things to notice</span>`;
-$('#splashBg').style.backgroundImage = `url('${byId.p03?.file || P[0].file}')`;
+$('#chips').innerHTML = `<span>${P.length} 360° points</span><span>${G.stations.length} public sensor stations</span>`;
 setMap(mapState); initMap(); resize();
 const startId = (location.hash.slice(1) && byId[location.hash.slice(1)]) ? location.hash.slice(1) : order[0].id;
 tex(startId);
@@ -362,7 +348,7 @@ renderer.setAnimationLoop(now => {
   const h = headingDeg(); tape.style.left = `${150 - (h / 15) * 30 - 15 - 360 / 15 * 30}px`;
   if ((coneT += dt) > .08) { coneT = 0; updateCone(); }
 });
-window.__fg = { go, G, get cur() { return cur; }, turnTo, showTopic, showStation, setMap };
+window.__fg = { go, G, get cur() { return cur; }, turnTo, showStation, setMap };
 </script>
 </body>
 </html>
