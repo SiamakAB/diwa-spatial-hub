@@ -178,7 +178,7 @@ function buildSites() {
       <div class="det">
         <div style="font-size:11.5px;color:rgba(225,238,255,.85)">${ns} public sensors at ${list.length} stations</div>
         ${ns ? `<div class="bars">${bars}</div><div class="leg">${Object.entries(cnt).map(([k, v]) => `<span><i style="background:${CATS[k][1]}"></i>${CATS[k][0]} ${v}</span>`).join('')}</div>` : ''}
-        <div class="btns"><a class="btn" href="../?site=${P.table}">Open the 3D table</a>${id === 'oulanka' ? '<a class="btn sec" href="../ar-table/">AR Table</a>' : ''}<button class="btn sec" data-fit="${id}">Zoom to catchment</button></div>
+        <div class="btns"><a class="btn" href="../?site=${P.table}">Open the 3D table</a>${id === 'oulanka' ? '<a class="btn sec" href="../fieldguide/">360° field guide</a><a class="btn sec" href="../ar-table/">AR Table</a>' : ''}<button class="btn sec" data-fit="${id}">Zoom to catchment</button></div>
         ${REAL[id] ? '' : '<div style="font-size:10.5px;color:rgba(200,225,255,.55);margin-top:8px">The 3D table of this supersite is still illustrative.</div>'}
       </div></div>`;
   }).join('');
