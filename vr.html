@@ -747,7 +747,7 @@ body.hud #hint{color:rgba(160,215,255,.6)}
   <div class="kbd-row">Draw on the whiteboard<span>Whiteboard icon, then <kbd>Drag</kbd></span></div>
   <div class="kbd-row">Play / pause timeline<span><kbd>P</kbd></span></div>
   <div class="kbd-row">Close / back<span><kbd>Esc</kbd></span></div>
-  <div class="small-note">Click a table, a floating label or a dock icon to fly there. Glowing globes on the Oulankajoki table are sensor stations on the pine heath and the fen; camera pins open 360° views. Table terrain shows the concept only.</div>
+  <div class="small-note">Click a table, a floating label or a dock icon to fly there. Small glowing globes on the Oulankajoki table are public sensor stations, coloured by what they measure; camera pins open 360° views. Table terrain shows the concept only.</div>
   <div class="help-credits">
     <h5>Credits</h5>
     <p><b>Siamak Bazzaz</b> · Spatial Computing Architect<br>Concept, design and development</p>
@@ -985,6 +985,7 @@ const ICON = {
   people: '<circle cx="9" cy="8" r="3.2"/><path d="M3 19.5c.6-3.3 3-5.2 6-5.2s5.4 1.9 6 5.2"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.4.2 4 1.8 4.5 4.6"/>',
   cloud: '<path d="M7 18.5h10.5a4 4 0 0 0 .4-8 5.5 5.5 0 0 0-10.6-1.2A4.6 4.6 0 0 0 7 18.5z"/>',
   map: '<path d="M3.5 6.5 9 4l6 2.5L20.5 4v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>',
+  catch: '<path d="M6 4.5c3-1.6 6.2.4 8.6-.6 2.2-.9 4.4.6 4.6 3.2.2 2.6-1.6 3.6-1.2 6 .4 2.6-1.4 5.4-4.6 5.9-3.4.5-5-1.6-7.6-1.4C3.4 17.8 2.6 14.6 3.6 12c.9-2.4-.6-3.6.1-5.4.4-1 1.2-1.6 2.3-2.1z"/><path d="M12 7.5c.4 2.2-1.6 3.2-1.2 5.2.3 1.6 1.8 2.3 2.2 3.8"/><path d="M8.2 10.5c1.3.3 2.1 1.1 2.6 2.2M15.6 9.6c-1.2.5-2.2 1.6-2.6 3"/>',
   book: '<path d="M4 5.5c2.6-1 5.3-1 8 .8 2.7-1.8 5.4-1.8 8-.8v13c-2.6-1-5.3-1-8 .8-2.7-1.8-5.4-1.8-8-.8z"/><path d="M12 6.3v13"/>',
   news: '<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M7 9h10M7 12.5h10M7 16h6"/>',
   pen: '<path d="M4 20l1-4.5L15.5 5a2.1 2.1 0 0 1 3 3L8 18.5z"/><path d="M13.5 7l3 3"/>',
@@ -3651,6 +3652,7 @@ function buildUI() {
   item('live', 'live', 'Video wall', focusLive);
   item('', 'pano', '360° views', () => openPano(CONFIG.PANORAMAS[0].id));
   item('', 'map', 'Supersite map', focusMap);
+  item('', 'catch', 'Catchment map', focusCatch);
   item('', 'news', 'Latest DIWA News', focusNews);
   item('', 'book', 'DIWA Knowledge', focusKnowledge);
   item('', 'sofa', 'Lounge · sit and talk', () => focusLounge(0));
@@ -4229,7 +4231,7 @@ function hubContext() {
   const near = []; const cp = camera.position;
   tables.forEach(T => near.push([T.site.name + ' table', Math.hypot(cp.x - T.site.pos[0], cp.z - T.site.pos[1])]));
   SCREENS.forEach(S => near.push([`video screen "${S.cfg?.title || ''}"`, cp.distanceTo(S.center)]));
-  near.push(['Finland map board', Math.hypot(cp.x - MAPB.pos.x, cp.z - MAPB.pos.z)], ['news board', Math.hypot(cp.x - NEWS.pos.x, cp.z - NEWS.pos.z)]);
+  near.push(['Finland map board', Math.hypot(cp.x - MAPB.pos.x, cp.z - MAPB.pos.z)], ['DIWA Catchments board', Math.hypot(cp.x - CATB.pos.x, cp.z - CATB.pos.z)], ['news board', Math.hypot(cp.x - NEWS.pos.x, cp.z - NEWS.pos.z)]);
   LOUNGES.forEach((p, i) => near.push([`lounge ${i + 1}`, Math.hypot(cp.x - p.x, cp.z - p.z)]));
   near.sort((a, b) => a[1] - b[1]);
   const st = [];
@@ -4989,13 +4991,15 @@ function applyHUD() {
   });
   // video wall, news and supersite map: running light frames
   SCREENS.forEach(S => { const f = hudFrame(14.4, 8.1, .32, .06, .45); f.position.set(0, 1.8 + 8.1 / 2, .03); S.g.add(f); S.g.traverse(o => { if (o.material?.isMeshPhysicalMaterial) o.material.color.setHex(0x0a1422); }); });
-  [[NEWS, NEWS.W, NEWS.H, NEWS.y0], [MAPB, MAPB.W, MAPB.H, MAPB.y0]].forEach(([B, W, H, y0]) => { const f = hudFrame(W, H, .12, .035, .1); f.position.set(0, y0 + H / 2, .02); B.g.add(f); });
+  [[NEWS, NEWS.W, NEWS.H, NEWS.y0], [MAPB, MAPB.W, MAPB.H, MAPB.y0], [CATB, CATB.W, CATB.H, CATB.y0]].forEach(([B, W, H, y0]) => { const f = hudFrame(W, H, .12, .035, .1); f.position.set(0, y0 + H / 2, .02); B.g.add(f); });
   BOARDS.forEach(B => { const g = B.g || B.mesh?.parent; if (!g) return; const f = hudFrame(WB.W, WB.H, .1, .03, .08); f.position.set(0, WB.y0 + WB.H / 2, .02); g.add(f); });
   // blueprint shimmer over the map
   const bp = new THREE.Mesh(new THREE.PlaneGeometry(MAPB.W, MAPB.H), hudMat(HUD_BP_FS, { uSize: { value: new THREE.Vector2(MAPB.W, MAPB.H) } }, { blending: THREE.AdditiveBlending }));
   bp.position.set(0, MAPB.y0 + MAPB.H / 2, .006); MAPB.g.add(bp);
+  const bp2 = new THREE.Mesh(new THREE.PlaneGeometry(CATB.W, CATB.H), hudMat(HUD_BP_FS, { uSize: { value: new THREE.Vector2(CATB.W, CATB.H) } }, { blending: THREE.AdditiveBlending }));
+  bp2.position.set(0, CATB.y0 + CATB.H / 2, .006); CATB.g.add(bp2);
   // stand boards in dark metal
-  [NEWS.g, MAPB.g, ...BOARDS.map(B => B.g)].forEach(g => g && g.traverse(o => { if (o.material?.isMeshPhysicalMaterial) o.material.color.setHex(0x0a1422); }));
+  [NEWS.g, MAPB.g, CATB.g, ...BOARDS.map(B => B.g)].forEach(g => g && g.traverse(o => { if (o.material?.isMeshPhysicalMaterial) o.material.color.setHex(0x0a1422); }));
 }
 // blueprint version of the Finland map image: sea and land in blues, lines and text in light cyan
 function blueprintImage(img) {
