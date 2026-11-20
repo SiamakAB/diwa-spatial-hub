@@ -673,6 +673,9 @@ body.hud #hint{color:rgba(160,215,255,.6)}
 .illus b{display:block;font-size:12px;color:#b86a00;margin-bottom:2px}
 body.night .illus b,body.hud .illus b{color:#ffc46b}
 .scen-tag em{display:block;font-style:normal;font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#ffc46b;margin-top:2px}
+.badge.live{background:rgba(52,211,153,.16);color:var(--ink)}
+.badge.live i{background:#34d399;box-shadow:0 0 6px #34d399}
+body.night .badge.live, body.hud .badge.live{background:rgba(52,211,153,.2)}
 
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
@@ -3817,6 +3820,99 @@ function chart(el, { series, unit, height = 132, type = 'line', decimals = 1, la
 const C1 = '#4fd1ff', C2 = '#ff9f43', C3 = '#5ff0b0';
 const SEQ = ['#bfe8ff', '#4fc3ff', '#1f7fd6'];
 
+
+/* ---------- open data: FMI weather + Syke hydrology (last 12 months) ---------- */
+const OPEN = { state: 'idle', weather: null, hydro: null, why: {}, done: {} };
+const OPEN_SITE = { lat: 66.3700, lon: 29.3120, E: 603390.8, N: 7363068.5 };
+const OPEN_N = 365, SYKE_API = 'https://rajapinnat.ymparisto.fi/api/Hydrologiarajapinta/1.1/odata/';
+const isoDay = d => d.toISOString().slice(0, 10);
+const escH = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const addDays = (d, k) => { const x = new Date(d); x.setUTCDate(x.getUTCDate() + k); return x; };
+function openWindow() { const end = new Date(); end.setUTCHours(0, 0, 0, 0); const e = addDays(end, -1); return { start: addDays(e, -(OPEN_N - 1)), end: e }; }
+// map of 'YYYY-MM-DD' -> value  ->  { data: filled array, latest: {v, date} }  (null if too sparse)
+function openSeries(map, start, minDays = 45) {
+  const a = new Array(OPEN_N).fill(null); let k = 0, latest = null;
+  for (let i = 0; i < OPEN_N; i++) { const key = isoDay(addDays(start, i)), v = map.get(key); if (v != null && isFinite(v)) { a[i] = v; k++; latest = { v, date: key }; } }
+  if (k < minDays) return null;
+  let last = -1;
+  for (let i = 0; i < OPEN_N; i++) if (a[i] != null) {
+    if (last < 0) for (let j = 0; j < i; j++) a[j] = a[i];
+    else for (let j = last + 1; j < i; j++) a[j] = a[last] + (a[i] - a[last]) * (j - last) / (i - last);
+    last = i;
+  }
+  for (let j = last + 1; j < OPEN_N; j++) a[j] = a[last];
+  return { data: a, latest, days: k };
+}
+const kmBetween = (la1, lo1, la2, lo2) => { const r = Math.PI / 180, x = (lo2 - lo1) * r * Math.cos((la1 + la2) / 2 * r), y = (la2 - la1) * r; return Math.hypot(x, y) * 6371; };
+async function fetchFMI() {
+  const { start, end } = openWindow();
+  const base = `https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature&storedquery_id=fmi::observations::weather::daily::simple&latlon=${OPEN_SITE.lat},${OPEN_SITE.lon}&maxlocations=1&parameters=tday,rrday,snow`;
+  const chunks = []; for (let s = start; s <= end; s = addDays(s, 92)) { const e = addDays(s, 91); chunks.push([s, e > end ? end : e]); }
+  const maps = { tday: new Map(), rrday: new Map(), snow: new Map() }; let pos = null;
+  await Promise.all(chunks.map(async ([a, b]) => {
+    const r = await fetch(`${base}&starttime=${isoDay(a)}T00:00:00Z&endtime=${isoDay(b)}T00:00:00Z`); if (!r.ok) throw new Error('FMI HTTP ' + r.status);
+    const x = new DOMParser().parseFromString(await r.text(), 'text/xml'), q = (el, n) => el.getElementsByTagNameNS('*', n)[0]?.textContent;
+    for (const el of x.getElementsByTagNameNS('*', 'BsWfsElement')) {
+      const t = q(el, 'Time'), p = q(el, 'ParameterName'), v = parseFloat(q(el, 'ParameterValue'));
+      if (!pos && q(el, 'pos')) pos = q(el, 'pos').trim().split(/\s+/).map(Number);
+      if (t && maps[p] && isFinite(v)) maps[p].set(t.slice(0, 10), (p === 'rrday' || p === 'snow') ? Math.max(0, v) : v);
+    }
+  }));
+  let station = 'nearest FMI weather station';
+  if (pos) try {
+    const r = await fetch(`https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature&storedquery_id=fmi::ef::stations&bbox=${pos[1] - .01},${pos[0] - .01},${pos[1] + .01},${pos[0] + .01}`);
+    const x = new DOMParser().parseFromString(await r.text(), 'text/xml');
+    const nm = [...x.getElementsByTagNameNS('*', 'name')].find(n => /name/i.test(n.getAttribute('codeSpace') || '')) || x.getElementsByTagNameNS('*', 'name')[0];
+    if (nm?.textContent) station = nm.textContent.trim();
+  } catch (e) { }
+  const out = { kind: 'weather', provider: 'Finnish Meteorological Institute (FMI) open data', licence: 'CC BY 4.0', station, distKm: pos ? +kmBetween(OPEN_SITE.lat, OPEN_SITE.lon, pos[0], pos[1]).toFixed(1) : null, start: isoDay(start), end: isoDay(end), updated: new Date().toISOString(),
+    series: { airT: openSeries(maps.tday, start), precip: openSeries(maps.rrday, start), snow: openSeries(maps.snow, start, 20) } };
+  if (!out.series.airT) throw new Error('FMI returned no temperature data');
+  return out;
+}
+async function sykeJSON(url) { const r = await fetch(url.startsWith('http') ? url : SYKE_API + url, { headers: { Accept: 'application/json' } }); if (!r.ok) throw new Error('Syke HTTP ' + r.status); return r.json(); }
+async function fetchSYKE() {
+  const { start, end } = openWindow();
+  const pl = await sykeJSON(`Paikka?$filter=${encodeURIComponent("substringof('Oulankajoki',Nimi)")}&$top=200`);
+  const sites = (pl.value || []).map(p => ({ id: p.Paikka_Id, name: p.Nimi, nro: p.Nro, d: Math.hypot((p.KoordErTmIta || 0) - OPEN_SITE.E, (p.KoordErTmPohj || 0) - OPEN_SITE.N) }))
+    .filter(x => x.d < 80000).sort((a, b) => a.d - b.d).slice(0, 8);
+  if (!sites.length) throw new Error('No Oulankajoki gauges found');
+  const get = async (ent, scale) => {
+    for (const st of sites) {
+      try {
+        let url = `${ent}?$filter=${encodeURIComponent(`Paikka_Id eq ${st.id} and Aika ge datetime'${isoDay(start)}T00:00:00'`)}&$orderby=Aika&$top=1000`, guard = 0; const m = new Map();
+        while (url && guard++ < 6) { const j = await sykeJSON(url); (j.value || []).forEach(v => { if (v.Arvo != null) m.set(String(v.Aika).slice(0, 10), +v.Arvo * scale); }); url = j['odata.nextLink'] || null; }
+        const ser = openSeries(m, start, 30); if (ser) return { ...ser, gauge: st.name, nro: st.nro, distKm: +(st.d / 1000).toFixed(1) };
+      } catch (e) { }
+    }
+    return null;
+  };
+  const [Q, WL, WT] = await Promise.all([get('Virtaama', 1), get('Vedenkorkeus', .01), get('LampoPintavesi', 1)]);
+  if (!Q && !WL) throw new Error('Syke returned no discharge or water level data');
+  return { kind: 'hydro', provider: 'Finnish Environment Institute (Syke) hydrology API', licence: 'CC BY 4.0', start: isoDay(start), end: isoDay(end), updated: new Date().toISOString(), series: { Q, WL, WT } };
+}
+async function openSnapshot(name) { const r = await fetch(`data/open/${name}.json`, { cache: 'no-cache' }); if (!r.ok) throw new Error('no snapshot'); const j = await r.json(); j.snapshot = true; return j; }
+function loadOpenData() {
+  if (OPEN.promise) return OPEN.promise;
+  OPEN.state = 'loading';
+  const one = async (key, live, snap) => { try { OPEN[key] = await live(); } catch (e) { OPEN.why[key] = e.message; try { OPEN[key] = await openSnapshot(snap); } catch (e2) { OPEN[key] = null; } }
+    OPEN.done[key] = true; if ($('#openLoading')?.dataset.k === key && HERO) renderSiteTab(HERO); };
+  OPEN.promise = Promise.all([one('weather', fetchFMI, 'oulanka-weather'), one('hydro', fetchSYKE, 'oulanka-hydro')]).then(() => {
+    OPEN.state = 'done';
+  });
+  return OPEN.promise;
+}
+// chart helpers for the 12-month window
+const openDate = (O, i) => new Date(O.start + 'T00:00:00Z').getTime() + i * 864e5;
+const fmtOpen = (O, i) => { const d = new Date(openDate(O, i)); return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`; };
+const openTicks = (O, step = 1) => { const t = []; for (let i = 0; i < OPEN_N; i++) { const d = new Date(openDate(O, i)); if (d.getUTCDate() === 1 && d.getUTCMonth() % 2 === 0) t.push([Math.floor(i / step), `${MONTHS[d.getUTCMonth()]} ${String(d.getUTCFullYear()).slice(2)}`]); } return t; };
+const openIdx = (O, day) => { const s = new Date(O.start + 'T00:00:00Z'), doy = Math.floor((s - Date.UTC(s.getUTCFullYear(), 0, 1)) / 864e5); return ((day - doy) % 365 + 365) % 365; };
+function openChart(el, O, name, ser, unit, o = {}) {
+  return chart(el, { series: [{ name, color: C1, data: ser.data }], unit, months: false, xTicks: openTicks(O), labelFor: i => fmtOpen(O, i), dayToIndex: d => openIdx(O, d), ...o });
+}
+function openWeekly(ser) { const w = []; ser.data.forEach((v, i) => { const k = Math.floor(i / 7); w[k] = (w[k] || 0) + v; }); return w; }
+const openBadge = O => `<span class="badge live"><i></i>${O.snapshot ? 'Open data · daily copy' : 'Open data · live'}</span>`;
+
 /* ---------- site panel ---------- */
 let siteTab = 'overview';
 function openSitePanel(site) {
@@ -3871,25 +3967,51 @@ function renderSiteTab(site) {
     b.querySelectorAll('.list-row').forEach(r => r.addEventListener('click', () => openGlobe(r.dataset.g)));
     b.querySelectorAll('.cat-chip').forEach(c => c.addEventListener('click', () => { const k = c.dataset.cat; sensorFilter.has(k) ? sensorFilter.delete(k) : sensorFilter.add(k); applySensorFilter(); renderSiteTab(site); }));
   } else if (tab === 'weather') {
-    b.innerHTML = `<div class="fade-in"><div class="stats" id="wStats"></div>
+    const W = OPEN.weather;
+    if (!OPEN.done.weather) { loadOpenData(); b.innerHTML = `<div class="fade-in"><div class="card" id="openLoading" data-k="weather"><h3>Loading open weather data…</h3><div class="small-note">Daily observations for the last 12 months from the Finnish Meteorological Institute.</div></div></div>`; }
+    else if (W) {
+      const S = W.series, upd = S.airT.latest.date;
+      b.innerHTML = `<div class="fade-in"><div class="stats" id="wStats"></div>
+      <div class="card"><h3>Air temperature <span class="note">°C · daily mean</span></h3><div id="cT"></div></div>
+      ${S.precip ? `<div class="card"><h3>Precipitation <span class="note">mm · weekly total</span></h3><div id="cP"></div></div>` : ''}
+      ${S.snow ? `<div class="card"><h3>Snow depth <span class="note">cm · daily</span></h3><div id="cS"></div></div>` : ''}
+      <div style="display:flex;gap:8px;align-items:flex-start">${openBadge(W)}<span class="small-note" style="margin:0">Source: ${W.provider}, ${escH(W.station)}${W.distKm != null ? ` (${W.distKm} km from the research station)` : ''}, licence ${W.licence}. Last 12 months, latest day ${upd}.${S.snow ? '' : ' No snow depth is reported at this station.'}</span></div></div>`;
+      openChart($('#cT'), W, 'Air temperature', S.airT, '°C');
+      if (S.precip) chart($('#cP'), { series: [{ name: 'Precipitation', color: C1, data: openWeekly(S.precip) }], unit: 'mm', type: 'bar', months: false, xTicks: openTicks(W, 7), labelFor: i => `Week of ${fmtOpen(W, i * 7)}`, dayToIndex: d => Math.min(52, Math.floor(openIdx(W, d) / 7)) });
+      if (S.snow) openChart($('#cS'), W, 'Snow depth', S.snow, 'cm', { decimals: 0, zeroBase: true });
+    } else {
+      b.innerHTML = `<div class="fade-in"><div class="stats" id="wStats"></div>
       <div class="card"><h3>Air temperature <span class="note">°C · daily</span></h3><div id="cT"></div></div>
       <div class="card"><h3>Precipitation <span class="note">mm · weekly total</span></h3><div id="cP"></div></div>
       <div class="card"><h3>Snow depth <span class="note">cm · daily</span></h3><div id="cS"></div></div>
-      <div style="display:flex;gap:8px;align-items:center">${exNote}<span class="small-note" style="margin:0">Illustrative weather series for the Oulanka area, 2025.</span></div></div>`;
-    chart($('#cT'), { series: [{ name: 'Air temperature', color: C1, data: D.airT }], unit: '°C' });
-    chart($('#cP'), { series: [{ name: 'Precipitation', color: C1, data: D.weekly }], unit: 'mm', type: 'bar', labelFor: i => `Week of ${fmtDate(i * 7)}`, dayToIndex: d => Math.min(51, Math.floor(d / 7)) });
-    chart($('#cS'), { series: [{ name: 'Snow depth', color: C1, data: D.snow }], unit: 'cm', decimals: 0, zeroBase: true });
+      <div style="display:flex;gap:8px;align-items:center">${exNote}<span class="small-note" style="margin:0">FMI open data could not be loaded right now, so these are illustrative example series.</span></div></div>`;
+      chart($('#cT'), { series: [{ name: 'Air temperature', color: C1, data: D.airT }], unit: '°C' });
+      chart($('#cP'), { series: [{ name: 'Precipitation', color: C1, data: D.weekly }], unit: 'mm', type: 'bar', labelFor: i => `Week of ${fmtDate(i * 7)}`, dayToIndex: d => Math.min(51, Math.floor(d / 7)) });
+      chart($('#cS'), { series: [{ name: 'Snow depth', color: C1, data: D.snow }], unit: 'cm', decimals: 0, zeroBase: true });
+    }
   } else if (tab === 'hydro') {
-    b.innerHTML = `<div class="fade-in"><div class="stats" id="hStats"></div>
+    const Hy = OPEN.hydro;
+    if (!OPEN.done.hydro) { loadOpenData(); b.innerHTML = `<div class="fade-in"><div class="card" id="openLoading" data-k="hydro"><h3>Loading open river data…</h3><div class="small-note">Daily discharge, water level and water temperature for the Oulankajoki from the Finnish Environment Institute.</div></div></div>`; }
+    else if (Hy) {
+      const S = Hy.series, g = [...new Map([S.Q, S.WL, S.WT].filter(Boolean).map(x => [x.gauge, x])).values()];
+      b.innerHTML = `<div class="fade-in"><div class="stats" id="hStats"></div>
+      ${S.Q ? `<div class="card"><h3>Discharge <span class="note">m³/s · daily</span></h3><div id="cQ"></div></div>` : ''}
+      ${S.WL ? `<div class="card"><h3>Water level <span class="note">m above gauge datum</span></h3><div id="cW"></div></div>` : ''}
+      ${S.WT ? `<div class="card"><h3>Water temperature <span class="note">°C</span></h3><div id="cWT"></div></div>` : ''}
+      <div style="display:flex;gap:8px;align-items:flex-start">${openBadge(Hy)}<span class="small-note" style="margin:0">Source: ${Hy.provider}, licence ${Hy.licence}. Gauge${g.length > 1 ? 's' : ''}: ${g.map(x => `${escH(x.gauge)}${x.nro ? ' (' + escH(x.nro) + ')' : ''}, ${x.distKm} km away`).join('; ')}. Last 12 months.${S.WT ? '' : ' No water temperature is published for these gauges.'}</span></div></div>`;
+      if (S.Q) openChart($('#cQ'), Hy, 'Discharge', S.Q, 'm³/s', { decimals: 1, zeroBase: true });
+      if (S.WL) openChart($('#cW'), Hy, 'Water level', S.WL, 'm', { decimals: 2 });
+      if (S.WT) openChart($('#cWT'), Hy, 'Water temperature', S.WT, '°C', { zeroBase: true });
+    } else {
+      b.innerHTML = `<div class="fade-in"><div class="stats" id="hStats"></div>
       <div class="card"><h3>Discharge <span class="note">m³/s</span></h3><div id="cQ"></div></div>
       <div class="card"><h3>Water level <span class="note">m above gauge datum</span></h3><div id="cW"></div></div>
       <div class="card"><h3>Water temperature <span class="note">°C</span></h3><div id="cWT"></div></div>
-      <div class="card"><h3>Turbidity <span class="note">FNU</span></h3><div id="cTU"></div></div>
-      <div style="display:flex;gap:8px;align-items:center">${exNote}<span class="small-note" style="margin:0">River gauge data is not in the experiment template. Replace with gauge exports when available.</span></div></div>`;
-    chart($('#cQ'), { series: [{ name: 'Discharge', color: C1, data: D.Q }], unit: 'm³/s', decimals: 0, zeroBase: true });
-    chart($('#cW'), { series: [{ name: 'Water level', color: C1, data: D.WL }], unit: 'm', decimals: 2 });
-    chart($('#cWT'), { series: [{ name: 'Water temperature', color: C1, data: D.WT }], unit: '°C', zeroBase: true });
-    chart($('#cTU'), { series: [{ name: 'Turbidity', color: C1, data: D.TURB }], unit: 'FNU', zeroBase: true });
+      <div style="display:flex;gap:8px;align-items:center">${exNote}<span class="small-note" style="margin:0">Syke open data could not be loaded right now, so these are illustrative example series.</span></div></div>`;
+      chart($('#cQ'), { series: [{ name: 'Discharge', color: C1, data: D.Q }], unit: 'm³/s', decimals: 0, zeroBase: true });
+      chart($('#cW'), { series: [{ name: 'Water level', color: C1, data: D.WL }], unit: 'm', decimals: 2 });
+      chart($('#cWT'), { series: [{ name: 'Water temperature', color: C1, data: D.WT }], unit: '°C', zeroBase: true });
+    }
   }
   b.querySelectorAll('[data-act]').forEach(x => x.addEventListener('click', () => {
     const a = x.dataset.act;
@@ -3901,8 +4023,11 @@ function renderSiteTab(site) {
 function updateStats() {
   const d = playback.day, w = $('#wStats'), h = $('#hStats');
   const stat = (k, v, u) => `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u}</small></div></div>`;
-  if (w) w.innerHTML = stat('Air temperature', D.airT[d].toFixed(1), '°C') + stat('Snow depth', D.snow[d].toFixed(0), 'cm') + stat('Precipitation · 7 d', D.precip.slice(Math.max(0, d - 6), d + 1).reduce((a, b) => a + b, 0).toFixed(1), 'mm') + stat('Cloud cover', Math.round(D.cloud[d] * 100), '%') + stat('Today', D.precip[d] > .3 ? (precipState(d).snow > 0 ? 'Snow' : 'Rain') : 'Dry', D.precip[d] > .3 ? D.precip[d].toFixed(1) + ' mm' : '');
-  if (h) h.innerHTML = stat('Discharge', D.Q[d].toFixed(0), 'm³/s') + stat('Water level', D.WL[d].toFixed(2), 'm') + stat('Water temp.', D.WT[d].toFixed(1), '°C') + stat('Turbidity', D.TURB[d].toFixed(1), 'FNU');
+  const W = OPEN.weather, Hy = OPEN.hydro, lt = x => x ? x.latest : null, sv = (x, f, dec) => x ? (+x.latest.v).toFixed(dec) : '–';
+  if (w && W) w.innerHTML = stat('Air temp. · latest', sv(W.series.airT, 0, 1), '°C') + stat('Snow depth · latest', sv(W.series.snow, 0, 0), W.series.snow ? 'cm' : '') + stat('Precipitation · 30 d', W.series.precip ? W.series.precip.data.slice(-30).reduce((a, b) => a + b, 0).toFixed(0) : '–', W.series.precip ? 'mm' : '') + stat('Latest day', W.series.airT.latest.date.slice(5).split('-').reverse().join('.'), '');
+  else if (w) w.innerHTML = stat('Air temperature', D.airT[d].toFixed(1), '°C') + stat('Snow depth', D.snow[d].toFixed(0), 'cm') + stat('Precipitation · 7 d', D.precip.slice(Math.max(0, d - 6), d + 1).reduce((a, b) => a + b, 0).toFixed(1), 'mm') + stat('Cloud cover', Math.round(D.cloud[d] * 100), '%') + stat('Today', D.precip[d] > .3 ? (precipState(d).snow > 0 ? 'Snow' : 'Rain') : 'Dry', D.precip[d] > .3 ? D.precip[d].toFixed(1) + ' mm' : '');
+  if (h && Hy) h.innerHTML = stat('Discharge · latest', sv(Hy.series.Q, 0, 1), Hy.series.Q ? 'm³/s' : '') + stat('Water level · latest', sv(Hy.series.WL, 0, 2), Hy.series.WL ? 'm' : '') + (Hy.series.WT ? stat('Water temp. · latest', sv(Hy.series.WT, 0, 1), '°C') : '') + stat('Latest day', ((Hy.series.Q || Hy.series.WL).latest.date).slice(5).split('-').reverse().join('.'), '');
+  else if (h) h.innerHTML = stat('Discharge', D.Q[d].toFixed(0), 'm³/s') + stat('Water level', D.WL[d].toFixed(2), 'm') + stat('Water temp.', D.WT[d].toFixed(1), '°C') + stat('Turbidity', D.TURB[d].toFixed(1), 'FNU');
   const sc = $('#scStats'); if (sc && sensorCard.G) sc.innerHTML = sensorStats(sensorCard.G, d);
 }
 
@@ -5311,7 +5436,7 @@ async function boot() {
   renderer.setAnimationLoop(loop);
   renderer.compile(scene, camera);
   await progress(1, 'Ready');
-  window.__hub = { bookNow: () => bookClock = 0, agentBook, agentAttend, BOARDS, wbApply, KN, focusKnowledge, knLoadFiles, kAsk, knSearch, sitAt, SEATS, hubContext, sendAI, IDLE, AGENTS, tables, AGX, agentCommand, openAgentMenu, AG_ACTIONS, greetVisitor, THREE, scene, camera, controls, focusSite, goHome, focusAI, focusLive, openPano, closePano, openGlobe, startStory, focusCatch, openCatchCard, focusSite, GLOBES, tableOf, setFenSurvey, storyStep, applySeason, setDay, state, renderer,
+  window.__hub = { OPEN, bookNow: () => bookClock = 0, agentBook, agentAttend, BOARDS, wbApply, KN, focusKnowledge, knLoadFiles, kAsk, knSearch, sitAt, SEATS, hubContext, sendAI, IDLE, AGENTS, tables, AGX, agentCommand, openAgentMenu, AG_ACTIONS, greetVisitor, THREE, scene, camera, controls, focusSite, goHome, focusAI, focusLive, openPano, closePano, openGlobe, startStory, focusCatch, openCatchCard, focusSite, GLOBES, tableOf, setFenSurvey, storyStep, applySeason, setDay, state, renderer,
     summonOrb, dismissOrb, D, cloudSets, precipSets, setOrbState, updateOrb, deliver, caption, applyFlood, applyIce, setIceDay, clearScenario, music, ORB, scen, enter, simulatePeer, sitAt, focusLounge, toggleNight, mp, getAurora: () => aurora, focusLive, focusScreen, focusMap, focusNews, focusWhiteboard, openMapCard, wbApply, SCREENS, WB, BOARDS };
   $('#loader').classList.add('ready');
   const nm = $('#ldName'); nm.value = mp.name; setTimeout(() => { if (!entered) nm.focus(); }, 400);

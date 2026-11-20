@@ -663,3 +663,6 @@ body.hud #hint{color:rgba(160,215,255,.6)}
 .illus b{display:block;font-size:12px;color:#b86a00;margin-bottom:2px}
 body.night .illus b,body.hud .illus b{color:#ffc46b}
 .scen-tag em{display:block;font-style:normal;font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#ffc46b;margin-top:2px}
+.badge.live{background:rgba(52,211,153,.16);color:var(--ink)}
+.badge.live i{background:#34d399;box-shadow:0 0 6px #34d399}
+body.night .badge.live, body.hud .badge.live{background:rgba(52,211,153,.2)}
