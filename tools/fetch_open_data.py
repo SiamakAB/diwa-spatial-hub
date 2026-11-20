@@ -52,16 +52,26 @@ def series(m, start, min_days=45):
     return {'data': [round(x, 3) for x in a], 'latest': latest, 'days': k}
 
 
+def km(la1, lo1, la2, lo2):
+    r = math.pi / 180
+    return math.hypot((lo2 - lo1) * r * math.cos((la1 + la2) / 2 * r), (la2 - la1) * r) * 6371
+
+
+def now():
+    return dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+
+
 def local(tag):
     return tag.rsplit('}', 1)[-1]
 
 
 def fmi():
     start, end = window()
+    # all stations in a box around Oulanka (Salla - Kuusamo airport); the nearest one reporting each value is used
     base = ('https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature'
             '&storedquery_id=fmi::observations::weather::daily::simple'
-            f'&latlon={LAT},{LON}&maxlocations=1&parameters=tday,rrday,snow')
-    maps = {'tday': {}, 'rrday': {}, 'snow': {}}; pos = None
+            '&bbox=28.4,65.9,30.2,66.9&parameters=tday,rrday,snow')
+    st = {}
     s = start
     while s <= end:
         e = min(s + dt.timedelta(days=91), end)
@@ -72,33 +82,47 @@ def fmi():
             f = {local(c.tag): (c.text or '').strip() for c in el.iter()}
             try: v = float(f.get('ParameterValue', 'nan'))
             except ValueError: continue
-            p = f.get('ParameterName')
-            if pos is None and f.get('pos'):
-                pos = [float(x) for x in f['pos'].split()]
-            if p in maps and math.isfinite(v):
-                maps[p][f['Time'][:10]] = max(0.0, v) if p in ('rrday', 'snow') else v
+            p, ps = f.get('ParameterName'), f.get('pos', '')
+            if p not in ('tday', 'rrday', 'snow') or not ps or not math.isfinite(v):
+                continue
+            if ps not in st:
+                la, lo = [float(x) for x in ps.split()]
+                st[ps] = {'pos': (la, lo), 'd': km(LAT, LON, la, lo), 'tday': {}, 'rrday': {}, 'snow': {}}
+            st[ps][p][f['Time'][:10]] = max(0.0, v) if p in ('rrday', 'snow') else v
         s = e + dt.timedelta(days=1)
-    station = 'nearest FMI weather station'
-    if pos:
+    lst = sorted(st.values(), key=lambda x: x['d'])
+    print('FMI stations in box:', [(round(x['d'], 1), len(x['tday']), len(x['rrday']), len(x['snow'])) for x in lst])
+
+    def pick(p, mn):
+        for S in lst:
+            ser = series(S[p], start, mn)
+            if ser: return ser, S
+        return None
+    T, P, SN = pick('tday', 45), pick('rrday', 45), pick('snow', 20)
+    if not T:
+        raise RuntimeError(f'FMI returned no temperature data ({len(lst)} stations)')
+    names = {}
+    def name(S):
+        k = S['pos']
+        if k in names: return names[k]
+        nm = 'FMI weather station'
         try:
+            la, lo = k
             root = ET.fromstring(get('https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature'
-                                     f'&storedquery_id=fmi::ef::stations&bbox={pos[1]-.01},{pos[0]-.01},{pos[1]+.01},{pos[0]+.01}'))
-            names = [el for el in root.iter() if local(el.tag) == 'name']
-            nm = next((el for el in names if 'name' in (el.get('codeSpace') or '')), names[0] if names else None)
-            if nm is not None and nm.text: station = nm.text.strip()
+                                     f'&storedquery_id=fmi::ef::stations&bbox={lo-.01},{la-.01},{lo+.01},{la+.01}'))
+            els = [el for el in root.iter() if local(el.tag) == 'name']
+            el = next((x for x in els if 'name' in (x.get('codeSpace') or '')), els[0] if els else None)
+            if el is not None and el.text: nm = el.text.strip()
         except Exception as ex:
             print('station name lookup failed:', ex)
-    dist = None
-    if pos:
-        r = math.pi / 180
-        dist = round(math.hypot((pos[1] - LON) * r * math.cos((LAT + pos[0]) / 2 * r), (pos[0] - LAT) * r) * 6371, 1)
-    out = {'kind': 'weather', 'provider': 'Finnish Meteorological Institute (FMI) open data', 'licence': 'CC BY 4.0',
-           'station': station, 'distKm': dist, 'start': start.isoformat(), 'end': end.isoformat(),
-           'updated': dt.datetime.utcnow().isoformat() + 'Z',
-           'series': {'airT': series(maps['tday'], start), 'precip': series(maps['rrday'], start), 'snow': series(maps['snow'], start, 20)}}
-    if not out['series']['airT']:
-        raise RuntimeError('FMI returned no temperature data')
-    return out
+        names[k] = nm; return nm
+    def tag(o):
+        if not o: return None
+        ser, S = o; ser.update(station=name(S), distKm=round(S['d'], 1)); return ser
+    airT = tag(T)
+    return {'kind': 'weather', 'provider': 'Finnish Meteorological Institute (FMI) open data', 'licence': 'CC BY 4.0',
+            'station': airT['station'], 'distKm': airT['distKm'], 'start': start.isoformat(), 'end': end.isoformat(),
+            'updated': now(), 'series': {'airT': airT, 'precip': tag(P), 'snow': tag(SN)}}
 
 
 def syke_json(url):
@@ -134,7 +158,7 @@ def syke():
         return None
 
     out = {'kind': 'hydro', 'provider': 'Finnish Environment Institute (Syke) hydrology API', 'licence': 'CC BY 4.0',
-           'start': start.isoformat(), 'end': end.isoformat(), 'updated': dt.datetime.utcnow().isoformat() + 'Z',
+           'start': start.isoformat(), 'end': end.isoformat(), 'updated': now(),
            'series': {'Q': one('Virtaama', 1), 'WL': one('Vedenkorkeus', .01), 'WT': one('LampoPintavesi', 1)}}
     if not out['series']['Q'] and not out['series']['WL']:
         raise RuntimeError('Syke returned no discharge or water level data')
