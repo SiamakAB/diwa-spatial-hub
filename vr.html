@@ -1134,7 +1134,10 @@ async function progress(p, label) { $('#ldBar').style.width = (p * 100) + '%'; $
    Example time series (illustrative, not measured)
    ===================================================================== */
 const YEAR = 2025, DAYS = 365;
-const dateOf = i => new Date(Date.UTC(YEAR, 0, 1 + i));
+// REAL: set when FMI/Syke open data replaces the example year (index stays = day of year; each day gets its real year)
+const REAL = { on: false, weather: false, hydro: false, endDoy: 364, endYear: YEAR };
+const yearOfIdx = i => REAL.on ? (i <= REAL.endDoy ? REAL.endYear : REAL.endYear - 1) : YEAR;
+const dateOf = i => new Date(Date.UTC(yearOfIdx(i), 0, 1 + i));
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const fmtDate = i => { const d = dateOf(i); return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`; };
 const seasonOfDay = i => { const m = dateOf(i).getUTCMonth(); return (m <= 2 || m === 11) ? 'winter' : m <= 4 ? 'spring' : m <= 7 ? 'summer' : 'autumn'; };
@@ -1194,7 +1197,8 @@ function genData() {
 const D = genData();
 // cloud cover (0–1), illustrative: from rain, humidity and slow weather systems
 D.cloud = (() => { const r = mulberry32(31); let ar = 0; return D.precip.map((p, i) => { ar = .85 * ar + (r() - .5) * .5; const wet = D.smoothArr(D.precip, 2)[i]; return clamp(.32 + wet * .22 + ar * .6 + (D.rh[i] - 80) * .012, 0, 1); }); })();
-const PEAK_DAY = D.Q.indexOf(Math.max(...D.Q.slice(60, 200)));
+let PEAK_DAY = D.Q.indexOf(Math.max(...D.Q.slice(60, 200)));
+D.wlLo = 0.6; D.wlHi = 2.2;
 
 /* =====================================================================
    Renderer / scene / camera
@@ -3831,8 +3835,8 @@ const addDays = (d, k) => { const x = new Date(d); x.setUTCDate(x.getUTCDate() +
 function openWindow() { const end = new Date(); end.setUTCHours(0, 0, 0, 0); const e = addDays(end, -1); return { start: addDays(e, -(OPEN_N - 1)), end: e }; }
 // map of 'YYYY-MM-DD' -> value  ->  { data: filled array, latest: {v, date} }  (null if too sparse)
 function openSeries(map, start, minDays = 45) {
-  const a = new Array(OPEN_N).fill(null); let k = 0, latest = null;
-  for (let i = 0; i < OPEN_N; i++) { const key = isoDay(addDays(start, i)), v = map.get(key); if (v != null && isFinite(v)) { a[i] = v; k++; latest = { v, date: key }; } }
+  const a = new Array(OPEN_N).fill(null), mask = new Array(OPEN_N).fill(0); let k = 0, latest = null;
+  for (let i = 0; i < OPEN_N; i++) { const key = isoDay(addDays(start, i)), v = map.get(key); if (v != null && isFinite(v)) { a[i] = v; mask[i] = 1; k++; latest = { v, date: key }; } }
   if (k < minDays) return null;
   let last = -1;
   for (let i = 0; i < OPEN_N; i++) if (a[i] != null) {
@@ -3841,7 +3845,7 @@ function openSeries(map, start, minDays = 45) {
     last = i;
   }
   for (let j = last + 1; j < OPEN_N; j++) a[j] = a[last];
-  return { data: a, latest, days: k };
+  return { data: a, latest, days: k, raw: mask };
 }
 const kmBetween = (la1, lo1, la2, lo2) => { const r = Math.PI / 180, x = (lo2 - lo1) * r * Math.cos((la1 + la2) / 2 * r), y = (la2 - la1) * r; return Math.hypot(x, y) * 6371; };
 async function fetchFMI() {
@@ -3915,9 +3919,39 @@ function loadOpenData() {
   const one = async (key, live, snap) => { try { OPEN[key] = await live(); } catch (e) { OPEN.why[key] = e.message; try { OPEN[key] = await openSnapshot(snap); } catch (e2) { OPEN[key] = null; } }
     OPEN.done[key] = true; if ($('#openLoading')?.dataset.k === key && HERO) renderSiteTab(HERO); };
   OPEN.promise = Promise.all([one('weather', fetchFMI, 'oulanka-weather'), one('hydro', fetchSYKE, 'oulanka-hydro')]).then(() => {
-    OPEN.state = 'done';
+    OPEN.state = 'done'; applyRealData();
   });
   return OPEN.promise;
+}
+// put the open data into the hub's day-of-year timeline (animations, story, scenarios, AI charts, VR)
+function openToDoy(O, ser) {
+  const out = new Array(DAYS).fill(null), raw = new Array(DAYS).fill(false), s0 = new Date(O.start + 'T00:00:00Z').getTime();
+  for (let i = 0; i < OPEN_N; i++) { const d = new Date(s0 + i * 864e5), doy = Math.floor((d - Date.UTC(d.getUTCFullYear(), 0, 1)) / 864e5); if (doy > 364) continue; out[doy] = ser.data[i]; raw[doy] = ser.raw ? !!ser.raw[i] : true; }
+  for (let k = 0; k < DAYS; k++) if (out[k] == null) out[k] = out[k - 1] ?? out[k + 1] ?? 0;
+  return { a: out, raw };
+}
+function applyRealData() {
+  const W = OPEN.weather, Hy = OPEN.hydro; if (!W && !Hy) return;
+  const O = W || Hy, end = new Date(O.end + 'T00:00:00Z');
+  REAL.endYear = end.getUTCFullYear(); REAL.endDoy = Math.min(364, Math.floor((end - Date.UTC(REAL.endYear, 0, 1)) / 864e5)); REAL.on = true;
+  if (W && W.series.airT) {
+    D.airT = openToDoy(W, W.series.airT).a; REAL.weather = true;
+    if (W.series.precip) D.precip = openToDoy(W, W.series.precip).a;
+    if (W.series.snow) D.snow = openToDoy(W, W.series.snow).a;
+    D.weekly = Array.from({ length: 52 }, (_, w) => D.precip.slice(w * 7, w * 7 + 7).reduce((a, b) => a + b, 0));
+    const r = mulberry32(31); let ar = 0; const wet = D.smoothArr(D.precip, 2);
+    D.cloud = D.precip.map((p, i) => { ar = .85 * ar + (r() - .5) * .5; return clamp(.32 + wet[i] * .22 + ar * .6 + (D.rh[i] - 80) * .012, 0, 1); });
+  }
+  if (Hy && (Hy.series.Q || Hy.series.WL)) {
+    REAL.hydro = true;
+    if (Hy.series.Q) { D.Q = openToDoy(Hy, Hy.series.Q).a; PEAK_DAY = argMax(D.Q, 60, 200); }
+    if (Hy.series.WL) { D.WL = openToDoy(Hy, Hy.series.WL).a; const so = [...D.WL].sort((a, b) => a - b); D.wlLo = so[Math.floor(DAYS * .02)]; D.wlHi = Math.max(D.wlLo + .3, so[Math.floor(DAYS * .98)]); }
+    if (Hy.series.WT) { const t = openToDoy(Hy, Hy.series.WT); D.WT = t.a.map((v, i) => t.raw[i] ? v : ([0, 1, 2, 3, 10, 11].includes(dateOf(i).getUTCMonth()) ? 0.1 : v)); }
+    const dQ = D.Q.map((q, i) => i ? Math.max(0, q - D.Q[i - 1]) : 0);
+    D.TURB = D.smoothArr(dQ, 2).map((d, i) => 1.8 + d * 0.55 + D.Q[i] * 0.025);
+  }
+  computeScenarios(); buildStory();
+  try { setDay(playback.day); updateStats(); } catch (e) { }
 }
 // chart helpers for the 12-month window
 const openDate = (O, i) => new Date(O.start + 'T00:00:00Z').getTime() + i * 864e5;
@@ -4127,7 +4161,7 @@ function renderStationCard(G) {
       <dl class="kv">${x.type ? `<dt>Observes</dt><dd>${esc(x.type)}</dd>` : ''}${x.params ? `<dt>Parameters</dt><dd>${esc(x.params)}${x.units ? ` <span class="note">(${esc(x.units)})</span>` : ''}</dd>` : ''}${x.res ? `<dt>Interval</dt><dd>${esc(x.res)}</dd>` : ''}${x.start ? `<dt>Since</dt><dd>${esc(x.start)}${x.end ? ' to ' + esc(x.end) : ''}</dd>` : ''}${x.fmt ? `<dt>Format</dt><dd>${esc(x.fmt)}</dd>` : ''}<dt>Data level</dt><dd>${esc(x.level)}</dd></dl>
       ${x.note ? `<div class="small-note">${esc(x.note)}</div>` : ''}</div>`).join('')}
     <div class="card"><h3>Location <span class="note">ETRS-TM35FIN</span></h3><dl class="kv"><dt>Easting</dt><dd>${G.E}</dd><dt>Northing</dt><dd>${G.N}</dd>${G.z ? `<dt>Elevation</dt><dd>${G.z} m (N2000)</dd>` : ''}</dl>
-      <div class="small-note">From the DIWA critical-zone sensor template. Time series will be connected from the DIWA datalake.</div></div>`;
+      <div class="small-note">From the DIWA critical-zone sensor template. No readings are shown for this station yet: its time series will be connected from the DIWA datalake. The Weather and Hydrology tabs show open data from FMI and Syke.</div></div>`;
   $('#scClose').addEventListener('click', closeSensorCard);
   globeObjs.forEach(o => o.tag.classList.toggle('show', o.G.id === G.id));
 }
@@ -4141,13 +4175,13 @@ function setDay(d, fromUser = false) {
   playback.day = clamp(Math.round(d), 0, DAYS - 1);
   $('#tlRange').value = playback.day;
   $('#tlFill').style.width = (playback.day / (DAYS - 1) * 100) + '%';
-  $('#tlDate').innerHTML = `${fmtDate(playback.day)}<small>${YEAR} · ${seasonOfDay(playback.day)}</small>`;
+  $('#tlDate').innerHTML = `${fmtDate(playback.day)}<small>${dateOf(playback.day).getUTCFullYear()} · ${seasonOfDay(playback.day)}</small>`;
   charts.forEach(c => c.setDay(playback.day));
   updateStats();
   const s = seasonOfDay(playback.day);
   if ((playback.playing || fromUser || story.active) && s !== state.season) applySeason(s);
   // water level on the hero table
-  const T = tableOf('oulanka'); if (T && !scen.kind) { const k = (D.WL[playback.day] - 0.6) / 1.6; T.waterTarget = T.wlBase + clamp(k, -.1, 1) * (T.real ? T.wlAmp : .055); }
+  const T = tableOf('oulanka'); if (T && !scen.kind) { const k = (D.WL[playback.day] - D.wlLo) / (D.wlHi - D.wlLo); T.waterTarget = T.wlBase + clamp(k, -.1, 1) * (T.real ? T.wlAmp : .055); }
 }
 function togglePlay() { playback.playing ? stopPlay() : startPlay(); }
 function startPlay() { if (playback.day >= DAYS - 1) setDay(0); playback.playing = true; $('#tlPlay').innerHTML = svg('pause'); }
@@ -4157,18 +4191,30 @@ function stopPlay() { playback.playing = false; $('#tlPlay').innerHTML = svg('pl
    Story mode — spring snowmelt flood (illustrative)
    ===================================================================== */
 const story = { active: false, i: 0 };
-const STORY = [
-  { eyebrow: 'Late winter · March', title: 'The snowpack peaks', day: 70, view: 'over',
-    text: () => `By late March the snowpack around Oulanka reaches about ${D.snow[70].toFixed(0)} cm. The river is under ice and flow is close to winter baseflow, around ${D.Q[70].toFixed(0)} m³/s.` },
-  { eyebrow: 'Melt onset · late April', title: 'Warm days start the melt', day: 112, view: 'snow',
-    text: () => `Air temperatures climb above zero and the snow block sensors record the snowpack warming to 0 °C. Soil under reduced snow (S−) has been colder all winter than under added snow (S+).` },
-  { eyebrow: 'Flood peak · ' + fmtDate(PEAK_DAY), title: 'Meltwater reaches the river', day: PEAK_DAY, view: 'river',
-    text: () => `Discharge peaks at about ${D.Q[PEAK_DAY].toFixed(0)} m³/s, roughly ${Math.round(D.Q[PEAK_DAY] / D.Q[70])}× late-winter flow. Water level rises by ${(D.WL[PEAK_DAY] - D.WL[70]).toFixed(1)} m and turbidity spikes as banks erode.` },
-  { eyebrow: 'Recession · June', title: 'Back to summer conditions', day: 172, view: 'over',
-    text: () => `With the snow gone, flow recedes to about ${D.Q[172].toFixed(0)} m³/s and water temperature rises past ${D.WT[172].toFixed(0)} °C. Summer rain events now drive the smaller peaks.` },
-];
+let STORY = [];
+const argMax = (a, i0, i1) => { let k = i0; for (let i = i0; i <= i1; i++) if (a[i] > a[k]) k = i; return k; };
+const fmtDY = i => `${fmtDate(i)} ${dateOf(i).getUTCFullYear()}`;
+function buildStory() {
+  const snowPk = argMax(D.snow, 0, 130);
+  let melt = -1; for (let i = snowPk; i < 200; i++) if (D.airT[i] > 0 && D.airT[i + 1] > 0 && D.airT[i + 2] > 0 && D.snow[i + 4] < D.snow[i] - 1) { melt = i; break; }
+  if (melt < 0) melt = Math.min(snowPk + 20, 150);
+  let bare = -1; for (let i = melt; i < 220; i++) if (D.snow[i] < 1) { bare = i; break; }
+  const peak = PEAK_DAY, rec = Math.min(260, peak + 35), base = Math.max(0, Math.min(snowPk, peak - 30));
+  const wSrc = REAL.weather ? 'the FMI weather station at the research station' : 'the example weather series', hSrc = REAL.hydro ? 'the Syke gauge on the Oulankajoki' : 'the example river series';
+  STORY = [
+    { eyebrow: `Snowpack peak · ${fmtDY(snowPk)}`, title: 'The snowpack peaks', day: snowPk, view: 'over',
+      text: () => `On ${fmtDY(snowPk)} the snow at ${wSrc} reached ${D.snow[snowPk].toFixed(0)} cm, the deepest of the winter. The river is under ice and flows at about ${D.Q[snowPk].toFixed(0)} m³/s at ${hSrc}.` },
+    { eyebrow: `Melt onset · ${fmtDY(melt)}`, title: 'Warm days start the melt', day: melt, view: 'snow',
+      text: () => `From ${fmtDY(melt)} the daily mean air temperature stays above 0 °C and the snow starts to go: ${D.snow[melt].toFixed(0)} cm on that day${bare >= 0 ? `, and the ground is snow-free by ${fmtDY(bare)}` : ''}.` },
+    { eyebrow: `Flood peak · ${fmtDY(peak)}`, title: 'Meltwater reaches the river', day: peak, view: 'river',
+      text: () => `Discharge peaks on ${fmtDY(peak)} at about ${D.Q[peak].toFixed(0)} m³/s, roughly ${Math.max(1, Math.round(D.Q[peak] / Math.max(1, D.Q[base])))}× the late-winter flow. The water level is ${(D.WL[peak] - D.WL[base]).toFixed(1)} m higher than in late winter.` },
+    { eyebrow: `Recession · ${fmtDY(rec)}`, title: 'Back to summer conditions', day: rec, view: 'over',
+      text: () => `By ${fmtDY(rec)} flow has fallen to about ${D.Q[rec].toFixed(0)} m³/s and the water temperature is ${D.WT[rec].toFixed(0)} °C. Summer rain now drives the smaller peaks.` },
+  ];
+}
+buildStory();
 function startStory() {
-  clearScenario(); story.active = true; stopPlay();
+  clearScenario(); story.active = true; stopPlay(); buildStory();
   if (focus.id !== 'oulanka') focusSite('oulanka', { keepStory: true, noFly: true });
   siteTab = 'hydro'; openSitePanel(HERO);
   $('#stDots').innerHTML = STORY.map(() => '<i></i>').join('');
@@ -4178,7 +4224,7 @@ function startStory() {
 function storyStep(i) {
   if (i < 0) return; if (i >= STORY.length) { endStory(); return; }
   story.i = i; const S = STORY[i], T = tableOf('oulanka');
-  $('#stEyebrow').textContent = S.eyebrow + ' · illustrative'; $('#stTitle').textContent = S.title; $('#stText').textContent = S.text();
+  $('#stEyebrow').textContent = S.eyebrow + (REAL.weather && REAL.hydro ? ' · measured' : ' · illustrative'); $('#stTitle').textContent = S.title; $('#stText').textContent = S.text();
   $('#stDots').querySelectorAll('i').forEach((d, k) => d.classList.toggle('on', k === i));
   $('#stPrev').style.visibility = i ? 'visible' : 'hidden'; $('#stNext').textContent = i === STORY.length - 1 ? 'Finish' : 'Next';
   const p0 = playback.day; tween(1500, e => setDay(lerp(p0, S.day, e)), easeInOut);
@@ -4681,11 +4727,14 @@ function iceSeries(dT) {
   return { h: out, freeze, breakup, max: Math.max(...out), days: out.filter(v => v > 1).length };
 }
 const smoothBump = (i, c, w) => Math.exp(-(((i - c) / w) ** 2));
+function computeScenarios() {
 FLOOD.forEach(f => {
   f.Q = D.Q.slice(FLOOD_W0, FLOOD_W1 + 1).map((q, j) => { const i = FLOOD_W0 + j; return q * (1 + (f.k - 1) * smoothBump(i, PEAK_DAY + 2 * (f.k - 1), 13 + 4 * (f.k - 1))); });
   f.peak = Math.max(...f.Q);
 });
 ICE.forEach(s => s.res = iceSeries(s.dT));
+}
+computeScenarios();
 
 const scen = { kind: null, id: null, sub: 'flood', iceK: 75, icePlaying: false, iceAcc: 0, ice: null, floes: null, floeData: [], curve: null, label: null, labelEl: null, iceChart: null };
 function buildScenarioObjects() {
@@ -5295,13 +5344,13 @@ function knWrap(c, text, maxW) {
 let knLC = null, knLast = 0;
 function knPaint() { if (knLC) knLC.redraw(); }
 const KN_TOPICS = [
-  [/snow/i, () => ({ title: 'Snow depth', unit: 'cm', data: D.snow, color: '#bfe8ff' })],
+  [/snow/i, () => ({ title: 'Snow depth', unit: 'cm', data: D.snow, color: '#bfe8ff', real: REAL.weather })],
   [/soil|frost|freez|ground temp/i, () => ({ title: 'Soil temperature at −10 cm', unit: '°C', data: D.soil10.CTL, color: '#ff9f43' })],
-  [/temp|warm|cold|climate|weather/i, () => ({ title: 'Air temperature', unit: '°C', data: D.airT, color: '#ff9f43' })],
-  [/flood|discharge|flow|runoff|river|stream/i, () => ({ title: 'Discharge, Oulankajoki', unit: 'm³/s', data: D.Q, color: '#4fd1ff' })],
-  [/rain|precip/i, () => ({ title: 'Weekly precipitation', unit: 'mm', data: D.weekly, color: '#5ff0b0' })],
+  [/temp|warm|cold|climate|weather/i, () => ({ title: 'Air temperature', unit: '°C', data: D.airT, color: '#ff9f43', real: REAL.weather })],
+  [/flood|discharge|flow|runoff|river|stream/i, () => ({ title: 'Discharge, Oulankajoki', unit: 'm³/s', data: D.Q, color: '#4fd1ff', real: REAL.hydro })],
+  [/rain|precip/i, () => ({ title: 'Weekly precipitation', unit: 'mm', data: D.weekly, color: '#5ff0b0', real: REAL.weather })],
 ];
-function knChartFor(q) { for (const [rx, f] of KN_TOPICS) if (rx.test(q)) return f(); return { title: 'Water level, Oulankajoki', unit: 'm', data: D.WL, color: '#4fd1ff' }; }
+function knChartFor(q) { for (const [rx, f] of KN_TOPICS) if (rx.test(q)) return f(); return { title: 'Water level, Oulankajoki', unit: 'm', data: D.WL, color: '#4fd1ff', real: REAL.hydro }; }
 function knPage(c, x, y, w, h, rot, seed) {
   const r = mulberry32(seed); c.save(); c.translate(x + w / 2, y + h / 2); c.rotate(rot); c.translate(-w / 2, -h / 2);
   c.shadowColor = 'rgba(0,0,0,.55)'; c.shadowBlur = 30; c.shadowOffsetY = 12; c.fillStyle = '#eaf3fb'; rrect(c, 0, 0, w, h, 14); c.fill(); c.shadowColor = 'transparent';
@@ -5322,7 +5371,7 @@ function knChart(c, x, y, w, h, ch, k) {
   const mono = 'ui-monospace, "SF Mono", Menlo, monospace', d = ch.data, n = d.length, mn = Math.min(...d), mx = Math.max(...d), pad = (mx - mn) * .1 || 1, lo = mn - pad, hi = mx + pad;
   const L = x + 70, R = x + w - 10, T = y + 54, B = y + h - 40, X = i => L + (R - L) * i / (n - 1), Y = v => B - (B - T) * (v - lo) / (hi - lo);
   c.fillStyle = '#7fd0ff'; c.font = `600 21px ${mono}`; c.fillText(`FIG. 1 · ${ch.title.toUpperCase()} · ${ch.unit}`, x, y + 22);
-  c.fillStyle = '#6f93b3'; c.font = `500 17px ${mono}`; c.fillText('DEMO DATA · ONE YEAR', x, y + 44);
+  c.fillStyle = '#6f93b3'; c.font = `500 17px ${mono}`; c.fillText(ch.real ? (/snow|air|precip/i.test(ch.title) ? 'FMI OPEN DATA' : 'SYKE OPEN DATA') + ' · LAST 12 MONTHS' : 'EXAMPLE DATA · ONE YEAR', x, y + 44);
   c.strokeStyle = 'rgba(120,210,255,.18)'; c.lineWidth = 1; c.font = `500 16px ${mono}`; c.textAlign = 'right';
   for (let i = 0; i <= 4; i++) { const v = lo + (hi - lo) * i / 4, yy = Y(v); c.beginPath(); c.moveTo(L, yy); c.lineTo(R, yy); c.stroke(); c.fillStyle = '#8fb8d8'; c.fillText(v.toFixed(Math.abs(hi - lo) < 10 ? 1 : 0), L - 10, yy + 5); }
   c.textAlign = 'center'; 'JFMAMJJASOND'.split('').forEach((m, i) => { c.fillStyle = '#8fb8d8'; c.fillText(m, X(Math.round((i + .5) * (n - 1) / 12)), B + 26); });
@@ -5442,6 +5491,7 @@ function knShowConnect() {
 async function boot() {
   await progress(.08, 'Building the hall');
   buildHall(); buildOutside();
+  loadOpenData();
   await progress(.22, 'Loading the Oulanka map data'); await loadOulanka();
   await progress(.3, 'Shaping the tables');
   for (let i = 0; i < SITES.length; i++) { buildTable(SITES[i]); if (i % 3 === 2) await progress(.3 + .4 * (i + 1) / SITES.length, `Shaping the tables · ${i + 1}/${SITES.length}`); }
