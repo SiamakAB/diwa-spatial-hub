@@ -33,10 +33,11 @@ def window():
 
 def series(m, start, min_days=45):
     a, k, latest = [None] * N, 0, None
+    mask = [False] * N
     for i in range(N):
         key = (start + dt.timedelta(days=i)).isoformat(); v = m.get(key)
         if v is not None and math.isfinite(v):
-            a[i] = v; k += 1; latest = {'v': v, 'date': key}
+            a[i] = v; mask[i] = True; k += 1; latest = {'v': v, 'date': key}
     if k < min_days:
         return None
     last = -1
@@ -49,7 +50,7 @@ def series(m, start, min_days=45):
             for j in range(last + 1, i): a[j] = a[last] + (a[i] - a[last]) * (j - last) / (i - last)
         last = i
     for j in range(last + 1, N): a[j] = a[last]
-    return {'data': [round(x, 3) for x in a], 'latest': latest, 'days': k}
+    return {'data': [round(x, 3) for x in a], 'latest': latest, 'days': k, 'raw': [1 if v else 0 for v in mask]}
 
 
 def km(la1, lo1, la2, lo2):
