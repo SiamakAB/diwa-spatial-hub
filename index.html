@@ -669,6 +669,11 @@ body.hud #hint{color:rgba(160,215,255,.6)}
 .cat-chip i{width:9px;height:9px;border-radius:50%;display:inline-block}
 .cat-chip.off{opacity:.38}
 
+.illus{margin:0 0 12px;padding:10px 12px;border-radius:12px;font-size:11.5px;line-height:1.45;color:var(--ink-2);background:rgba(255,179,71,.14);border:1px solid rgba(255,179,71,.45)}
+.illus b{display:block;font-size:12px;color:#b86a00;margin-bottom:2px}
+body.night .illus b,body.hud .illus b{color:#ffc46b}
+.scen-tag em{display:block;font-style:normal;font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#ffc46b;margin-top:2px}
+
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 </head>
@@ -2833,9 +2838,9 @@ const showScenTab = () => { try { siteTab = 'scen'; segSet($('#spTabs'), 'scen')
 const AG_ACTIONS = {
   tour:   { label: 'Give me a tour', run: A => agentTour(A) },
   flood:  { label: 'Spring flood', run: A => agentDo(A, 'oulanka', () => { focusSite('oulanka'); setTimeout(() => { applyFlood('q50'); showScenTab(); }, 1800); },
-            'This is a spring flood on the Oulankajoki at a one-in-fifty-year level. Snowmelt lifts the river over its floodplain. You can compare all three flood levels in the Scenarios tab.') },
+            'This is an illustrative spring flood on the Oulankajoki at a one-in-fifty-year level, made for demonstration rather than from a flood model. Snowmelt lifts the river over its floodplain. You can compare all three flood levels in the Scenarios tab.') },
   ice:    { label: 'River ice', run: A => agentDo(A, 'oulanka', () => { focusSite('oulanka'); setTimeout(() => { applyIce('jam'); showScenTab(); }, 1800); },
-            'Here is river ice on the Oulankajoki. Ice grows through the winter and breaks up in spring, and where broken ice piles up at a bend it can jam the river.') },
+            'Here is an illustrative river-ice season on the Oulankajoki, made for demonstration rather than from observations. Ice grows through the winter and breaks up in spring, and where broken ice piles up at a bend it can jam the river.') },
   winter: { label: () => state.season === 'winter' ? 'Show summer' : 'Show winter', run: A => { const w = state.season !== 'winter';
             agentDo(A, 'home', () => { goHome(); applySeason(w ? 'winter' : 'summer'); }, w ? 'This is the hall in winter. Every table and the forest outside are now covered in snow.' : 'And here is summer again, with green forests and open water on every table.'); } },
   night:  { label: () => state.night ? 'Back to daylight' : 'Northern lights', run: A => { const n = !state.night;
@@ -4219,7 +4224,7 @@ function hubContext() {
   L.push(`OULANKAJOKI SENSOR STATIONS (small glowing globes on the centre table, coloured by type: green soil, blue surface water, violet groundwater, yellow atmosphere, white remote sensing; only Open or Public sensors from the DIWA critical-zone sensor template): ${GLOBES.map(G => `${G.name}${G.place ? ' at ' + G.place : ''} (${G.sensors.map(x => [x.producer, x.model].filter(Boolean).join(' ') + (x.params ? ': ' + x.params : '')).join('; ')})`).join(' | ')}.`);
   if (FEN) L.push(`PUUKKOSUO FEN DRONE SURVEYS (${FEN.by}, ${FEN.camera}): ${FEN.surveys.map(S => `${S.season} ${S.label}, ${S.images} images from ${S.alt_m} m, ${S.gsd_cm} cm/pixel, accuracy ${S.gcp_err_cm} cm`).join('; ')}. The fen photo on the table follows the season buttons.`);
   L.push('Clicking a sensor globe opens a card with a time-series chart. A timeline at the bottom plays one year of illustrative weather and hydrology (discharge, water level, water temperature, air temperature, snow depth), and the table changes with the seasons (winter snow, spring melt, summer, autumn colours).');
-  L.push(`SCENARIOS on the Oulankajoki table: flooding (${FLOOD.map(f => f.name).join(', ')}) and river ice (${ICE.map(f => f.name).join(', ')}). There is also a story mode about the spring snowmelt flood.`);
+  L.push(`SCENARIOS on the Oulankajoki table (ILLUSTRATIVE ONLY: made for demonstration, not model output or observations; always say so when you mention them): flooding (${FLOOD.map(f => f.name).join(', ')}) and river ice (${ICE.map(f => f.name).join(', ')}). There is also a story mode about the spring snowmelt flood.`);
   L.push(`360° PHOTOS: ${CONFIG.PANORAMAS.length} real 360° photos from Oulanka are pinned on the centre table (${CONFIG.PANORAMAS.map(p => p.title).join(', ')}). Clicking one opens it full screen.`);
   L.push(`MEDIA WALL at the back of the hall, left to right: a Finland map board with pulsing circles for each supersite; three big video screens (${CONFIG.SCREENS.map(v => v.title).join('; ')}) that play when you walk close and unmute when clicked; and a Latest News board with a slideshow from digitalwaters.fi.`);
   L.push(`Current news on the board: ${CONFIG.NEWS.map(n => `${n.date}: ${n.title}`).join('; ')}.`);
@@ -4602,7 +4607,7 @@ function applyFlood(id, fly = true) {
   setDay(PEAK_DAY); scenarioWaterColor(true);
   T.waterTarget = T.wlBase + riseOf(T, F.rise * 100);
   { const p = riverPoint(SU.flood); scen.label.position.copy(p).setY(p.y + riseOf(T, F.rise * 100) + .32); } scen.label.visible = true; syncHeroLabels();
-  scen.labelEl.innerHTML = `<b>+${(F.rise * 100).toFixed(1)} m</b> · ${F.name}`;
+  scen.labelEl.innerHTML = `<b>+${(F.rise * 100).toFixed(1)} m</b> · ${F.name}<em>Illustrative</em>`;
   if (fly) { const v = scenView(SU.view); flyTo(v.pos, v.tgt, 1800); }
   refreshScenarioUI();
 }
@@ -4629,8 +4634,8 @@ function setIceDay(k, force = false) {
   T.waterTarget = T.wlBase + (jamOn ? riseOf(T, 2.8) : 0);
   if (jamOn) scenarioWaterColor(true); else T.wMat.color.setHex(h > .5 || breakupPhase ? 0x2a5f86 : WATER[state.season].color);
   scen.label.visible = jamOn || h > .5;
-  if (jamOn) { scen.label.position.copy(riverPoint(JAM_U)).add(new THREE.Vector3(0, .36, 0)); scen.labelEl.innerHTML = '<b>Ice jam</b> · water +2.8 m upstream'; }
-  else if (h > .5) { scen.label.position.copy(riverPoint(SU.ice)).add(new THREE.Vector3(0, .3, 0)); scen.labelEl.innerHTML = `<b>${h.toFixed(0)} cm</b> ice · ${fmtDate(d)}`; }
+  if (jamOn) { scen.label.position.copy(riverPoint(JAM_U)).add(new THREE.Vector3(0, .36, 0)); scen.labelEl.innerHTML = '<b>Ice jam</b> · water +2.8 m upstream<em>Illustrative</em>'; }
+  else if (h > .5) { scen.label.position.copy(riverPoint(SU.ice)).add(new THREE.Vector3(0, .3, 0)); scen.labelEl.innerHTML = `<b>${h.toFixed(0)} cm</b> ice · ${fmtDate(d)}<em>Illustrative</em>`; }
   if (breakupPhase && k === br && !S.jam) scen.floeData.forEach(f => f.u = Math.random());
   const s = seasonOfDay(d); if (s !== state.season) { applySeason(s); if (!jamOn) T.wMat.color.setHex(h > .5 || breakupPhase ? 0x2a5f86 : WATER[s].color); }
   // panel bits
@@ -4658,6 +4663,7 @@ function renderScenarioTab(b) {
   if (!FLOOD[0].share) FLOOD.forEach(f => f.share = floodedShare(f.rise));
   b.innerHTML = `<div class="fade-in">
     <div class="seg on-glass" id="scenSeg" style="display:flex;margin-bottom:12px"></div>
+    <div class="illus"><b>Illustrative scenarios</b>These floods and ice seasons are made for demonstration. They are not model output or observations of the Oulankajoki. Real model results from DIWA researchers will replace them.</div>
     <div id="scenBody"></div></div>`;
   makeSeg($('#scenSeg'), [{ v: 'flood', label: 'Flooding', icon: 'flood' }, { v: 'ice', label: 'River ice', icon: 'ice' }], scen.sub, v => { scen.sub = v; clearScenario(); renderScenarioBody(); });
   $('#scenSeg').querySelectorAll('button').forEach(x => x.style.flex = '1');
