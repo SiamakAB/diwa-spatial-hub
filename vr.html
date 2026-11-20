@@ -673,7 +673,7 @@ body.hud #hint{color:rgba(160,215,255,.6)}
 .illus b{display:block;font-size:12px;color:#b86a00;margin-bottom:2px}
 body.night .illus b,body.hud .illus b{color:#ffc46b}
 .scen-tag em{display:block;font-style:normal;font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#ffc46b;margin-top:2px}
-.badge.live{background:rgba(52,211,153,.16);color:var(--ink)}
+.badge.live{background:rgba(52,211,153,.16);color:var(--ink);white-space:nowrap;flex:none}
 .badge.live i{background:#34d399;box-shadow:0 0 6px #34d399}
 body.night .badge.live, body.hud .badge.live{background:rgba(52,211,153,.2)}
 
@@ -3846,29 +3846,37 @@ function openSeries(map, start, minDays = 45) {
 const kmBetween = (la1, lo1, la2, lo2) => { const r = Math.PI / 180, x = (lo2 - lo1) * r * Math.cos((la1 + la2) / 2 * r), y = (la2 - la1) * r; return Math.hypot(x, y) * 6371; };
 async function fetchFMI() {
   const { start, end } = openWindow();
-  const base = `https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature&storedquery_id=fmi::observations::weather::daily::simple&latlon=${OPEN_SITE.lat},${OPEN_SITE.lon}&maxlocations=1&parameters=tday,rrday,snow`;
+  // all stations in a box around Oulanka (Salla – Kuusamo airport); the nearest one that reports each value is used
+  const base = `https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature&storedquery_id=fmi::observations::weather::daily::simple&bbox=28.4,65.9,30.2,66.9&parameters=tday,rrday,snow`;
   const chunks = []; for (let s = start; s <= end; s = addDays(s, 92)) { const e = addDays(s, 91); chunks.push([s, e > end ? end : e]); }
-  const maps = { tday: new Map(), rrday: new Map(), snow: new Map() }; let pos = null;
+  const st = new Map(); // posKey -> { pos, tday, rrday, snow }
   await Promise.all(chunks.map(async ([a, b]) => {
     const r = await fetch(`${base}&starttime=${isoDay(a)}T00:00:00Z&endtime=${isoDay(b)}T00:00:00Z`); if (!r.ok) throw new Error('FMI HTTP ' + r.status);
     const x = new DOMParser().parseFromString(await r.text(), 'text/xml'), q = (el, n) => el.getElementsByTagNameNS('*', n)[0]?.textContent;
     for (const el of x.getElementsByTagNameNS('*', 'BsWfsElement')) {
-      const t = q(el, 'Time'), p = q(el, 'ParameterName'), v = parseFloat(q(el, 'ParameterValue'));
-      if (!pos && q(el, 'pos')) pos = q(el, 'pos').trim().split(/\s+/).map(Number);
-      if (t && maps[p] && isFinite(v)) maps[p].set(t.slice(0, 10), (p === 'rrday' || p === 'snow') ? Math.max(0, v) : v);
+      const t = q(el, 'Time'), p = q(el, 'ParameterName'), v = parseFloat(q(el, 'ParameterValue')), ps = (q(el, 'pos') || '').trim();
+      if (!t || !ps || !['tday', 'rrday', 'snow'].includes(p) || !isFinite(v)) continue;
+      if (!st.has(ps)) { const pos = ps.split(/\s+/).map(Number); st.set(ps, { pos, d: kmBetween(OPEN_SITE.lat, OPEN_SITE.lon, pos[0], pos[1]), tday: new Map(), rrday: new Map(), snow: new Map() }); }
+      st.get(ps)[p].set(t.slice(0, 10), (p === 'rrday' || p === 'snow') ? Math.max(0, v) : v);
     }
   }));
-  let station = 'nearest FMI weather station';
-  if (pos) try {
-    const r = await fetch(`https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature&storedquery_id=fmi::ef::stations&bbox=${pos[1] - .01},${pos[0] - .01},${pos[1] + .01},${pos[0] + .01}`);
-    const x = new DOMParser().parseFromString(await r.text(), 'text/xml');
-    const nm = [...x.getElementsByTagNameNS('*', 'name')].find(n => /name/i.test(n.getAttribute('codeSpace') || '')) || x.getElementsByTagNameNS('*', 'name')[0];
-    if (nm?.textContent) station = nm.textContent.trim();
-  } catch (e) { }
-  const out = { kind: 'weather', provider: 'Finnish Meteorological Institute (FMI) open data', licence: 'CC BY 4.0', station, distKm: pos ? +kmBetween(OPEN_SITE.lat, OPEN_SITE.lon, pos[0], pos[1]).toFixed(1) : null, start: isoDay(start), end: isoDay(end), updated: new Date().toISOString(),
-    series: { airT: openSeries(maps.tday, start), precip: openSeries(maps.rrday, start), snow: openSeries(maps.snow, start, 20) } };
-  if (!out.series.airT) throw new Error('FMI returned no temperature data');
-  return out;
+  const list = [...st.values()].sort((a, b) => a.d - b.d);
+  const pick = (p, min) => { for (const S of list) { const ser = openSeries(S[p], start, min); if (ser) return { ser, S }; } return null; };
+  const T = pick('tday', 45), P = pick('rrday', 45), SN = pick('snow', 20);
+  if (!T) throw new Error(`FMI returned no temperature data (${list.length} stations)`);
+  const nameOf = async S => {
+    try {
+      const [la, lo] = S.pos, r = await fetch(`https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature&storedquery_id=fmi::ef::stations&bbox=${lo - .01},${la - .01},${lo + .01},${la + .01}`);
+      const x = new DOMParser().parseFromString(await r.text(), 'text/xml');
+      const nm = [...x.getElementsByTagNameNS('*', 'name')].find(n => /name/i.test(n.getAttribute('codeSpace') || '')) || x.getElementsByTagNameNS('*', 'name')[0];
+      return nm?.textContent?.trim() || 'FMI weather station';
+    } catch (e) { return 'FMI weather station'; }
+  };
+  const used = [...new Set([T, P, SN].filter(Boolean).map(o => o.S))];
+  const names = new Map(await Promise.all(used.map(async S => [S, await nameOf(S)])));
+  const tag = o => o ? { station: names.get(o.S), distKm: +o.S.d.toFixed(1) } : {};
+  return { kind: 'weather', provider: 'Finnish Meteorological Institute (FMI) open data', licence: 'CC BY 4.0', station: names.get(T.S), distKm: +T.S.d.toFixed(1), start: isoDay(start), end: isoDay(end), updated: new Date().toISOString(),
+    series: { airT: { ...T.ser, ...tag(T) }, precip: P ? { ...P.ser, ...tag(P) } : null, snow: SN ? { ...SN.ser, ...tag(SN) } : null } };
 }
 async function sykeJSON(url) { const r = await fetch(url.startsWith('http') ? url : SYKE_API + url, { headers: { Accept: 'application/json' } }); if (!r.ok) throw new Error('Syke HTTP ' + r.status); return r.json(); }
 async function fetchSYKE() {
@@ -3975,7 +3983,7 @@ function renderSiteTab(site) {
       <div class="card"><h3>Air temperature <span class="note">°C · daily mean</span></h3><div id="cT"></div></div>
       ${S.precip ? `<div class="card"><h3>Precipitation <span class="note">mm · weekly total</span></h3><div id="cP"></div></div>` : ''}
       ${S.snow ? `<div class="card"><h3>Snow depth <span class="note">cm · daily</span></h3><div id="cS"></div></div>` : ''}
-      <div style="display:flex;gap:8px;align-items:flex-start">${openBadge(W)}<span class="small-note" style="margin:0">Source: ${W.provider}, ${escH(W.station)}${W.distKm != null ? ` (${W.distKm} km from the research station)` : ''}, licence ${W.licence}. Last 12 months, latest day ${upd}.${S.snow ? '' : ' No snow depth is reported at this station.'}</span></div></div>`;
+      <div style="display:flex;gap:8px;align-items:flex-start">${openBadge(W)}<span class="small-note" style="margin:0">Source: ${W.provider}, licence ${W.licence}. Station${[...new Set([S.airT, S.precip, S.snow].filter(Boolean).map(x => x.station || W.station))].length > 1 ? 's' : ''}: ${[...new Map([S.airT, S.precip, S.snow].filter(Boolean).map(x => [x.station || W.station, x])).values()].map(x => `${escH(x.station || W.station)} (${x.distKm ?? W.distKm} km away)`).join('; ')}. Last 12 months, latest day ${upd}.${S.snow ? '' : ' No snow depth is reported at this station.'}</span></div></div>`;
       openChart($('#cT'), W, 'Air temperature', S.airT, '°C');
       if (S.precip) chart($('#cP'), { series: [{ name: 'Precipitation', color: C1, data: openWeekly(S.precip) }], unit: 'mm', type: 'bar', months: false, xTicks: openTicks(W, 7), labelFor: i => `Week of ${fmtOpen(W, i * 7)}`, dayToIndex: d => Math.min(52, Math.floor(openIdx(W, d) / 7)) });
       if (S.snow) openChart($('#cS'), W, 'Snow depth', S.snow, 'cm', { decimals: 0, zeroBase: true });
