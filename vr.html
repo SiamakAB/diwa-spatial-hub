@@ -3864,12 +3864,21 @@ async function fetchFMI() {
   const pick = (p, min) => { for (const S of list) { const ser = openSeries(S[p], start, min); if (ser) return { ser, S }; } return null; };
   const T = pick('tday', 45), P = pick('rrday', 45), SN = pick('snow', 20);
   if (!T) throw new Error(`FMI returned no temperature data (${list.length} stations)`);
+  // station names: take the FMI station whose position is closest to the data position (never just the first in the list)
+  let fac = null;
   const nameOf = async S => {
     try {
-      const [la, lo] = S.pos, r = await fetch(`https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature&storedquery_id=fmi::ef::stations&bbox=${lo - .01},${la - .01},${lo + .01},${la + .01}`);
-      const x = new DOMParser().parseFromString(await r.text(), 'text/xml');
-      const nm = [...x.getElementsByTagNameNS('*', 'name')].find(n => /name/i.test(n.getAttribute('codeSpace') || '')) || x.getElementsByTagNameNS('*', 'name')[0];
-      return nm?.textContent?.trim() || 'FMI weather station';
+      if (!fac) {
+        const r = await fetch('https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature&storedquery_id=fmi::ef::stations&bbox=27.5,65.5,31.0,67.5');
+        const x = new DOMParser().parseFromString(await r.text(), 'text/xml');
+        fac = [...x.getElementsByTagNameNS('*', 'EnvironmentalMonitoringFacility')].map(f => {
+          const nm = [...f.getElementsByTagNameNS('*', 'name')].find(n => /\/name$/.test(n.getAttribute('codeSpace') || ''));
+          const ps = f.getElementsByTagNameNS('*', 'pos')[0]?.textContent.trim().split(/\s+/).map(Number);
+          return nm && ps && ps.length > 1 ? { name: nm.textContent.trim(), pos: ps } : null;
+        }).filter(Boolean);
+      }
+      let best = null, bd = 1e9; for (const f of fac) { const d = kmBetween(S.pos[0], S.pos[1], f.pos[0], f.pos[1]); if (d < bd) { bd = d; best = f; } }
+      return best && bd < 1.5 ? best.name : 'FMI weather station';
     } catch (e) { return 'FMI weather station'; }
   };
   const used = [...new Set([T, P, SN].filter(Boolean).map(o => o.S))];
