@@ -1,0 +1,27 @@
+name: Daily open data (FMI + Syke)
+
+on:
+  schedule:
+    - cron: '17 4 * * *'   # every day at 04:17 UTC
+  workflow_dispatch:        # lets you run it by hand from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch the last 12 months
+        run: python3 tools/fetch_open_data.py
+      - name: Commit the daily copy
+        run: |
+          git config user.name "diwa-open-data-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/open
+          git diff --cached --quiet || git commit -m "Daily open data update"
+          git push
