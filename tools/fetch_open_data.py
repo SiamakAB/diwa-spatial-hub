@@ -101,21 +101,23 @@ def fmi():
     T, P, SN = pick('tday', 45), pick('rrday', 45), pick('snow', 20)
     if not T:
         raise RuntimeError(f'FMI returned no temperature data ({len(lst)} stations)')
-    names = {}
+    fac = []
+    try:
+        root = ET.fromstring(get('https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature'
+                                 '&storedquery_id=fmi::ef::stations&bbox=27.5,65.5,31.0,67.5'))
+        for f in root.iter():
+            if local(f.tag) != 'EnvironmentalMonitoringFacility': continue
+            nm = next((x.text.strip() for x in f.iter() if local(x.tag) == 'name' and (x.get('codeSpace') or '').endswith('/name') and x.text), None)
+            ps = next((x.text.split() for x in f.iter() if local(x.tag) == 'pos' and x.text), None)
+            if nm and ps and len(ps) > 1: fac.append((nm, float(ps[0]), float(ps[1])))
+    except Exception as ex:
+        print('station list failed:', ex)
+    print('FMI stations listed:', len(fac))
+
     def name(S):
-        k = S['pos']
-        if k in names: return names[k]
-        nm = 'FMI weather station'
-        try:
-            la, lo = k
-            root = ET.fromstring(get('https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature'
-                                     f'&storedquery_id=fmi::ef::stations&bbox={lo-.01},{la-.01},{lo+.01},{la+.01}'))
-            els = [el for el in root.iter() if local(el.tag) == 'name']
-            el = next((x for x in els if 'name' in (x.get('codeSpace') or '')), els[0] if els else None)
-            if el is not None and el.text: nm = el.text.strip()
-        except Exception as ex:
-            print('station name lookup failed:', ex)
-        names[k] = nm; return nm
+        la, lo = S['pos']
+        best = min(fac, key=lambda f: km(la, lo, f[1], f[2]), default=None)
+        return best[0] if best and km(la, lo, best[1], best[2]) < 1.5 else 'FMI weather station'
     def tag(o):
         if not o: return None
         ser, S = o; ser.update(station=name(S), distKm=round(S['d'], 1)); return ser
